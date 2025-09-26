@@ -2,6 +2,8 @@
 
 export default function AppointmentPage() {
   return (
-    <div></div>
+    <div>
+      
+    </div>
   )
 }
