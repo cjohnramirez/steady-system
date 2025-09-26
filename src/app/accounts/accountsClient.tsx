@@ -59,16 +59,24 @@ export default function AccountsClient({
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Helpers to get current data & setters dynamically
-  const getCurrentData = useCallback((): {
-    data: UserType[];
-    setData: React.Dispatch<React.SetStateAction<any[]>>;
-  } => {
-    if (activeSub === "students")
-      return { data: students, setData: setStudents };
-    if (activeSub === "counselors")
-      return { data: counselors, setData: setCounselors };
-    return { data: admins, setData: setAdmins };
-  }, [activeSub, students, counselors, admins]);
+  function getCurrentData<T extends UserType>() {
+    if (activeSub === "students") {
+      return {
+        data: students as T[],
+        setData: setStudents as React.Dispatch<React.SetStateAction<T[]>>,
+      };
+    }
+    if (activeSub === "counselors") {
+      return {
+        data: counselors as T[],
+        setData: setCounselors as React.Dispatch<React.SetStateAction<T[]>>,
+      };
+    }
+    return {
+      data: admins as T[],
+      setData: setAdmins as React.Dispatch<React.SetStateAction<T[]>>,
+    };
+  }
 
   const handleDelete = useCallback(
     (id: number) => {
@@ -106,20 +114,26 @@ export default function AccountsClient({
 
   // Filtering logic (useMemo for performance)
   const filtered = useMemo(() => {
-    return data.filter((r: any) => {
+    return data.filter((r: UserType) => {
       const candidates = [
         r.lastName ?? "",
         r.firstName ?? "",
         r.email ?? "",
-        r.college ?? "",
+        "college" in r ? r.college ?? "" : "",
       ];
-      if (activeSub === "students")
+      if (
+        activeSub === "students" &&
+        "program" in r &&
+        "yearLevel" in r &&
+        "emotionalStatus" in r
+      )
         candidates.push(
           r.program ?? "",
           r.yearLevel ?? "",
           r.emotionalStatus ?? ""
         );
-      if (activeSub === "counselors") candidates.push(r.availability ?? "");
+      if (activeSub === "counselors" && "availability" in r)
+        candidates.push(r.availability ?? "");
       return candidates.join(" ").toLowerCase();
     });
   }, [data, activeSub]);
@@ -145,7 +159,7 @@ export default function AccountsClient({
 
   function toggleSelectAll() {
     if (allSelected) setSelectedOnPage([]);
-    else setSelectedOnPage(paginated.map((r: any) => r.id));
+    else setSelectedOnPage(paginated.map((r: UserType) => r.id));
   }
 
   function toggleRow(id: number) {
@@ -203,7 +217,9 @@ export default function AccountsClient({
             {subTabs.map((t) => (
               <button
                 key={t.key}
-                onClick={() => setActiveSub(t.key as any)}
+                onClick={() =>
+                  setActiveSub(t.key as "students" | "counselors" | "admins")
+                }
                 className={`px-4 py-1.5 rounded-md text-sm transition-all ${getSubTabStyle(
                   t.key
                 )}`}
@@ -284,7 +300,7 @@ export default function AccountsClient({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginated.map((row: any) => (
+                    {paginated.map((row: Student | Counselor | Admin) => (
                       <TableRow
                         key={row.id}
                         className="border-b border-gray-100 transition-colors hover:bg-gray-50"
@@ -336,21 +352,21 @@ export default function AccountsClient({
                         {activeSub === "students" && (
                           <>
                             <TableCell className="text-sm text-gray-800 whitespace-nowrap px-4 py-2">
-                              {row.college}
+                              {(row as Student).college}
                             </TableCell>
                             <TableCell className="text-sm text-gray-800 whitespace-nowrap px-4 py-2">
-                              {row.program}
+                              {(row as Student).program}
                             </TableCell>
                             <TableCell className="text-sm text-gray-800 whitespace-nowrap px-4 py-2">
-                              {row.yearLevel}
+                              {(row as Student).yearLevel}
                             </TableCell>
                             <TableCell className="px-4 py-2">
                               <Badge
                                 className={`text-xs font-medium rounded-full ${getEmotionalStatusStyle(
-                                  row.emotionalStatus
+                                  (row as Student).emotionalStatus
                                 )}`}
                               >
-                                {row.emotionalStatus}
+                                {(row as Student).emotionalStatus}
                               </Badge>
                             </TableCell>
                           </>
@@ -358,17 +374,18 @@ export default function AccountsClient({
                         {activeSub === "counselors" && (
                           <>
                             <TableCell className="text-sm text-gray-800 whitespace-nowrap px-4 py-2">
-                              {row.college}
+                              {(row as Counselor).college}
                             </TableCell>
                             <TableCell className="px-4 py-2">
                               <Badge
                                 className={`text-xs font-medium rounded-full ${
-                                  row.availability === "Available"
+                                  (row as Counselor).availability ===
+                                  "Available"
                                     ? "bg-green-100 text-green-700"
                                     : "bg-red-100 text-red-700"
                                 }`}
                               >
-                                {row.availability}
+                                {(row as Counselor).availability}
                               </Badge>
                             </TableCell>
                           </>
