@@ -21,7 +21,7 @@ export const columns: ColumnDef<Appointment>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected  () ||
+          table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
@@ -81,8 +81,12 @@ export const columns: ColumnDef<Appointment>[] = [
         "bg-amber-300": status === "pending",
         "bg-green-300": status === "done",
       });
-      
+
       return <Badge className={statusColor}>{String(status)}</Badge>;
+    },
+    filterFn: (row, columnId, filterValue: string[]) => {
+      if (!filterValue?.length) return true;
+      return filterValue.includes(row.getValue(columnId ));
     },
   },
   {

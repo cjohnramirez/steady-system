@@ -85,7 +85,7 @@ export default function NavigationBar() {
           const isActive = pathName === nav.link || pathName.startsWith(`${nav.link}`);
 
           const activeStatus = clsx(
-            "border-b-2",
+            "border-b-2 pb-2",
             {
               "border-gray-700": isActive,
               "border-none": !isActive
