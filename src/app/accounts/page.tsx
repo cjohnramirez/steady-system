@@ -1,6 +1,6 @@
-import { STUDENTS } from "@/lib/data/students";
-import { COUNSELORS } from "@/lib/data/counselors";
-import { ADMINS } from "@/lib/data/admin";
+import { STUDENTS } from "@/lib/data/students-data";
+import { COUNSELORS } from "@/lib/data/counselors-data";
+import { ADMINS } from "@/lib/data/admin-data";
 import AccountsClient from "./accountsClient";
 
 export default function AccountsPage() {
