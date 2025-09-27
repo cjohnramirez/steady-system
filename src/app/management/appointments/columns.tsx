@@ -77,9 +77,9 @@ export const columns: ColumnDef<Appointment>[] = [
       const status = row.getValue("status") ?? "";
 
       const statusColor = clsx("text-black", {
-        "bg-blue-300": status === "approved",
-        "bg-amber-300": status === "pending",
-        "bg-green-300": status === "done",
+        "bg-blue-200": status === "approved",
+        "bg-amber-200": status === "pending",
+        "bg-green-200": status === "done",
       });
 
       return <Badge className={statusColor}>{String(status)}</Badge>;

@@ -14,7 +14,6 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import clsx from "clsx";
 
 type Navigation = {
@@ -34,6 +33,14 @@ const navigationObj: Navigation[] = [
   {
     name: "Appointments",
     link: "/appointments",
+  },
+  {
+    name: "Landing Page",
+    link: "/landing",
+  },
+  {
+    name: "Settings",
+    link: "/settings",
   },
 ];
 
