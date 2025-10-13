@@ -25,7 +25,6 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  OnChangeFn,
   SortingState,
   useReactTable,
   VisibilityState,
