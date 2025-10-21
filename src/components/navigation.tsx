@@ -48,7 +48,7 @@ export default function NavigationBar() {
   const pathName = usePathname();
 
   return (
-    <div className="sticky top-0 flex w-full flex-col gap-5 border-b-1 p-5 pb-0 bg-white">
+    <div className="sticky top-0 flex w-full flex-col gap-5 border-b-1 p-5 pb-0 bg-white z-2">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <Image src="/icon.png" alt="GCS Icon" width={48} height={48} />

@@ -1,6 +1,6 @@
-import { Article } from "../types/landing";
+import { Announcements, Article, Playlist } from "../types/landing";
 
-export const mockArticles: Article[] = [
+export const articleData: Article[] = [
   {
     id: 1,
     title: "The Journey Within: Reflections on Self-Acceptance",
@@ -13,6 +13,7 @@ export const mockArticles: Article[] = [
     },
     authorName: "Alice Johnson",
     articleImage: "",
+    addedAt: "2024-06-10T09:00:00Z",
   },
   {
     id: 2,
@@ -26,6 +27,7 @@ export const mockArticles: Article[] = [
     },
     authorName: "Bob Smith",
     articleImage: "",
+    addedAt: "2024-06-10T09:05:00Z",
   },
   {
     id: 3,
@@ -39,6 +41,7 @@ export const mockArticles: Article[] = [
     },
     authorName: "Carol Lee",
     articleImage: "",
+    addedAt: "2024-06-10T09:10:00Z",
   },
   {
     id: 4,
@@ -52,5 +55,100 @@ export const mockArticles: Article[] = [
     },
     authorName: "David Kim",
     articleImage: "",
+    addedAt: "2024-06-10T09:15:00Z",
+  },
+];
+
+export const announcementsData: Announcements[] = [
+  {
+    id: 1,
+    title: "Peer Support Group Session",
+    startDate: "2024-06-15T09:00:00Z",
+    endDate: "2024-06-15T10:30:00Z",
+    location: "Counseling Center Room 101",
+    description:
+      "Join our peer support group to share experiences and learn coping strategies in a safe environment.",
+    annoucementImage: "",
+  },
+  {
+    id: 2,
+    title: "Stress Management Workshop",
+    startDate: "2024-06-18T13:00:00Z",
+    endDate: "2024-06-18T15:00:00Z",
+    location: "Multipurpose Hall",
+    description:
+      "Interactive workshop on techniques for managing stress and promoting mental wellness.",
+    annoucementImage: "",
+  },
+  {
+    id: 3,
+    title: "Career Guidance Seminar",
+    startDate: "2024-06-22T10:00:00Z",
+    endDate: "2024-06-22T12:00:00Z",
+    location: "Auditorium",
+    description:
+      "Seminar on career planning, resume building, and interview skills for students.",
+    annoucementImage: "",
+  },
+  {
+    id: 4,
+    title: "One-on-One Counseling Sign-Up",
+    startDate: "2024-06-25T08:00:00Z",
+    endDate: "2024-06-25T17:00:00Z",
+    location: "Counseling Office",
+    description:
+      "Register for individual counseling sessions with our guidance counselors.",
+    annoucementImage: "",
+  },
+];
+
+export const playlistData: Playlist[] = [
+  {
+    id: 1,
+    title: "Morning Motivation",
+    link: "https://open.spotify.com/playlist/1",
+    creator: "Jane Doe",
+    platform: {
+      platformName: "Spotify",
+      platformIcon: "",
+    },
+    image: "",
+    emotion: "Motivated",
+  },
+  {
+    id: 2,
+    title: "Focus & Study",
+    link: "https://music.youtube.com/playlist?list=2",
+    creator: "John Smith",
+    platform: {
+      platformName: "YouTube Music",
+      platformIcon: "",
+    },
+    image: "",
+    emotion: "Focused",
+  },
+  {
+    id: 3,
+    title: "Relaxing Evenings",
+    link: "https://soundcloud.com/user/playlist/3",
+    creator: "Emily Clark",
+    platform: {
+      platformName: "SoundCloud",
+      platformIcon: "",
+    },
+    image: "",
+    emotion: "Relaxed",
+  },
+  {
+    id: 4,
+    title: "Feel Good Hits",
+    link: "https://music.apple.com/playlist/4",
+    creator: "Michael Lee",
+    platform: {
+      platformName: "Apple Music",
+      platformIcon: "",
+    },
+    image: "",
+    emotion: "Happy",
   },
 ];
