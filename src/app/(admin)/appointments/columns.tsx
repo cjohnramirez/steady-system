@@ -15,7 +15,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const columns: ColumnDef<Appointment>[] = [
+export const appointmentColumns: ColumnDef<Appointment>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -86,7 +86,7 @@ export const columns: ColumnDef<Appointment>[] = [
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;
-      return filterValue.includes(row.getValue(columnId ));
+      return filterValue.includes(row.getValue(columnId));
     },
   },
   {

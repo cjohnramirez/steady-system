@@ -1,5 +1,6 @@
 "use client";
 
+import { DataTablePagination } from "@/components/pagination";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,6 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Table,
   TableBody,
@@ -29,6 +35,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+import { Download, Filter, Search, SearchIcon, Sidebar } from "lucide-react";
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
@@ -39,7 +46,12 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  toolbarExtra,
+  searchQuery,
+}: DataTableProps<TData, TValue> & {
+  toolbarExtra?: React.ReactNode;
+  searchQuery: string;
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -66,38 +78,50 @@ export function DataTable<TData, TValue>({
 
   return (
     <div>
-      <div className="flex gap-4 justify-between">
+      <div className="flex justify-between gap-4">
         <div>
-          <Tabs
-            defaultValue="pending"
-            onValueChange={(value) => {
-              value !== "all"
-                ? setColumnFilters([{ id: "status", value: value }])
-                : setColumnFilters([]);
-            }}
-          >
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="approved">Approved</TabsTrigger>
-              <TabsTrigger value="done">Done</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {toolbarExtra ? (
+            <>{toolbarExtra}</>
+          ) : (
+            <Tabs
+              defaultValue="pending"
+              onValueChange={(value) => {
+                value !== "all"
+                  ? setColumnFilters([{ id: "status", value: value }])
+                  : setColumnFilters([]);
+              }}
+            >
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="pending">Pending</TabsTrigger>
+                <TabsTrigger value="approved">Approved</TabsTrigger>
+                <TabsTrigger value="done">Done</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          )}
         </div>
         <div className="flex gap-4">
-          <Input
-            placeholder="Filter name..."
-            value={
-              (table.getColumn("studentName")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("studentName")?.setFilterValue(event.target.value)
-            }
-            className="max-w-96"
-          />
+          <InputGroup>
+            <InputGroupInput
+              placeholder="Input your search query..."
+              value={
+                (table.getColumn(searchQuery)?.getFilterValue() as string) ?? ""
+              }
+              onChange={(event) =>
+                table.getColumn(searchQuery)?.setFilterValue(event.target.value)
+              }
+              className="max-w-96"
+            />
+            <InputGroupAddon>
+              <SearchIcon />
+            </InputGroupAddon>
+          </InputGroup>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">Columns</Button>
+              <Button variant="outline">
+                <Sidebar />
+                Customize Sections
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {table
@@ -119,9 +143,17 @@ export function DataTable<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button variant="outline">
+            <Filter />
+            Filter
+          </Button>
+          <Button variant="outline">
+            <Download />
+            Export
+          </Button>
         </div>
       </div>
-      <div className="overflow-hidden rounded-md border mt-8">
+      <div className="mt-8 overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -133,7 +165,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -152,7 +184,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -171,24 +203,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex gap-4 justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }

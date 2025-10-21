@@ -6,9 +6,9 @@ export default function ProtectedRootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <>
       <NavigationBar />
-      {children}
-    </div>
+      <div className="p-2">{children}</div>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import { Counselor } from "../types/users";
 
-export const COUNSELORS: Counselor[] = [
+export const CounselorsData: Counselor[] = [
   {
     id: 1,
     lastName: "Manalo",

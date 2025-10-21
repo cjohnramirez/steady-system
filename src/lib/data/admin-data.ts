@@ -1,6 +1,6 @@
 import { Admin } from "../types/users";
 
-export const ADMINS: Admin[] = [
+export const AdminsData: Admin[] = [
   {
     id: 1,
     lastName: "Smith",
