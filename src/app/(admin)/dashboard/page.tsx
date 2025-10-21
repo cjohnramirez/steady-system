@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-white text-gray-900">
-      <main className="space-y-8 px-8 py-6">
+      <main className="space-y-8">
         <div>
           <h2 className="text-md font-semibold">Key Performance Indicators</h2>
           <p className="">Some important overview of the organization</p>
@@ -69,7 +69,7 @@ export default function DashboardPage() {
               <p>Total for the last 3 months</p>
             </div>
             <Tabs
-              defaultValue="dataLast3Months"
+              defaultValue="0"
               onValueChange={(value) => setSelectedChartTab(Number(value))}
             >
               <TabsList>

@@ -8,7 +8,7 @@ export default function ProtectedRootLayout({
   return (
     <>
       <NavigationBar />
-      <div className="p-2">{children}</div>
+      <div className="p-10">{children}</div>
     </>
   );
 }

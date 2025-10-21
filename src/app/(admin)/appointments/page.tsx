@@ -2,11 +2,11 @@
 
 import { DataTable } from "../../../components/data-table";
 import { appointmentsData } from "@/lib/data/appointments-data";
-import { appointmentColumns } from "./columns";
+import { appointmentColumns } from "./appointment-column";
 
 export default function AppointmentPage() {
   return (
-    <div className="p-8">
+    <div>
       <DataTable columns={appointmentColumns} data={appointmentsData} searchQuery="studentName"/>
     </div>
   );

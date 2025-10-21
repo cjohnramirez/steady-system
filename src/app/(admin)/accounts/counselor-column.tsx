@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -9,11 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Student } from "@/lib/types/users";
+import { Admin, Counselor } from "@/lib/types/users";
 import { ColumnDef } from "@tanstack/react-table";
+import clsx from "clsx";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const studentColumn: ColumnDef<Student>[] = [
+export const counselorColumn: ColumnDef<Counselor>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -44,7 +46,7 @@ export const studentColumn: ColumnDef<Student>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Student ID
+          Admin ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
@@ -94,30 +96,22 @@ export const studentColumn: ColumnDef<Student>[] = [
     },
   },
   {
-    accessorKey: "program",
-    header: "Program",
+    accessorKey: "availability",
+    header: "Availability",
     cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("program"))}
-        </div>
-      );
+      const availability = row.getValue("availability") ?? "";
+
+      const statusColor = clsx("text-black", {
+        "bg-red-200": availability === "Available",
+        "bg-green-200": availability === "Unavailable",
+      });
+
+      return <Badge className={statusColor}>{String(availability)}</Badge>;
     },
-  },
-  {
-    accessorKey: "yearLevel",
-    header: "Year Level",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("yearLevel"))}
-        </div>
-      );
+    filterFn: (row, columnId, filterValue: string[]) => {
+      if (!filterValue?.length) return true;
+      return filterValue.includes(row.getValue(columnId));
     },
-  },
-  {
-    accessorKey: "emotionalStatus",
-    header: "Emotional Status",
   },
   {
     id: "actions",

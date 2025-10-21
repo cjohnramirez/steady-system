@@ -48,8 +48,8 @@ export default function NavigationBar() {
   const pathName = usePathname();
 
   return (
-    <div className="flex flex-col w-full border-b-1 p-5 pb-0 gap-5">
-      <div className="flex items-center justify-between w-full">
+    <div className="sticky top-0 flex w-full flex-col gap-5 border-b-1 p-5 pb-0 bg-white">
+      <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <Image src="/icon.png" alt="GCS Icon" width={48} height={48} />
           <p>Guidance and Counseling Services</p>
@@ -66,7 +66,7 @@ export default function NavigationBar() {
           </svg>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="flex items-center gap-4">
-              <div className="h-6 w-6 bg-linear-to-t rounded-full from-amber-300 to-amber-600" />
+              <div className="h-6 w-6 rounded-full bg-linear-to-t from-amber-300 to-amber-600" />
               <p>Username</p>
               <Badge variant="secondary">User Role</Badge>
               <ChevronsUpDown size={20} />
@@ -89,22 +89,16 @@ export default function NavigationBar() {
       </div>
       <div className="flex gap-8 pl-5">
         {navigationObj.map((nav) => {
-          const isActive = pathName === nav.link || pathName.startsWith(`${nav.link}`);
+          const isActive =
+            pathName === nav.link || pathName.startsWith(`${nav.link}`);
 
-          const activeStatus = clsx(
-            "border-b-2 pb-2",
-            {
-              "border-gray-700": isActive,
-              "border-none": !isActive
-            }
-          );
+          const activeStatus = clsx("border-b-2 pb-2", {
+            "border-gray-700": isActive,
+            "border-none": !isActive,
+          });
 
           return (
-            <Link
-              href={nav.link}
-              key={nav.name}
-              className={activeStatus}
-            >
+            <Link href={nav.link} key={nav.name} className={activeStatus}>
               {nav.name}
             </Link>
           );
