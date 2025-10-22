@@ -24,23 +24,23 @@ type Navigation = {
 const navigationObj: Navigation[] = [
   {
     name: "Dashboard",
-    link: "/dashboard",
+    link: "/admin/dashboard",
   },
   {
     name: "Accounts",
-    link: "/accounts",
+    link: "/admin/accounts",
   },
   {
     name: "Appointments",
-    link: "/appointments",
+    link: "/admin/appointments",
   },
   {
     name: "Landing Page",
-    link: "/landing",
+    link: "/admin/landing",
   },
   {
     name: "Settings",
-    link: "/settings",
+    link: "/admin/settings",
   },
 ];
 
