@@ -24,3 +24,5 @@ export type Admin = {
   firstName: string;
   email: string;
 };
+
+export type Users = ["student", "admin", "counselor"];

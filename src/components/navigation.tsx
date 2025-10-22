@@ -78,7 +78,6 @@ export default function NavigationBar() {
           </DropdownMenu>
         </div>
         <div className="flex gap-4">
-          <Input placeholder="Filter name..." />
           <Button variant="outline" className="w-9">
             <Bell />
           </Button>
