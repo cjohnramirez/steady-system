@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import DashboardChart from "./_components/dashboard-chart";
-import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   LineElement,
