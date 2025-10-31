@@ -5,40 +5,9 @@ import { ChevronRight, Plus } from "lucide-react";
 import ArticleTile from "./components/article-tile";
 import AnnoucementTile from "./components/annoucements-tile";
 import PlaylistTile from "./components/playlist-tile";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "@/components/ui/skeleton";
-
-async function fetchArticles(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("article_with_details")
-    .select(`*`)
-    .range(0, 3);
-
-  if (error) throw error;
-  return data || [];
-}
-
-async function fetchPlaylist(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("playlist_with_details")
-    .select(`*`)
-    .range(0, 3);
-
-  if (error) throw error;
-  return data || [];
-}
-
-async function fetchAnnouncements(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("announcement")
-    .select(`*`)
-    .range(0, 3);
-
-  if (error) throw error;
-  return data || [];
-}
+import { fetchAnnouncements, fetchArticles, fetchPlaylist } from "./actions";
 
 export default function LandingPage() {
   const supabase = createClient();

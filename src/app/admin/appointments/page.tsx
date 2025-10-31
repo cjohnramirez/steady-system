@@ -7,35 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-async function fetchAllAppointments(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("appointment_with_details")
-    .select(`*`);
-
-  if (error) throw error;
-  return data || [];
-}
-
-async function fetchPendingAppointments(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("appointment_with_details")
-    .select(`*`)
-    .eq("status", "pending");
-
-  if (error) throw error;
-  return data || [];
-}
-
-async function fetchApprovedAppointments(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("appointment_with_details")
-    .select(`*`)
-    .eq("status", "approved");
-
-  if (error) throw error;
-  return data || [];
-}
+import { fetchAllAppointments, fetchApprovedAppointments, fetchPendingAppointments } from "./actions";
 
 async function fetchCompletedAppointments(supabase: SupabaseClient) {
   const { data, error } = await supabase
