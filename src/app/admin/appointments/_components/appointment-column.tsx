@@ -10,11 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Admin } from "@/lib/types/users";
+import { Appointment, AppointmentWithStudentAndCounselor } from "@/types/main";
 import { ColumnDef } from "@tanstack/react-table";
+import clsx from "clsx";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const adminColumn: ColumnDef<Admin>[] = [
+export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -45,48 +46,57 @@ export const adminColumn: ColumnDef<Admin>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Admin ID
+          Appointment ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
     },
   },
   {
-    accessorKey: "email",
-    header: "Email Address",
+    accessorKey: "studentId",
+    header: "Student Id",
   },
   {
-    accessorKey: "lastName",
+    accessorKey: "student_id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Last Name
+          Student Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
     },
   },
   {
-    accessorKey: "firstName",
-    header: ({ column }) => {
-      return (
-        <button
-          onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
-          className="flex items-center gap-2"
-        >
-          First Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </button>
-      );
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.getValue("status") ?? "";
+
+      const statusColor = clsx("text-black", {
+        "bg-blue-200": status === "approved",
+        "bg-amber-200": status === "pending",
+        "bg-green-200": status === "done",
+      });
+
+      return <Badge className={statusColor}>{String(status)}</Badge>;
     },
+    filterFn: (row, columnId, filterValue: string[]) => {
+      if (!filterValue?.length) return true;
+      return filterValue.includes(row.getValue(columnId));
+    },
+  },
+  {
+    accessorKey: "notes",
+    header: "Notes",
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const adminAccount = row.original;
+      const appointment = row.original;
 
       return (
         <DropdownMenu>
@@ -100,13 +110,13 @@ export const adminColumn: ColumnDef<Admin>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(String(adminAccount.id))
+                navigator.clipboard.writeText(appointment.id)
               }
             >
-              Copy Admin ID
+              Copy Appointment ID
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit Admin</DropdownMenuItem>
-            <DropdownMenuItem>Delete Admin</DropdownMenuItem>
+            <DropdownMenuItem>Edit Appointment</DropdownMenuItem>
+            <DropdownMenuItem>Delete Appointment</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

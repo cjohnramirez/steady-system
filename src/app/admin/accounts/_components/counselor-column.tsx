@@ -10,12 +10,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Admin, Counselor } from "@/lib/types/users";
+import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const counselorColumn: ColumnDef<Counselor>[] = [
+function getTodayBool(days: boolean[]) {
+  const jsDay = new Date().getDay();
+  const dayIndex = jsDay === 0 ? 7 : jsDay;
+  return days[dayIndex] ?? false;
+}
+
+export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -39,14 +45,14 @@ export const counselorColumn: ColumnDef<Counselor>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "id",
+    accessorKey: "counselor_id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Admin ID
+          Counselor ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
@@ -57,7 +63,7 @@ export const counselorColumn: ColumnDef<Counselor>[] = [
     header: "Email Address",
   },
   {
-    accessorKey: "lastName",
+    accessorKey: "last_name",
     header: ({ column }) => {
       return (
         <button
@@ -71,7 +77,7 @@ export const counselorColumn: ColumnDef<Counselor>[] = [
     },
   },
   {
-    accessorKey: "firstName",
+    accessorKey: "first_name",
     header: ({ column }) => {
       return (
         <button
@@ -85,28 +91,43 @@ export const counselorColumn: ColumnDef<Counselor>[] = [
     },
   },
   {
-    accessorKey: "college",
+    accessorKey: "college_id",
     header: "College",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college")}
+          {row.getValue("college_id")}
         </div>
       );
     },
   },
   {
-    accessorKey: "availability",
+    accessorKey: "availability_id",
     header: "Availability",
     cell: ({ row }) => {
-      const availability = row.getValue("availability") ?? "";
+      const originalRow = row.original
+
+      const availabilityArray = row.getValue("availability_id") ?? "";
+
+      const isActive = originalRow.is_active;
+
+      const status =
+        isActive === true
+          ? getTodayBool(
+              (Array.isArray(availabilityArray) && availabilityArray) || [],
+            )
+          : false;
 
       const statusColor = clsx("text-black", {
-        "bg-red-200": availability === "Available",
-        "bg-green-200": availability === "Unavailable",
+        "bg-red-200": status === false,
+        "bg-green-200": status === true,
       });
 
-      return <Badge className={statusColor}>{String(availability)}</Badge>;
+      return (
+        <Badge className={statusColor}>
+          {status === true ? "Available" : "Not Available"}
+        </Badge>
+      );
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;
@@ -130,13 +151,13 @@ export const counselorColumn: ColumnDef<Counselor>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(String(studentAccount.id))
+                navigator.clipboard.writeText(String(studentAccount.counselor_id))
               }
             >
-              Copy Student ID
+              Copy Counselor ID
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit Student</DropdownMenuItem>
-            <DropdownMenuItem>Delete Student</DropdownMenuItem>
+            <DropdownMenuItem>Edit Counselor</DropdownMenuItem>
+            <DropdownMenuItem>Delete Counselor</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

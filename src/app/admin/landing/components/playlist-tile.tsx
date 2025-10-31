@@ -1,17 +1,19 @@
-import { Playlist } from "@/lib/types/landing";
+import { PlaylistWithEmotionalStatus } from "@/types/main";
 import Image from "next/image";
 
 export default function PlaylistTile({
   playlistData,
 }: {
-  playlistData: Playlist;
+  playlistData: PlaylistWithEmotionalStatus;
 }) {
   return (
     <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl border border-gray-300 p-4">
       <div className="relative w-1/3">
         <Image
           src={
-            playlistData.image !== "" ? playlistData.image : "/placeholder.png"
+            playlistData.image && playlistData.image !== ""
+              ? playlistData.image
+              : "/placeholder.png"
           }
           alt={playlistData.title + "-image"}
           fill
@@ -25,21 +27,8 @@ export default function PlaylistTile({
           <p>by {playlistData.creator}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="relative h-8 w-8">
-            <Image
-              src={
-                playlistData.platform.platformIcon !== ""
-                  ? playlistData.platform.platformIcon
-                  : "/placeholder.png"
-              }
-              alt={playlistData.title + "-platform-icon"}
-              fill
-              className="rounded-md object-cover"
-              sizes="32px"
-            />
-          </div>
           <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
-            <p>{playlistData.emotion}</p>
+            <p>{playlistData.emotional_status?.name}</p>
           </div>
         </div>
       </div>

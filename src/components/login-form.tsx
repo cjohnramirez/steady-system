@@ -3,7 +3,7 @@
 import { login } from "@/app/auth/login/[role]/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Users } from "@/lib/types/users";
+import { Users } from "../../types/users";
 import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "./ui/button";

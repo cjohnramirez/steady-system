@@ -1,58 +1,92 @@
 "use client";
 
 import { useState } from "react";
-import { studentColumn } from "./student-column";
-import { adminColumn } from "./admin-column";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudentsData } from "@/lib/data/students-data";
-import { AdminsData } from "@/lib/data/admin-data";
-import { DataTable } from "@/components/data-table";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Admin, Counselor, Student } from "@/lib/types/users";
-import { CounselorsData } from "@/lib/data/counselors-data";
-import { counselorColumn } from "./counselor-column";
+import { DataTable } from "@/app/admin/_components/data-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { createClient } from "@/utils/supabase/client";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
 
-type TabConfig =
-  | {
-      name: "students";
-      data: typeof StudentsData;
-      columns: ColumnDef<Student, unknown>[];
-    }
-  | {
-      name: "admins";
-      data: typeof AdminsData;
-      columns: ColumnDef<Admin, unknown>[];
-    }
-  | {
-      name: "counselors";
-      data: typeof CounselorsData;
-      columns: ColumnDef<Counselor, unknown>[];
-    };
+import { studentColumn } from "./_components/student-column";
+import { adminColumn } from "./_components/admin-column";
+import { counselorColumn } from "./_components/counselor-column";
+
+async function fetchStudents(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from("student_with_details")
+    .select(`*`);
+
+  if (error) throw error;
+  return data || [];
+}
+
+async function fetchAdmins(supabase: SupabaseClient) {
+  const { data, error } = await supabase.from("admin").select(`*`);
+
+  if (error) throw error;
+  return data || [];
+}
+
+async function fetchCounselors(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from("counselor_with_details")
+    .select(`*`);
+  if (error) throw error;
+  return data || [];
+}
+
+type TabName = "students" | "admins" | "counselors";
 
 export default function AccountsPage() {
-  const [activeTab, setActiveTab] = useState<TabConfig["name"]>("students");
+  const supabase = createClient();
 
-  const tabs: TabConfig[] = [
-    { name: "students", data: StudentsData, columns: studentColumn },
-    { name: "admins", data: AdminsData, columns: adminColumn },
-    { name: "counselors", data: CounselorsData, columns: counselorColumn },
-  ];
+  const [activeTab, setActiveTab] = useState<TabName>("students");
 
-  const active = tabs.find((t) => t.name === activeTab)!;
+  const { data: students = [] } = useQuery({
+    queryKey: ["students"],
+    queryFn: () => fetchStudents(supabase),
+  });
+
+  const { data: admins = [] } = useQuery({
+    queryKey: ["admins"],
+    queryFn: () => fetchAdmins(supabase),
+  });
+
+  const { data: counselors = [] } = useQuery({
+    queryKey: ["counselors"],
+    queryFn: () => fetchCounselors(supabase),
+  });
+
+  const tabs = {
+    students: {
+      name: "students" as const,
+      data: students,
+      columns: studentColumn,
+    },
+    admins: { name: "admins" as const, data: admins, columns: adminColumn },
+    counselors: {
+      name: "counselors" as const,
+      data: counselors,
+      columns: counselorColumn,
+    },
+  };
+
+  const active = tabs[activeTab];
 
   return (
     <div>
       <DataTable
-        columns={active.columns as ColumnDef<any, unknown>[]}
-        data={active.data as any}
-        searchQuery="firstName"
+        columns={active.columns}
+        data={active.data}
+        searchQuery="first_name"
         toolbarExtra={
           <Tabs
             value={activeTab}
-            onValueChange={(v) => setActiveTab(v as TabConfig["name"])}
+            onValueChange={(v) => setActiveTab(v as TabName)}
           >
             <TabsList>
-              {tabs.map((tab) => (
+              {Object.values(tabs).map((tab) => (
                 <TabsTrigger key={tab.name} value={tab.name}>
                   {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
                 </TabsTrigger>

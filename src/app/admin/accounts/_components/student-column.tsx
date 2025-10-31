@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -10,12 +9,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Appointment } from "@/lib/types/appointments";
+import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
-import clsx from "clsx";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const appointmentColumns: ColumnDef<Appointment>[] = [
+export const studentColumn: ColumnDef<Tables<"student">>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -39,64 +37,99 @@ export const appointmentColumns: ColumnDef<Appointment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "appointmentId",
+    accessorKey: "student_id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Appointment ID
+          Student ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
     },
   },
   {
-    accessorKey: "studentId",
-    header: "Student Id",
+    accessorKey: "email",
+    header: "Email Address",
   },
   {
-    accessorKey: "studentName",
+    accessorKey: "last_name",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Student Name
+          Last Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "first_name",
+    header: ({ column }) => {
+      return (
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
+          className="flex items-center gap-2"
+        >
+          First Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </button>
+      );
+    },
+  },
+  {
+    accessorKey: "college_name",
+    header: "College",
     cell: ({ row }) => {
-      const status = row.getValue("status") ?? "";
-
-      const statusColor = clsx("text-black", {
-        "bg-blue-200": status === "approved",
-        "bg-amber-200": status === "pending",
-        "bg-green-200": status === "done",
-      });
-
-      return <Badge className={statusColor}>{String(status)}</Badge>;
-    },
-    filterFn: (row, columnId, filterValue: string[]) => {
-      if (!filterValue?.length) return true;
-      return filterValue.includes(row.getValue(columnId));
+      return (
+        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
+          {row.getValue("college_name")}
+        </div>
+      );
     },
   },
   {
-    accessorKey: "notes",
-    header: "Notes",
+    accessorKey: "department_name",
+    header: "Department",
+    cell: ({ row }) => {
+      return (
+        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
+          {String(row.getValue("department_name"))}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "year_level",
+    header: "Year Level",
+    cell: ({ row }) => {
+      return (
+        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
+          {String(row.getValue("year_level"))}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "emotional_status_name",
+    header: "Emotional Status",
+    cell: ({ row }) => {
+      return (
+        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
+          {row.getValue("emotional_status_name")}
+        </div>
+      );
+    },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const appointment = row.original;
+      const studentAccount = row.original;
 
       return (
         <DropdownMenu>
@@ -110,13 +143,13 @@ export const appointmentColumns: ColumnDef<Appointment>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(appointment.appointmentId)
+                navigator.clipboard.writeText(String(studentAccount.student_id))
               }
             >
-              Copy Appointment ID
+              Copy Student ID
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit Appointment</DropdownMenuItem>
-            <DropdownMenuItem>Delete Appointment</DropdownMenuItem>
+            <DropdownMenuItem>Edit Student</DropdownMenuItem>
+            <DropdownMenuItem>Delete Student</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

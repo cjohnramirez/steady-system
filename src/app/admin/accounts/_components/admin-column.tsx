@@ -9,11 +9,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Student } from "@/lib/types/users";
+import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const studentColumn: ColumnDef<Student>[] = [
+export const adminColumn: ColumnDef<Tables<"admin">>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -37,14 +37,14 @@ export const studentColumn: ColumnDef<Student>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "id",
+    accessorKey: "admin_id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Student ID
+          Admin ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
@@ -55,7 +55,7 @@ export const studentColumn: ColumnDef<Student>[] = [
     header: "Email Address",
   },
   {
-    accessorKey: "lastName",
+    accessorKey: "last_name",
     header: ({ column }) => {
       return (
         <button
@@ -69,7 +69,7 @@ export const studentColumn: ColumnDef<Student>[] = [
     },
   },
   {
-    accessorKey: "firstName",
+    accessorKey: "first_name",
     header: ({ column }) => {
       return (
         <button
@@ -83,46 +83,9 @@ export const studentColumn: ColumnDef<Student>[] = [
     },
   },
   {
-    accessorKey: "college",
-    header: "College",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college")}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "program",
-    header: "Program",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("program"))}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "yearLevel",
-    header: "Year Level",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("yearLevel"))}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "emotionalStatus",
-    header: "Emotional Status",
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
-      const studentAccount = row.original;
+      const adminAccount = row.original;
 
       return (
         <DropdownMenu>
@@ -136,13 +99,13 @@ export const studentColumn: ColumnDef<Student>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(String(studentAccount.id))
+                navigator.clipboard.writeText(String(adminAccount.id))
               }
             >
-              Copy Student ID
+              Copy Admin ID
             </DropdownMenuItem>
-            <DropdownMenuItem>Edit Student</DropdownMenuItem>
-            <DropdownMenuItem>Delete Student</DropdownMenuItem>
+            <DropdownMenuItem>Edit Admin</DropdownMenuItem>
+            <DropdownMenuItem>Delete Admin</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

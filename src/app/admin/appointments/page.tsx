@@ -1,13 +1,12 @@
 "use client";
 
-import { DataTable } from "../../../components/data-table";
-import { appointmentsData } from "@/lib/data/appointments-data";
-import { appointmentColumns } from "./appointment-column";
+import { DataTable } from "../_components/data-table";
+import { appointmentColumns } from "./_components/appointment-column";
 
 export default function AppointmentPage() {
   return (
     <div>
-      <DataTable columns={appointmentColumns} data={appointmentsData} searchQuery="studentName"/>
+      {/* <DataTable columns={appointmentColumns} data={appointmentsData} searchQuery="studentName"/> */}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTablePagination } from "@/components/pagination";
+import { DataTablePagination } from "./pagination";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,7 +8,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -35,7 +34,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Download, Filter, Search, SearchIcon, Sidebar } from "lucide-react";
+import { Download, Filter, SearchIcon, Sidebar } from "lucide-react";
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {

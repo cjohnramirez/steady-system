@@ -3,21 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createServiceClient } from "@/utils/supabase/server";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const userData = {
+  const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
-  const { data, error } = await supabase.auth.signInWithPassword(userData);
-
-  if (data) console.log(data);
+  const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
     redirect("/error");
@@ -28,18 +24,32 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
+  const supabaseService = await createServiceClient();
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
+  const formDataObj = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signUp(data);
+  const { data : userData, error: signUpError } = await supabase.auth.signUp(formDataObj);
 
-  if (error) {
+  if (signUpError) {
+    console.log("Signup Error: ", signUpError.message);
+    redirect("/error");
+  }
+
+  const userRole: { user_id: string; role: "student" | "admin" | "counselor" } = {
+    user_id: userData.user?.id as string,
+    role: "admin",
+  };
+
+  const { error: roleError } = await supabaseService
+    .from("user_roles")
+    .insert([userRole]);
+
+  if (roleError) {
+    console.log("Role Error: ", roleError.message);
     redirect("/error");
   }
 

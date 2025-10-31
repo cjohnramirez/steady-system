@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import DashboardChart from "./dashboard-chart";
+import DashboardChart from "./_components/dashboard-chart";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -15,10 +15,7 @@ import {
 } from "chart.js";
 import { TrendingUp } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  graphs,
-  statsInfo,
-} from "@/lib/data/dashboard-data";
+import { graphs, statsInfo } from "@/lib/dashboard-data";
 
 ChartJS.register(
   LineElement,
@@ -48,7 +45,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-between">
                 <h3>{item.label}</h3>
-                <span className="flex items-center gap-2 rounded-md border border-gray-100 bg-white text-xs font-medium py-1 px-3">
+                <span className="flex items-center gap-2 rounded-md border border-gray-100 bg-white px-3 py-1 text-xs font-medium">
                   <TrendingUp strokeWidth={1.25} size={20} />
                   +12.5%
                 </span>
@@ -79,7 +76,7 @@ export default function DashboardPage() {
               </TabsList>
             </Tabs>
           </div>
-          <DashboardChart chartData={graphs[selectedChartTab]}/>
+          <DashboardChart chartData={graphs[selectedChartTab]} />
         </div>
       </main>
     </div>

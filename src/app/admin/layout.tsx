@@ -1,4 +1,4 @@
-import NavigationBar from "@/components/navigation";
+import NavigationBar from "./_components/navigation";
 
 export default function ProtectedRootLayout({
   children,

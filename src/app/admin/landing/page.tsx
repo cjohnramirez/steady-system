@@ -1,11 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  announcementsData,
-  articleData,
-  playlistData,
-} from "@/lib/data/landing-data";
 import { ChevronRight, Plus } from "lucide-react";
 import ArticleTile from "./components/article-tile";
 import AnnoucementsTile from "./components/annoucements-tile";
@@ -14,7 +9,7 @@ import PlaylistTile from "./components/playlist-tile";
 export default function LandingPage() {
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex justify-between">
+      {/* <div className="flex justify-between">
         <div>
           <h2 className="text-md font-semibold">Articles to Read</h2>
           <p className="">Added articles here are shown in the landing page</p>
@@ -82,9 +77,9 @@ export default function LandingPage() {
         </Button>
       </div>
       <div className="flex h-full items-stretch justify-center gap-4">
-        <div className="grid grid-cols-4 gap-4 w-full">
+        <div className="grid w-full grid-cols-4 gap-4">
           {playlistData.slice(0, 4).map((playlist) => (
-            <PlaylistTile playlistData={playlist} key={playlist.id}/>
+            <PlaylistTile playlistData={playlist} key={playlist.id} />
           ))}
         </div>
         <div className="flex h-auto items-stretch">
@@ -96,7 +91,7 @@ export default function LandingPage() {
             See More
           </Button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
