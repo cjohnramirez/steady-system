@@ -5,14 +5,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { College } from "@/types/main";
+import { Tables } from "@/types/supabase";
 
 export default function CollegeDropdown({
   isLoading,
   colleges,
 }: {
   isLoading: boolean;
-  colleges: College[];
+  colleges: Tables<"college">[];
 }) {
 
   return (
@@ -22,7 +22,7 @@ export default function CollegeDropdown({
         <Button variant="outline">Select</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {colleges?.map((college, idx) => (
+        {colleges.map((college, idx) => (
           <DropdownMenuLabel key={idx}>
             {college.id ?? "None"}
           </DropdownMenuLabel>

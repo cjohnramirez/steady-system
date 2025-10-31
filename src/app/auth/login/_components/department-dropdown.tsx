@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
-import { Department } from "@/types/main";
+import { Tables } from "@/types/supabase";
 import { useState } from "react";
 
 export default function DepartmentDropdown({
@@ -14,7 +14,7 @@ export default function DepartmentDropdown({
   departments,
 }: {
   isLoading: boolean;
-  departments: Department[];
+  departments: Tables<"department">[];
 }) {
   const [selected, setSelected] = useState<string | null>(null);
 
