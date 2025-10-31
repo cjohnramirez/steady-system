@@ -105,7 +105,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     accessorKey: "availability_id",
     header: "Availability",
     cell: ({ row }) => {
-      const originalRow = row.original
+      const originalRow = row.original;
 
       const availabilityArray = row.getValue("availability_id") ?? "";
 
@@ -151,7 +151,9 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(String(studentAccount.counselor_id))
+                navigator.clipboard.writeText(
+                  String(studentAccount.counselor_id),
+                )
               }
             >
               Copy Counselor ID

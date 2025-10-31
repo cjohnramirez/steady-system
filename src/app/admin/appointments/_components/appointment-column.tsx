@@ -10,12 +10,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Appointment, AppointmentWithStudentAndCounselor } from "@/types/main";
+import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
-export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[] = [
+export const appointmentColumns: ColumnDef<
+  Tables<"appointment_with_details">
+>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -39,25 +41,7 @@ export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[]
     enableHiding: false,
   },
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <button
-          onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
-          className="flex items-center gap-2"
-        >
-          Appointment ID
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </button>
-      );
-    },
-  },
-  {
-    accessorKey: "studentId",
-    header: "Student Id",
-  },
-  {
-    accessorKey: "student_id",
+    accessorKey: "last_student_name",
     header: ({ column }) => {
       return (
         <button
@@ -67,6 +51,38 @@ export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[]
           Student Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
+      );
+    },
+    cell: ({ row }) => {
+      const originalRow = row.original;
+
+      return (
+        <p>
+          {originalRow.first_student_name}, {originalRow.last_student_name}
+        </p>
+      );
+    },
+  },
+  {
+    accessorKey: "counselor_id",
+    header: ({ column }) => {
+      return (
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
+          className="flex items-center gap-2"
+        >
+          Counselor Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </button>
+      );
+    },
+    cell: ({ row }) => {
+      const originalRow = row.original;
+
+      return (
+        <p>
+          {originalRow.first_counselor_name}, {originalRow.last_counselor_name}
+        </p>
       );
     },
   },
@@ -79,7 +95,8 @@ export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[]
       const statusColor = clsx("text-black", {
         "bg-blue-200": status === "approved",
         "bg-amber-200": status === "pending",
-        "bg-green-200": status === "done",
+        "bg-green-200": status === "completed",
+        "bg-red-200": status === "cancelled",
       });
 
       return <Badge className={statusColor}>{String(status)}</Badge>;
@@ -92,6 +109,15 @@ export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[]
   {
     accessorKey: "notes",
     header: "Notes",
+  },
+  {
+    accessorKey: "scheduled_at",
+    header: "Scheduled At",
+    cell: ({ row }) => {
+      const originalRow = row.original;
+
+      return <p>{new Date(String(originalRow.scheduled_at)).toLocaleString()}</p>;
+    },
   },
   {
     id: "actions",
@@ -110,10 +136,10 @@ export const appointmentColumns: ColumnDef<AppointmentWithStudentAndCounselor>[]
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(appointment.id)
+                navigator.clipboard.writeText(appointment.scheduled_at || "")
               }
             >
-              Copy Appointment ID
+              Copy Appointment Date
             </DropdownMenuItem>
             <DropdownMenuItem>Edit Appointment</DropdownMenuItem>
             <DropdownMenuItem>Delete Appointment</DropdownMenuItem>

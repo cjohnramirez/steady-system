@@ -3,13 +3,65 @@
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Plus } from "lucide-react";
 import ArticleTile from "./components/article-tile";
-import AnnoucementsTile from "./components/annoucements-tile";
+import AnnoucementTile from "./components/annoucements-tile";
 import PlaylistTile from "./components/playlist-tile";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+
+async function fetchArticles(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from("article_with_details")
+    .select(`*`)
+    .range(0, 3);
+
+  if (error) throw error;
+  return data || [];
+}
+
+async function fetchPlaylist(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from("playlist_with_details")
+    .select(`*`)
+    .range(0, 3);
+
+  if (error) throw error;
+  return data || [];
+}
+
+async function fetchAnnouncements(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from("announcement")
+    .select(`*`)
+    .range(0, 3);
+
+  if (error) throw error;
+  return data || [];
+}
 
 export default function LandingPage() {
+  const supabase = createClient();
+
+  const { data: articleData = [], isLoading: articleDataLoading } = useQuery({
+    queryKey: ["articles"],
+    queryFn: () => fetchArticles(supabase),
+  });
+
+  const { data: annoucementData = [], isLoading: annoucementDataLoading } =
+    useQuery({
+      queryKey: ["annoucements"],
+      queryFn: () => fetchAnnouncements(supabase),
+    });
+
+  const { data: playlistData = [], isLoading: playlistDataLoading } = useQuery({
+    queryKey: ["playlists"],
+    queryFn: () => fetchPlaylist(supabase),
+  });
+
   return (
     <div className="flex flex-col gap-8">
-      {/* <div className="flex justify-between">
+      <div className="flex justify-between">
         <div>
           <h2 className="text-md font-semibold">Articles to Read</h2>
           <p className="">Added articles here are shown in the landing page</p>
@@ -20,10 +72,16 @@ export default function LandingPage() {
         </Button>
       </div>
       <div className="flex h-full items-stretch justify-center gap-4">
-        <div className="grid grid-cols-4 gap-4">
-          {articleData.slice(0, 4).map((article) => (
-            <ArticleTile articleTile={article} key={article.id} />
-          ))}
+        <div className="grid w-full grid-cols-4 place-items-stretch gap-4">
+          {articleDataLoading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <ArticleTile key={idx} isLoading />
+              ))
+            : articleData
+                .slice(0, 4)
+                .map((article, idx) => (
+                  <ArticleTile key={idx} articleTile={article} />
+                ))}
         </div>
         <div className="flex h-auto items-stretch">
           <Button
@@ -48,13 +106,16 @@ export default function LandingPage() {
         </Button>
       </div>
       <div className="flex h-full items-stretch justify-center gap-4">
-        <div className="grid grid-cols-4 gap-4">
-          {announcementsData.slice(0, 4).map((annoucement) => (
-            <AnnoucementsTile
-              announcements={annoucement}
-              key={annoucement.id}
-            />
-          ))}
+        <div className="grid w-full grid-cols-4 place-content-stretch gap-4">
+          {annoucementDataLoading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <AnnoucementTile key={idx} isLoading />
+              ))
+            : annoucementData
+                .slice(0, 4)
+                .map((annoucement, idx) => (
+                  <AnnoucementTile annoucementTile={annoucement} key={idx} />
+                ))}
         </div>
         <div className="flex h-auto items-stretch">
           <Button
@@ -77,10 +138,16 @@ export default function LandingPage() {
         </Button>
       </div>
       <div className="flex h-full items-stretch justify-center gap-4">
-        <div className="grid w-full grid-cols-4 gap-4">
-          {playlistData.slice(0, 4).map((playlist) => (
-            <PlaylistTile playlistData={playlist} key={playlist.id} />
-          ))}
+        <div className="grid w-full grid-cols-4 place-content-stretch gap-4">
+          {playlistDataLoading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <PlaylistTile key={idx} isLoading />
+              ))
+            : playlistData
+                .slice(0, 4)
+                .map((playlist, idx) => (
+                  <PlaylistTile playlistTile={playlist} key={idx} />
+                ))}
         </div>
         <div className="flex h-auto items-stretch">
           <Button
@@ -91,7 +158,7 @@ export default function LandingPage() {
             See More
           </Button>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

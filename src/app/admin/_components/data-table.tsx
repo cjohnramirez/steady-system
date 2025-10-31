@@ -13,6 +13,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -35,7 +36,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { Download, Filter, SearchIcon, Sidebar } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,18 +48,36 @@ export function DataTable<TData, TValue>({
   data,
   toolbarExtra,
   searchQuery,
+  isLoading,
 }: DataTableProps<TData, TValue> & {
   toolbarExtra?: React.ReactNode;
   searchQuery: string;
+  isLoading: boolean;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
+  const tableData = useMemo(
+    () => (isLoading ? Array(30).fill({}) : data),
+    [isLoading, data],
+  );
+
+  const tableColumns = useMemo(
+    () =>
+      isLoading
+        ? columns.map((column) => ({
+            ...column,
+            cell: () => <Skeleton className="rounded- h-6 w-full m-2 p-2" />,
+          }))
+        : columns,
+    [isLoading, columns],
+  );
+
   const table = useReactTable({
-    data,
-    columns,
+    data: tableData,
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -78,27 +97,7 @@ export function DataTable<TData, TValue>({
   return (
     <div>
       <div className="flex justify-between gap-4">
-        <div>
-          {toolbarExtra ? (
-            <>{toolbarExtra}</>
-          ) : (
-            <Tabs
-              defaultValue="pending"
-              onValueChange={(value) => {
-                value !== "all"
-                  ? setColumnFilters([{ id: "status", value: value }])
-                  : setColumnFilters([]);
-              }}
-            >
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="approved">Approved</TabsTrigger>
-                <TabsTrigger value="done">Done</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )}
-        </div>
+        <div>{toolbarExtra}</div>
         <div className="flex gap-4">
           <InputGroup>
             <InputGroupInput

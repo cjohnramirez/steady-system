@@ -490,6 +490,31 @@ export type Database = {
       }
     }
     Views: {
+      appointment_with_details: {
+        Row: {
+          first_counselor_name: string | null
+          first_student_name: string | null
+          last_counselor_name: string | null
+          last_student_name: string | null
+          notes: string | null
+          scheduled_at: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
+      article_with_details: {
+        Row: {
+          added_at: string | null
+          article_image: string | null
+          author_name: string | null
+          content: string | null
+          id: string | null
+          publisher_icon: string | null
+          publisher_name: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       counselor_with_details: {
         Row: {
           availability_id: boolean[] | null
@@ -515,6 +540,17 @@ export type Database = {
           last_name: string | null
           student_id: number | null
           year_level: number | null
+        }
+        Relationships: []
+      }
+      playlist_with_details: {
+        Row: {
+          creator: string | null
+          emotional_status_name: string | null
+          id: string
+          image: string | null
+          link: string
+          title: string
         }
         Relationships: []
       }

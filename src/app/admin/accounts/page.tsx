@@ -3,38 +3,13 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "@/app/admin/_components/data-table";
-import { ColumnDef } from "@tanstack/react-table";
 import { createClient } from "@/utils/supabase/client";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 
 import { studentColumn } from "./_components/student-column";
 import { adminColumn } from "./_components/admin-column";
 import { counselorColumn } from "./_components/counselor-column";
-
-async function fetchStudents(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("student_with_details")
-    .select(`*`);
-
-  if (error) throw error;
-  return data || [];
-}
-
-async function fetchAdmins(supabase: SupabaseClient) {
-  const { data, error } = await supabase.from("admin").select(`*`);
-
-  if (error) throw error;
-  return data || [];
-}
-
-async function fetchCounselors(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("counselor_with_details")
-    .select(`*`);
-  if (error) throw error;
-  return data || [];
-}
+import { fetchAdmins, fetchCounselors, fetchStudents } from "./actions";
 
 type TabName = "students" | "admins" | "counselors";
 
@@ -43,17 +18,17 @@ export default function AccountsPage() {
 
   const [activeTab, setActiveTab] = useState<TabName>("students");
 
-  const { data: students = [] } = useQuery({
+  const { data: students = [], isLoading: isStudentsLoading } = useQuery({
     queryKey: ["students"],
     queryFn: () => fetchStudents(supabase),
   });
 
-  const { data: admins = [] } = useQuery({
+  const { data: admins = [], isLoading: isAdminsLoading } = useQuery({
     queryKey: ["admins"],
     queryFn: () => fetchAdmins(supabase),
   });
 
-  const { data: counselors = [] } = useQuery({
+  const { data: counselors = [], isLoading: isCounselorsLoading } = useQuery({
     queryKey: ["counselors"],
     queryFn: () => fetchCounselors(supabase),
   });
@@ -63,20 +38,28 @@ export default function AccountsPage() {
       name: "students" as const,
       data: students,
       columns: studentColumn,
+      isLoading: isStudentsLoading,
     },
-    admins: { name: "admins" as const, data: admins, columns: adminColumn },
+    admins: {
+      name: "admins" as const,
+      data: admins,
+      columns: adminColumn,
+      isLoading: isAdminsLoading,
+    },
     counselors: {
       name: "counselors" as const,
       data: counselors,
       columns: counselorColumn,
+      isLoading: isCounselorsLoading,
     },
   };
 
   const active = tabs[activeTab];
 
   return (
-    <div>
+    <>
       <DataTable
+        isLoading={active.isLoading}
         columns={active.columns}
         data={active.data}
         searchQuery="first_name"
@@ -95,6 +78,6 @@ export default function AccountsPage() {
           </Tabs>
         }
       />
-    </div>
+    </>
   );
 }
