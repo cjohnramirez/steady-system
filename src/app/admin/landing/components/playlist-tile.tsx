@@ -11,7 +11,7 @@ export default function PlaylistTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl p-4 border border-gray-300">
+      <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl p-2 border border-gray-300">
         <div className="relative w-1/3">
           <Skeleton className="h-full w-full rounded-2xl" />
         </div>

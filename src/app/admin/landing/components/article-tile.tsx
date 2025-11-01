@@ -12,7 +12,7 @@ export default function ArticleTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl w-full border border-gray-300">
+      <div className="flex h-full flex-col overflow-hidden rounded-2xl w-full border border-gray-300 p-2">
         <Skeleton className="h-40 w-full rounded-t-2xl" />
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
           <div className="space-y-2">

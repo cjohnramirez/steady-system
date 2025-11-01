@@ -40,7 +40,7 @@ export default function DashboardPage() {
           {statsInfo.map((item, i) => (
             <div
               key={i}
-              className="rounded-xl border border-gray-100 bg-gradient-to-b from-transparent to-[#FFC878] p-6"
+              className="rounded-xl border border-gray-100 bg-gradient-to-b from-transparent to-brand-light p-6"
             >
               <div className="flex items-center justify-between">
                 <h3>{item.label}</h3>

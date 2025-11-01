@@ -12,7 +12,7 @@ export default function AnnoucementTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl w-full border border-gray-300">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-gray-300 p-2">
         <Skeleton className="h-40 w-full rounded-t-2xl" />
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
           <div className="space-y-2">
@@ -24,7 +24,7 @@ export default function AnnoucementTile({
           <Skeleton className="h-10 w-full" />
         </div>
       </div>
-    )
+    );
   }
 
   if (!annoucementTile) return null;
@@ -53,7 +53,9 @@ export default function AnnoucementTile({
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
             <Calendar size={16} />
-            <p>Archived {new Date(annoucementTile.start_date).toDateString()}</p>
+            <p>
+              Archived {new Date(annoucementTile.start_date).toDateString()}
+            </p>
           </div>
           <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
             <MapPin size={16} />
