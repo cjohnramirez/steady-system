@@ -6,50 +6,72 @@ import { createServiceClient } from "@/utils/supabase/service";
 export default async function SignUpFormAction(
   formData: FormData,
 ): Promise<{ error?: string; success?: string }> {
-  const supabase = await createClient();
-  const supabaseAdmin = await createServiceClient();
+  const supabase = await createClient(); // normal users
+  const supabaseAdmin = await createServiceClient(); // superuser
 
-  const { error: signUpError } = await supabase.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: formData.get("email")?.toString() || "",
     password: formData.get("password")?.toString() || "",
   });
 
   if (signUpError) {
-    return { error: "Internal server error" };
+    console.error("🧠 SIGNUP ERROR:", signUpError);
+    return { error: "Sign up failed" };
   }
 
-  const { data: userData } = await supabase.auth.getUser();
-
-  if (!userData.user?.id) {
+  if (!signUpData.user?.id) {
+    console.error("❌ User ID missing after signup:", signUpData);
     return { error: "User ID not found" };
   }
 
+  console.log("🧠 DEBUG INSERT user_roles", {
+    user_id: signUpData.user.id,
+    role: "student",
+  });
+
+  const userRole: { user_id: string; role: "student" | "admin" | "counselor" } =
+    {
+      user_id: signUpData.user?.id as string,
+      role: "student",
+    };
+
   const { error: updateRoleError } = await supabaseAdmin
     .from("user_roles")
-    .insert({
-      user_id: userData.user.id,
-      role: "student",
-    });
+    .insert([userRole]);
 
   if (updateRoleError) {
-    return { error: "Updating user role unsuccessful" };
+    console.error("❌ ROLE INSERT ERROR:", updateRoleError);
+    return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
+
+  const yearLevel = Number(formData.get("year_level") || 1);
+  const studentId = Number(formData.get("student_id") || 1);
 
   const { error: updateStudentError } = await supabaseAdmin
     .from("student")
     .insert({
-      first_name: formData.get("firstName")?.toString() || "",
-      last_name: formData.get("lastName")?.toString() || "",
+      first_name: formData.get("first_name")?.toString() || "",
+      last_name: formData.get("last_name")?.toString() || "",
       email: formData.get("email")?.toString() || "",
-      department_id: formData.get("department")?.toString() || null,
-      year_level: Number(formData.get("year_level") || 0),
-      student_id: Number(formData.get("studentId") || 0),
-      user_id: userData.user.id,
+      department_id: formData.get("department")?.toString(),
+      year_level: yearLevel > 0 ? yearLevel : 1,
+      student_id: studentId > 0 ? studentId : 1,
+      user_id: signUpData.user.id,
     });
 
   if (updateStudentError) {
-    return { error: "Internal server error" };
+    console.log("❌ STUDENT INSERT ERROR:", {
+      yearLevel,
+      studentId,
+      firstName: formData.get("first_name"),
+      lastName: formData.get("last_name"),
+      email: formData.get("email"),
+      departmentId: formData.get("department"),
+    });
+    return { error: `Failed to insert student: ${updateStudentError.message}` };
   }
+
+  console.log("✅ SIGNUP SUCCESS for user:", signUpData.user.id);
 
   return { success: "Sign Up successful" };
 }

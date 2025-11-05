@@ -1,11 +1,9 @@
 import LoginForm from "../_components/login-form";
 
-export default async function LoginPage({
-  params,
-}: {
-  params: { role: string };
+export default async function LoginPage(props: {
+  params: Promise<{ role: string }>;
 }) {
-  const role = params.role as "admin" | "student" | "counselor";
+  const { role } = await props.params;
 
-  return <LoginForm role={role} />;
+  return <LoginForm role={role as "admin" | "student" | "counselor"} />;
 }

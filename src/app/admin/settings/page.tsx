@@ -1,7 +1,7 @@
 "use client";
 
+import { Edit } from "lucide-react";
 import { useState } from "react";
-import { FaEdit } from "react-icons/fa";
 
 export default function Settings() {
   const [profile, setProfile] = useState({
@@ -14,7 +14,7 @@ export default function Settings() {
   });
 
   return (
-    <div className="min-h-screen bg-[#fafafa] px-10 py-8">
+    <div className="min-h-screen">
       {/* Top Nav Indicator */}
       <div className="text-gray-600 text-sm mb-6">
         Guidance and Counseling Services / <span className="font-semibold">Settings</span>
@@ -159,7 +159,7 @@ export default function Settings() {
 
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-orange-300 to-[#f7a84e] flex items-center justify-center">
-                <FaEdit className="absolute bottom-0 right-0 bg-white p-1 rounded-full text-gray-600 cursor-pointer" />
+                <Edit className="absolute bottom-0 right-0 bg-white p-1 rounded-full text-gray-600 cursor-pointer" />
               </div>
               <div className="flex gap-2">
                 <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100">

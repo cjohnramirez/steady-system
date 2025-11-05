@@ -26,6 +26,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import SignUpFormAction from "../actions";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton, 
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Eye, EyeClosed } from "lucide-react";
 
 export async function fetchDepartment(
   supabase: SupabaseClient,
@@ -56,6 +63,7 @@ export default function SignUpForm() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
   const [college, setCollege] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const { data: departmentData = [], isLoading: isDepartmentLoading } =
     useQuery({
@@ -63,27 +71,28 @@ export default function SignUpForm() {
       queryFn: () => fetchDepartment(supabase, college),
     });
 
-  console.log(departmentData);
-
   const { data: collegeData = [] } = useQuery({
     queryKey: ["college", "all"],
     queryFn: () => fetchCollege(supabase),
   });
 
   const formSchema = z.object({
-    firstName: z.string().min(2, "First name is too short"),
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
     lastName: z
-      .string({ error: "Last name required" })
-      .min(2, "First name is too short"),
-    email: z.email({ error: "Invalid email" }),
-    college: z.uuid("Invalid college ID"),
-    department: z.uuid("Invalid department ID"),
-    year_level: z.int().min(1, "Year too low").max(5, "Year too high"),
-    studentId: z.number({ error: "Not a valid student ID" }),
+      .string({ error: "Last name is required" })
+      .min(2, "Last name must be at least 2 characters"),
+    email: z.email({ error: "Please enter a valid email address" }),
+    college: z.uuid("Please select a valid college"),
+    departmentId: z.uuid("Please select a valid department"),
+    yearLevel: z
+      .int()
+      .min(1, "Year level must be between 1 and 5")
+      .max(5, "Year level must be between 1 and 5"),
+    studentId: z.number({ error: "Please enter a valid student ID number" }),
     password: z
       .string()
-      .min(8, "Password too short")
-      .max(255, "Password too long"),
+      .min(8, "Password must be at least 8 characters")
+      .max(255, "Password must not exceed 255 characters"),
   });
 
   const form = useForm({
@@ -91,9 +100,9 @@ export default function SignUpForm() {
       firstName: "",
       lastName: "",
       email: "",
-      department: "",
+      departmentId: "",
       college: "",
-      year_level: 1,
+      yearLevel: 1,
       password: "",
       studentId: 0,
     },
@@ -106,13 +115,13 @@ export default function SignUpForm() {
       try {
         const formData = new FormData();
 
-        formData.append("firstName", form.value.firstName);
-        formData.append("lastName", form.value.lastName);
+        formData.append("first_name", form.value.firstName);
+        formData.append("last_name", form.value.lastName);
         formData.append("email", form.value.email);
-        formData.append("department", form.value.department);
-        formData.append("year_level", form.value.year_level.toString());
+        formData.append("department_id", form.value.departmentId);
+        formData.append("year_level", form.value.yearLevel.toString());
         formData.append("password", form.value.password);
-        formData.append("studentId", form.value.studentId.toString());
+        formData.append("student_id", form.value.studentId.toString());
 
         const res = await SignUpFormAction(formData);
 
@@ -124,12 +133,11 @@ export default function SignUpForm() {
         if (res?.success) {
           toast.success(res.success);
         }
-
       } catch {
-        toast.error("Sign Up unsuccessful");
+        toast.error("Sign up unsuccessful");
       } finally {
         setIsLoading(false);
-        router.replace("/")
+        router.replace("/");
       }
     },
   });
@@ -216,6 +224,7 @@ export default function SignUpForm() {
                     onChange={(e) => field.handleChange(e.target.value)}
                     aria-invalid={isInvalid}
                     placeholder="Enter a valid email address"
+                    type="email"
                   />
                   {isInvalid ? (
                     <FieldError errors={field.state.meta.errors} />
@@ -236,17 +245,29 @@ export default function SignUpForm() {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="Enter a password"
-                    autoComplete="off"
-                    type="password"
-                  />
+                  <InputGroup>
+                    <InputGroupInput
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      type={showPassword ? "text" : "password"}
+                    />
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        aria-label="Copy"
+                        title="Copy"
+                        size="icon-xs"
+                        onClick={() => {
+                          setShowPassword(!showPassword);
+                        }}
+                      >
+                        {showPassword ? <Eye /> : <EyeClosed />}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
                   {isInvalid ? (
                     <FieldError errors={field.state.meta.errors} />
                   ) : (
@@ -304,7 +325,7 @@ export default function SignUpForm() {
                 );
               }}
             </form.Field>
-            <form.Field name="department">
+            <form.Field name="departmentId">
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
@@ -344,6 +365,81 @@ export default function SignUpForm() {
                     ) : (
                       <FieldDescription>
                         A department must be chosen
+                      </FieldDescription>
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+          </div>
+          <div className="flex gap-6">
+            <form.Field name="yearLevel">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Year Level</FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value.toString()}
+                      onValueChange={(value) =>
+                        field.handleChange(Number(value))
+                      }
+                    >
+                      <SelectTrigger
+                        id="select-department"
+                        aria-invalid={isInvalid}
+                      >
+                        <SelectValue placeholder="Select Year Level" />
+                      </SelectTrigger>
+                      <SelectContent position="item-aligned">
+                        {[
+                          { year: "1", name: "1st Year" },
+                          { year: "2", name: "2nd Year" },
+                          { year: "3", name: "3rd Year" },
+                          { year: "4", name: "4th Year" },
+                          { year: "5", name: "5th Year" },
+                        ].map((data, idx) => (
+                          <SelectItem value={data.year} key={idx}>
+                            {data.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid ? (
+                      <FieldError errors={field.state.meta.errors} />
+                    ) : (
+                      <FieldDescription>A year must be chosen</FieldDescription>
+                    )}
+                  </Field>
+                );
+              }}
+            </form.Field>
+            <form.Field name="studentId">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Student ID</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value.toString()}
+                      onBlur={field.handleBlur}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
+                      aria-invalid={isInvalid}
+                    />
+                    {isInvalid ? (
+                      <FieldError errors={field.state.meta.errors} />
+                    ) : (
+                      <FieldDescription>
+                        Must be a valid university-assigned ID
                       </FieldDescription>
                     )}
                   </Field>

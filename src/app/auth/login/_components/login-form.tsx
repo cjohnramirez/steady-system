@@ -15,19 +15,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
-import { jwtDecode } from "jwt-decode";
-
-type roles = "student" | "admin" | "counselor";
-
-interface JwtCustomPayload {
-  user_role: roles;
-  exp: number;
-  iat: number;
-  sub: string;
-}
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { Eye, EyeClosed } from "lucide-react";
+import { roles } from "@/types/main";
+import LoginFormAction from "../actions";
 
 const formSchema = z.object({
   email: z.email({ error: "Invalid email" }),
@@ -41,6 +39,7 @@ export default function LoginForm({ role }: { role: roles }) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -51,30 +50,24 @@ export default function LoginForm({ role }: { role: roles }) {
       onSubmit: formSchema,
     },
     onSubmit: async (form) => {
-      const supabase = createClient();
       setIsLoading(true);
 
       try {
-        const { error } = await supabase.auth.signInWithPassword(form.value);
+        const formData = new FormData();
+        formData.append("email", form.value.email);
+        formData.append("password", form.value.password);
 
-        if (error) {
-          toast.error("Internal server error");
+        const res = await LoginFormAction(formData, role);
+
+        if (res?.error) {
+          toast.error(res.error);
           return;
         }
 
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session) {
-          const jwt = jwtDecode<JwtCustomPayload>(session.access_token);
-          if (jwt.user_role !== role) {
-            toast.error("Unauthorized access for this role");
-            return;
-          }
+        if (res?.success) {
+          toast.success(res.success);
         }
 
-        toast.success("Authentication successful");
         router.push("/");
       } catch {
         toast.error("Authentication unsuccessful");
@@ -130,14 +123,30 @@ export default function LoginForm({ role }: { role: roles }) {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                  />
+                  <InputGroup>
+                    <InputGroupInput
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      type={showPassword ? "text" : "password"}
+                    />
+                    <InputGroupAddon align="inline-end">
+                      <InputGroupButton
+                        aria-label="Copy"
+                        title="Copy"
+                        size="icon-xs"
+                        onClick={() => {
+                          setShowPassword(!showPassword);
+                        }}
+                      >
+                        {showPassword ? <Eye /> : <EyeClosed />}
+                      </InputGroupButton>
+                    </InputGroupAddon>
+                  </InputGroup>
+
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );

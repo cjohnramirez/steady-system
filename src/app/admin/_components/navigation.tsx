@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { createClient } from "@/utils/supabase/client";
 
 type Navigation = {
   name: string;
@@ -47,7 +48,7 @@ export default function NavigationBar() {
   const pathName = usePathname();
 
   return (
-    <div className="sticky top-0 flex w-full flex-col gap-5 border-b-1 p-5 pb-0 bg-white z-2">
+    <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b-1 bg-white p-5 pb-0">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <Image src="/icon.png" alt="GCS Icon" width={48} height={48} />
@@ -72,7 +73,19 @@ export default function NavigationBar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuLabel>Account Options</DropdownMenuLabel>
-              <DropdownMenuItem>Log Out</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  const supabase = createClient();
+                  const {error} = await supabase.auth.signOut();
+                  
+                  if(error) {
+                    console.log(error)
+                  }
+                  console.log("signed out")
+                }}
+              >
+                Log Out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

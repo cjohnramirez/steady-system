@@ -27,10 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} w-full font-sans text-sm antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} w-full font-sans text-sm antialiased h-full`}
       >
         <Providers>{children}</Providers>
-        <Toaster position="top-right"/>
+        <Toaster position="top-right" />
       </body>
     </html>
   );
