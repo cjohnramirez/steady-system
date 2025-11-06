@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import DashboardPage from "./dashboard/page";
 
 export default function MainPage() {
-  return redirect("/admin/dashboard")
+  return <DashboardPage />
 }

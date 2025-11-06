@@ -17,15 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { createClient } from "@/utils/supabase/client";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import z from "zod";
-import SignUpFormAction from "../actions";
+import SignUpFormAction, { fetchCollege, fetchDepartment } from "../actions";
 import {
   InputGroup,
   InputGroupAddon,
@@ -33,34 +30,11 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Eye, EyeClosed } from "lucide-react";
-
-export async function fetchDepartment(
-  supabase: SupabaseClient,
-  college: string,
-) {
-  if (college) {
-    const { data, error } = await supabase
-      .from("department")
-      .select(`*`)
-      .eq("college_id", college);
-
-    if (error) throw error;
-    return data || [];
-  }
-  return [];
-}
-
-export async function fetchCollege(supabase: SupabaseClient) {
-  const { data, error } = await supabase.from("college").select(`*`);
-
-  if (error) throw error;
-  return data || [];
-}
+import { signUpFormSchema } from "../schema";
 
 export default function SignUpForm() {
   const router = useRouter();
 
-  const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
   const [college, setCollege] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -68,31 +42,12 @@ export default function SignUpForm() {
   const { data: departmentData = [], isLoading: isDepartmentLoading } =
     useQuery({
       queryKey: ["department", college],
-      queryFn: () => fetchDepartment(supabase, college),
+      queryFn: () => fetchDepartment(college),
     });
 
   const { data: collegeData = [] } = useQuery({
     queryKey: ["college", "all"],
-    queryFn: () => fetchCollege(supabase),
-  });
-
-  const formSchema = z.object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z
-      .string({ error: "Last name is required" })
-      .min(2, "Last name must be at least 2 characters"),
-    email: z.email({ error: "Please enter a valid email address" }),
-    college: z.uuid("Please select a valid college"),
-    departmentId: z.uuid("Please select a valid department"),
-    yearLevel: z
-      .int()
-      .min(1, "Year level must be between 1 and 5")
-      .max(5, "Year level must be between 1 and 5"),
-    studentId: z.number({ error: "Please enter a valid student ID number" }),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .max(255, "Password must not exceed 255 characters"),
+    queryFn: () => fetchCollege(),
   });
 
   const form = useForm({
@@ -107,7 +62,7 @@ export default function SignUpForm() {
       studentId: 0,
     },
     validators: {
-      onSubmit: formSchema,
+      onChange: signUpFormSchema,
     },
     onSubmit: async (form) => {
       setIsLoading(true);
@@ -269,7 +224,7 @@ export default function SignUpForm() {
                     </InputGroupAddon>
                   </InputGroup>
                   {isInvalid ? (
-                    <FieldError errors={field.state.meta.errors} />
+                    <FieldError errors={[field.state.meta.errors[0]]} />
                   ) : (
                     <FieldDescription>
                       Must be a minimum of 8 characters and maximum of 255

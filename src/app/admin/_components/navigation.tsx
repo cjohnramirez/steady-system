@@ -76,12 +76,12 @@ export default function NavigationBar() {
               <DropdownMenuItem
                 onClick={async () => {
                   const supabase = createClient();
-                  const {error} = await supabase.auth.signOut();
-                  
-                  if(error) {
-                    console.log(error)
+                  const { error } = await supabase.auth.signOut();
+
+                  if (error) {
+                    console.log(error);
                   }
-                  console.log("signed out")
+                  console.log("signed out");
                 }}
               >
                 Log Out
@@ -101,7 +101,9 @@ export default function NavigationBar() {
       <div className="flex gap-8 pl-5">
         {navigationObj.map((nav) => {
           const isActive =
-            pathName === nav.link || pathName.startsWith(`${nav.link}`);
+            (pathName === "/admin" && nav.name === "Dashboard") ||
+            pathName === nav.link ||
+            pathName.startsWith(`${nav.link}`);
 
           const activeStatus = clsx("border-b-2 pb-2", {
             "border-gray-700": isActive,

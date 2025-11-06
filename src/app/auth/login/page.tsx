@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import LoginPage from "./[role]/page";
 
 export default function LoginRedirect() {
-  redirect("/auth/login/student");
+  return <LoginPage params={Promise.resolve({ role: "student" })} />;
 }

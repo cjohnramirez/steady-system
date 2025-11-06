@@ -3,6 +3,34 @@
 import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
 
+export async function fetchDepartment(
+  college: string,
+) {
+  const supabase = await createClient();
+
+  if (college) {
+    const { data, error } = await supabase
+      .from("department")
+      .select(`*`)
+      .eq("college_id", college);
+
+    if (error) throw error;
+    return data || [];
+  }
+  return [];
+}
+
+export async function fetchCollege() {
+
+  const supabase = await createClient();
+
+
+  const { data, error } = await supabase.from("college").select(`*`);
+
+  if (error) throw error;
+  return data || [];
+}
+
 export default async function SignUpFormAction(
   formData: FormData,
 ): Promise<{ error?: string; success?: string }> {

@@ -47,7 +47,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           last_name: string | null
+          phone: string| null
           user_id: string | null
+          username: string | null
         }
         Insert: {
           admin_id?: number | null
@@ -56,7 +58,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_name?: string | null
+          phone?: string | null
           user_id?: string | null
+          username?: string | null
         }
         Update: {
           admin_id?: number | null
@@ -65,7 +69,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           last_name?: string | null
+          phone?: string | null
           user_id?: string | null
+          username?: string | null
         }
         Relationships: []
       }
@@ -415,6 +421,7 @@ export type Database = {
           last_name: string | null
           student_id: number
           user_id: string | null
+          username: string | null
           year_level: number
         }
         Insert: {
@@ -426,6 +433,7 @@ export type Database = {
           last_name?: string | null
           student_id: number
           user_id?: string | null
+          username?: string | null
           year_level: number
         }
         Update: {
@@ -437,6 +445,7 @@ export type Database = {
           last_name?: string | null
           student_id?: number
           user_id?: string | null
+          username?: string | null
           year_level?: number
         }
         Relationships: [
@@ -527,6 +536,17 @@ export type Database = {
         }
         Relationships: []
       }
+      playlist_with_details: {
+        Row: {
+          creator: string | null
+          emotional_status_name: string | null
+          id: string | null
+          image: string | null
+          link: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       student_with_details: {
         Row: {
           college_id: string | null
@@ -540,17 +560,6 @@ export type Database = {
           last_name: string | null
           student_id: number | null
           year_level: number | null
-        }
-        Relationships: []
-      }
-      playlist_with_details: {
-        Row: {
-          creator: string | null
-          emotional_status_name: string | null
-          id: string
-          image: string | null
-          link: string
-          title: string
         }
         Relationships: []
       }
