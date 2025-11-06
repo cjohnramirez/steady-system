@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,7 @@ export default function AdminProfile() {
       await queryClient.invalidateQueries({ queryKey: ["adminProfile"] });
       toast.success("Profile updated successfully!");
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       toast.error(err.message || "Failed to update profile");
     },
   });
@@ -45,7 +44,7 @@ export default function AdminProfile() {
       last_name: profile?.last_name ?? "",
       email: profile?.email ?? "",
       username: profile?.username ?? "",
-      phone: profile?.first_name ?? "",
+      phone: profile?.phone ?? "",
     },
     validators: { onChange: adminProfileFormSchema },
     onSubmit: async ({ value }) => {

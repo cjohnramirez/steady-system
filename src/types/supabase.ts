@@ -42,17 +42,19 @@ export type Database = {
       admin: {
         Row: {
           admin_id: number | null
+          avatar: string | null
           email: string | null
           first_name: string | null
           id: string
           is_active: boolean | null
           last_name: string | null
-          phone: string| null
+          phone: string | null
           user_id: string | null
           username: string | null
         }
         Insert: {
           admin_id?: number | null
+          avatar?: string | null
           email?: string | null
           first_name?: string | null
           id?: string
@@ -64,6 +66,7 @@ export type Database = {
         }
         Update: {
           admin_id?: number | null
+          avatar?: string | null
           email?: string | null
           first_name?: string | null
           id?: string

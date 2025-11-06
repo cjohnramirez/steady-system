@@ -26,7 +26,7 @@ import SignUpFormAction, { fetchCollege, fetchDepartment } from "../actions";
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupButton, 
+  InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Eye, EyeClosed } from "lucide-react";
@@ -52,31 +52,35 @@ export default function SignUpForm() {
 
   const form = useForm({
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      first_name: "",
+      last_name: "",
       email: "",
-      departmentId: "",
+      department_id: "",
       college: "",
-      yearLevel: 1,
+      year_level: "",
       password: "",
-      studentId: 0,
+      student_id: "",
+      username: "",
     },
     validators: {
       onChange: signUpFormSchema,
     },
     onSubmit: async (form) => {
+      console.log("onSubmit called");
+      console.log("Form values:", form.value);
       setIsLoading(true);
 
       try {
         const formData = new FormData();
 
-        formData.append("first_name", form.value.firstName);
-        formData.append("last_name", form.value.lastName);
+        formData.append("first_name", form.value.first_name);
+        formData.append("last_name", form.value.last_name);
         formData.append("email", form.value.email);
-        formData.append("department_id", form.value.departmentId);
-        formData.append("year_level", form.value.yearLevel.toString());
+        formData.append("department_id", form.value.department_id);
+        formData.append("year_level", form.value.year_level.toString());
         formData.append("password", form.value.password);
-        formData.append("student_id", form.value.studentId.toString());
+        formData.append("student_id", form.value.student_id.toString());
+        formData.append("username", form.value.username.toString());
 
         const res = await SignUpFormAction(formData);
 
@@ -88,7 +92,8 @@ export default function SignUpForm() {
         if (res?.success) {
           toast.success(res.success);
         }
-      } catch {
+      } catch (error) {
+        console.error("Sign up error:", error);
         toast.error("Sign up unsuccessful");
       } finally {
         setIsLoading(false);
@@ -105,15 +110,15 @@ export default function SignUpForm() {
       </div>
       <form
         className="mt-8 space-y-8"
-        id="login-form"
         onSubmit={(e) => {
           e.preventDefault();
+          console.log("Form submit event triggered");
           form.handleSubmit();
         }}
       >
         <FieldGroup>
           <div className="flex gap-8">
-            <form.Field name="firstName">
+            <form.Field name="first_name">
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
@@ -137,7 +142,7 @@ export default function SignUpForm() {
                 );
               }}
             </form.Field>
-            <form.Field name="lastName">
+            <form.Field name="last_name">
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
@@ -162,6 +167,35 @@ export default function SignUpForm() {
               }}
             </form.Field>
           </div>
+
+          <form.Field name="username">
+            {(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Username</FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    aria-invalid={isInvalid}
+                    placeholder="Choose a username"
+                  />
+                  {isInvalid ? (
+                    <FieldError errors={field.state.meta.errors} />
+                  ) : (
+                    <FieldDescription>
+                      Choose a unique username for your account
+                    </FieldDescription>
+                  )}
+                </Field>
+              );
+            }}
+          </form.Field>
 
           <form.Field name="email">
             {(field) => {
@@ -209,11 +243,12 @@ export default function SignUpForm() {
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
                       type={showPassword ? "text" : "password"}
+                      placeholder="Create a secure password"
                     />
                     <InputGroupAddon align="inline-end">
                       <InputGroupButton
-                        aria-label="Copy"
-                        title="Copy"
+                        aria-label="Toggle password visibility"
+                        title="Toggle password visibility"
                         size="icon-xs"
                         onClick={() => {
                           setShowPassword(!showPassword);
@@ -280,7 +315,7 @@ export default function SignUpForm() {
                 );
               }}
             </form.Field>
-            <form.Field name="departmentId">
+            <form.Field name="department_id">
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
@@ -328,7 +363,7 @@ export default function SignUpForm() {
             </form.Field>
           </div>
           <div className="flex gap-6">
-            <form.Field name="yearLevel">
+            <form.Field name="year_level">
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
@@ -338,13 +373,11 @@ export default function SignUpForm() {
                     <FieldLabel htmlFor={field.name}>Year Level</FieldLabel>
                     <Select
                       name={field.name}
-                      value={field.state.value.toString()}
-                      onValueChange={(value) =>
-                        field.handleChange(Number(value))
-                      }
+                      value={field.state.value.toString() || ""}
+                      onValueChange={(value) => field.handleChange(value)}
                     >
                       <SelectTrigger
-                        id="select-department"
+                        id="select-year-level"
                         aria-invalid={isInvalid}
                       >
                         <SelectValue placeholder="Select Year Level" />
@@ -372,7 +405,7 @@ export default function SignUpForm() {
                 );
               }}
             </form.Field>
-            <form.Field name="studentId">
+            <form.Field name="student_id">
               {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
@@ -385,10 +418,9 @@ export default function SignUpForm() {
                       name={field.name}
                       value={field.state.value.toString()}
                       onBlur={field.handleBlur}
-                      onChange={(e) =>
-                        field.handleChange(Number(e.target.value))
-                      }
+                      onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
+                      placeholder="Enter your student ID"
                     />
                     {isInvalid ? (
                       <FieldError errors={field.state.meta.errors} />
@@ -405,7 +437,6 @@ export default function SignUpForm() {
         </FieldGroup>
         <Button
           type="submit"
-          form="login-form"
           className="w-full"
           disabled={isLoading}
         >

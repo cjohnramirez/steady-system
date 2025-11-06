@@ -1,18 +1,20 @@
 import z from "zod";
 
 export const signUpFormSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z
+  first_name: z.string().min(2, "First name must be at least 2 characters"),
+  last_name: z
     .string({ error: "Last name is required" })
     .min(2, "Last name must be at least 2 characters"),
-  email: z.email({ error: "Please enter a valid email address" }),
-  college: z.uuid("Please select a valid college"),
-  departmentId: z.uuid("Please select a valid department"),
-  yearLevel: z
-    .int()
-    .min(1, "Year level must be between 1 and 5")
-    .max(5, "Year level must be between 1 and 5"),
-  studentId: z.number({ error: "Please enter a valid student ID number" }),
+  username: z
+    .string({ error: "Username is required" })
+    .min(2, "Username must be at least 2 characters"),
+  email: z.email("Please enter a valid email address"),
+  college: z.string().min(1, "Please select a valid college"),
+  department_id: z.string().min(1, "Please select a valid department"),
+  year_level: z.string().regex(/^[1-5]$/, "Year level must be between 1 and 5"),
+  student_id: z
+    .string()
+    .regex(/^\d{10}$/, "Student ID must be exactly 10 digits"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")

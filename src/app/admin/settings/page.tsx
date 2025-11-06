@@ -1,4 +1,4 @@
-import ProfileSettingsPage from "./profile/page";
+import ProfileSettingsPage from "./account/page";
 
 export default function SettingsPage() {
   return <ProfileSettingsPage />

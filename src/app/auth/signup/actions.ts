@@ -3,9 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
 
-export async function fetchDepartment(
-  college: string,
-) {
+export async function fetchDepartment(college: string) {
   const supabase = await createClient();
 
   if (college) {
@@ -21,9 +19,7 @@ export async function fetchDepartment(
 }
 
 export async function fetchCollege() {
-
   const supabase = await createClient();
-
 
   const { data, error } = await supabase.from("college").select(`*`);
 
@@ -72,8 +68,8 @@ export default async function SignUpFormAction(
     return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
 
-  const yearLevel = Number(formData.get("year_level") || 1);
-  const studentId = Number(formData.get("student_id") || 1);
+  const year_level = Number(formData.get("year_level") || 1);
+  const student_id = Number(formData.get("student_id") || 1);
 
   const { error: updateStudentError } = await supabaseAdmin
     .from("student")
@@ -81,20 +77,21 @@ export default async function SignUpFormAction(
       first_name: formData.get("first_name")?.toString() || "",
       last_name: formData.get("last_name")?.toString() || "",
       email: formData.get("email")?.toString() || "",
-      department_id: formData.get("department")?.toString(),
-      year_level: yearLevel > 0 ? yearLevel : 1,
-      student_id: studentId > 0 ? studentId : 1,
+      username: formData.get("username")?.toString() || "",
+      department_id: formData.get("department_id")?.toString() || "",
+      year_level: year_level,
+      student_id: student_id,
       user_id: signUpData.user.id,
     });
 
   if (updateStudentError) {
     console.log("❌ STUDENT INSERT ERROR:", {
-      yearLevel,
-      studentId,
-      firstName: formData.get("first_name"),
-      lastName: formData.get("last_name"),
+      year_level,
+      student_id,
+      first_name: formData.get("first_name"),
+      last_name: formData.get("last_name"),
       email: formData.get("email"),
-      departmentId: formData.get("department"),
+      department_id: formData.get("department_id"),
     });
     return { error: `Failed to insert student: ${updateStudentError.message}` };
   }
