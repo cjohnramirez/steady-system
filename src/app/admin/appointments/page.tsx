@@ -51,36 +51,41 @@ export default function AppointmentPage() {
       data: allData,
       columns: appointmentColumns,
       isLoading: isAllLoading,
+      rowUrl: (id : string) => `/admin/appointments/@modal/${id}`,
     },
     pending: {
       name: "pending" as const,
       data: pendingData,
       columns: appointmentColumns,
       isLoading: isPendingLoading,
+      rowUrl: (id : string) => `/admin/appointment/@modal/${id}`,
     },
     approved: {
       name: "approved" as const,
       data: approvedData,
       columns: appointmentColumns,
       isLoading: isApprovedLoading,
+      rowUrl: (id : string) => `/admin/appointment/@modal/${id}`,
     },
     done: {
       name: "done" as const,
       data: completedData,
       columns: appointmentColumns,
       isLoading: isCompletedLoading,
+      rowUrl: (id : string) => `/admin/appointment/@modal/${id}`,
     },
   };
 
-  const currentTab = tabs[activeTab];
+  const active = tabs[activeTab];
 
   return (
     <div>
       <DataTable
-        columns={currentTab.columns}
-        data={currentTab.data}
+        columns={active.columns}
+        data={active.data}
         searchQuery="last_student_name"
-        isLoading={currentTab.isLoading}
+        isLoading={active.isLoading}
+        rowUrl={active.rowUrl}
         toolbarExtra={
           <Tabs
             value={activeTab}

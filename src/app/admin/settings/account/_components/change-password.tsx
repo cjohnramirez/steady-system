@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation } from "@tanstack/react-query";
 import { updateAdminPassword } from "../actions";
 import { toast } from "sonner";
@@ -125,9 +127,7 @@ export default function ChangePassword() {
                           aria-label="Toggle password visibility"
                           title="Toggle password visibility"
                           size="icon-xs"
-                          onClick={() =>
-                            setShowPasswords(!showPasswords)
-                          }
+                          onClick={() => setShowPasswords(!showPasswords)}
                         >
                           {showPasswords ? <Eye /> : <EyeClosed />}
                         </InputGroupButton>

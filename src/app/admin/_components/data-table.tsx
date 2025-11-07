@@ -7,7 +7,7 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   InputGroup,
   InputGroupAddon,
@@ -35,7 +35,8 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { Download, Filter, SearchIcon, Sidebar } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -48,11 +49,15 @@ export function DataTable<TData, TValue>({
   toolbarExtra,
   searchQuery,
   isLoading,
+  rowUrl,
 }: DataTableProps<TData, TValue> & {
   toolbarExtra?: React.ReactNode;
   searchQuery: string;
   isLoading: boolean;
+  rowUrl: (id: string) => string;
 }) {
+  const router = useRouter();
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -68,7 +73,7 @@ export function DataTable<TData, TValue>({
       isLoading
         ? columns.map((column) => ({
             ...column,
-            cell: () => <Skeleton className="rounded- h-6 w-full m-2 p-2" />,
+            cell: () => <Skeleton className="rounded- m-2 h-6 w-full p-2" />,
           }))
         : columns,
     [isLoading, columns],
@@ -98,7 +103,7 @@ export function DataTable<TData, TValue>({
       <div className="flex justify-between gap-4">
         <div>{toolbarExtra}</div>
         <div className="flex gap-4">
-          <InputGroup>
+          <InputGroup className="bg-white">
             <InputGroupInput
               placeholder="Input your search query..."
               value={
@@ -134,7 +139,7 @@ export function DataTable<TData, TValue>({
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id}
+                      {column.id.split("_").map((substr) => substr + " ")}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -150,14 +155,14 @@ export function DataTable<TData, TValue>({
           </Button>
         </div>
       </div>
-      <div className="mt-8 overflow-hidden rounded-md border">
+      <div className="mt-8 overflow-hidden rounded-md border bg-white">
         <Table>
           <TableHeader className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="p-3">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -176,9 +181,16 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  onClick={() => {
+                    if (rowUrl) router.push(rowUrl(row.id));
+                  }}
+                  onMouseEnter={() => {
+                    if (rowUrl) router.prefetch(rowUrl(row.id));
+                  }}
+                  className="cursor-pointer"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="p-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -191,7 +203,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 p-3 text-center"
                 >
                   No results
                 </TableCell>

@@ -52,7 +52,7 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email Address",
+    header: "Email",
   },
   {
     accessorKey: "last_name",
@@ -83,23 +83,23 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
     },
   },
   {
-    accessorKey: "college_name",
+    accessorKey: "college",
     header: "College",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college_name")}
+          {row.getValue("college")}
         </div>
       );
     },
   },
   {
-    accessorKey: "department_name",
+    accessorKey: "department",
     header: "Department",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("department_name"))}
+          {String(row.getValue("department"))}
         </div>
       );
     },
@@ -116,12 +116,12 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
     },
   },
   {
-    accessorKey: "emotional_status_name",
+    accessorKey: "emotional_status",
     header: "Emotional Status",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {row.getValue("emotional_status_name")}
+          {row.getValue("emotional_status")}
         </div>
       );
     },

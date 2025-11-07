@@ -35,6 +35,7 @@ export const adminColumn: ColumnDef<Tables<"admin">>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+    
   },
   {
     accessorKey: "admin_id",

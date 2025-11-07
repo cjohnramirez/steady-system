@@ -5,7 +5,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "@/app/admin/_components/data-table";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-
 import { studentColumn } from "./_components/student-column";
 import { adminColumn } from "./_components/admin-column";
 import { counselorColumn } from "./_components/counselor-column";
@@ -39,18 +38,21 @@ export default function AccountsPage() {
       data: students,
       columns: studentColumn,
       isLoading: isStudentsLoading,
+      rowUrl: (id: string) => `/admin/accounts/student/${id}`,
     },
     admins: {
       name: "admins" as const,
       data: admins,
       columns: adminColumn,
       isLoading: isAdminsLoading,
+      rowUrl: (id: string) => `/admin/accounts/admin/${id}`,
     },
     counselors: {
       name: "counselors" as const,
       data: counselors,
       columns: counselorColumn,
       isLoading: isCounselorsLoading,
+      rowUrl: (id: string) => `/admin/accounts/counselor/${id}`,
     },
   };
 
@@ -63,6 +65,7 @@ export default function AccountsPage() {
         columns={active.columns}
         data={active.data}
         searchQuery="first_name"
+        rowUrl={active.rowUrl}
         toolbarExtra={
           <Tabs
             value={activeTab}

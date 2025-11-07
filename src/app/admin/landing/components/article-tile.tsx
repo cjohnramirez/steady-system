@@ -12,7 +12,7 @@ export default function ArticleTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl w-full border border-gray-300 p-2">
+      <div className="flex h-full flex-col overflow-hidden rounded-2xl w-full border border-gray-300 p-2 bg-white">
         <Skeleton className="h-40 w-full rounded-t-2xl" />
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
           <div className="space-y-2">
@@ -28,7 +28,7 @@ export default function ArticleTile({
   if (!articleTile) return null;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-300">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white">
       <div className="relative h-40 w-full">
         <Image
           src={

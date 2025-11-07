@@ -151,6 +151,13 @@ export type Database = {
             referencedRelation: "student"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       article: {
@@ -506,6 +513,7 @@ export type Database = {
         Row: {
           first_counselor_name: string | null
           first_student_name: string | null
+          id: string | null
           last_counselor_name: string | null
           last_student_name: string | null
           notes: string | null
@@ -529,12 +537,12 @@ export type Database = {
       }
       counselor_with_details: {
         Row: {
-          availability_id: boolean[] | null
-          college_id: string | null
+          availability: boolean[] | null
+          college: string | null
           counselor_id: number | null
           email: string | null
           first_name: string | null
-          is_active: boolean | null
+          is_not_available: boolean | null
           last_name: string | null
         }
         Relationships: []
@@ -552,14 +560,15 @@ export type Database = {
       }
       student_with_details: {
         Row: {
+          college: string | null
           college_id: string | null
-          college_name: string | null
+          department: string | null
           department_id: string | null
-          department_name: string | null
           email: string | null
+          emotional_status: string | null
           emotional_status_id: string | null
-          emotional_status_name: string | null
           first_name: string | null
+          id: string | null
           last_name: string | null
           student_id: number | null
           year_level: number | null

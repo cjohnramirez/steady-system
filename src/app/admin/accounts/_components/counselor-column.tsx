@@ -60,7 +60,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email Address",
+    header: "Email",
   },
   {
     accessorKey: "last_name",
@@ -91,25 +91,25 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     },
   },
   {
-    accessorKey: "college_id",
+    accessorKey: "college",
     header: "College",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college_id")}
+          {row.getValue("college")}
         </div>
       );
     },
   },
   {
-    accessorKey: "availability_id",
+    accessorKey: "availability",
     header: "Availability",
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      const availabilityArray = row.getValue("availability_id") ?? "";
+      const availabilityArray = row.getValue("availability") ?? "";
 
-      const isActive = originalRow.is_active;
+      const isActive = originalRow.is_not_available;
 
       const status =
         isActive === true

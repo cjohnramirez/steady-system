@@ -5,10 +5,11 @@ export default function ProtectedRootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  console.log("reload")
   return (
     <>
       <NavigationBar />
-      <div className="p-10 max-w-[1600px] m-auto">{children}</div>
+      <div className="p-10 max-w-[1600px] m-auto bg-gray-50">{children}</div>
     </>
   );
 }

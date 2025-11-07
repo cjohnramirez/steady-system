@@ -30,7 +30,7 @@ export default function DashboardPage() {
   const [selectedChartTab, setSelectedChartTab] = useState(0);
 
   return (
-    <div className="bg-white text-gray-900">
+    <div className=" text-gray-900">
       <main className="space-y-8">
         <div>
           <h2 className="text-md font-semibold">Key Performance Indicators</h2>
@@ -40,11 +40,11 @@ export default function DashboardPage() {
           {statsInfo.map((item, i) => (
             <div
               key={i}
-              className="rounded-xl border border-gray-100 bg-gradient-to-b from-transparent to-brand-light p-6"
+              className="rounded-xl border border-gray-200 bg-white p-6"
             >
               <div className="flex items-center justify-between">
                 <h3>{item.label}</h3>
-                <span className="flex items-center gap-2 rounded-md border border-gray-100 bg-white px-3 py-1 text-xs font-medium">
+                <span className="flex items-center gap-2 rounded-md px-3 py-1 text-xs font-medium border border-gray-200">
                   <TrendingUp strokeWidth={1.25} size={20} />
                   +12.5%
                 </span>
@@ -58,7 +58,7 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
-        <div className="rounded-xl border border-gray-200 p-10">
+        <div className="rounded-xl border border-gray-200 p-10 bg-white">
           <div className="mb-4 flex items-start justify-between">
             <div className="pb-10">
               <h3 className="font-semibold">Total Unique Website Visitors</h3>

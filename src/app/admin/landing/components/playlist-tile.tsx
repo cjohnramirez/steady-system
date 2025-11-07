@@ -11,7 +11,7 @@ export default function PlaylistTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl p-2 border border-gray-300">
+      <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl p-2 border border-gray-300 bg-white">
         <div className="relative w-1/3">
           <Skeleton className="h-full w-full rounded-2xl" />
         </div>
@@ -31,7 +31,7 @@ export default function PlaylistTile({
   if (!playlistTile) return null;
 
   return (
-    <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl border border-gray-300 p-4">
+    <div className="flex w-full flex-row gap-4 overflow-hidden rounded-2xl border border-gray-300 p-4 bg-white">
       <div className="relative w-1/3">
         <Image
           src={

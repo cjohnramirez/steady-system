@@ -1,5 +1,5 @@
-import ProfileSettingsPage from "./account/page";
+import AccountSettingsPage from "./account/page";
 
 export default function SettingsPage() {
-  return <ProfileSettingsPage />
+  return <AccountSettingsPage />
 }
