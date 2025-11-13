@@ -5,7 +5,7 @@ import { Tables } from "@/types/supabase";
 import { z } from "zod";
 import { adminPasswordFormSchema, adminProfileFormSchema } from "./schema";
 
-export async function getAdminProfile(): Promise<Tables<"admin"> | null> {
+export async function fetchAdminProfile(): Promise<Tables<"admin"> | null> {
   const supabase = await createClient();
 
   const { data: user } = await supabase.auth.getUser();

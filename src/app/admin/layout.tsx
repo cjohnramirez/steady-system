@@ -5,7 +5,6 @@ export default function ProtectedRootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("reload")
   return (
     <>
       <NavigationBar />

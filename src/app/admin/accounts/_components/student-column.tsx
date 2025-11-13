@@ -37,14 +37,14 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "student_id",
+    accessorKey: "university_id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Student ID
+          University ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
@@ -53,6 +53,20 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
   {
     accessorKey: "email",
     header: "Email",
+  },
+  {
+    accessorKey: "username",
+    header: ({ column }) => {
+      return (
+        <button
+          onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
+          className="flex items-center gap-2"
+        >
+          Username
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </button>
+      );
+    },
   },
   {
     accessorKey: "last_name",
@@ -116,17 +130,6 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
     },
   },
   {
-    accessorKey: "emotional_status",
-    header: "Emotional Status",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {row.getValue("emotional_status")}
-        </div>
-      );
-    },
-  },
-  {
     id: "actions",
     cell: ({ row }) => {
       const studentAccount = row.original;
@@ -143,10 +146,10 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() =>
-                navigator.clipboard.writeText(String(studentAccount.student_id))
+                navigator.clipboard.writeText(String(studentAccount.university_id))
               }
             >
-              Copy Student ID
+              Copy University ID
             </DropdownMenuItem>
             <DropdownMenuItem>Edit Student</DropdownMenuItem>
             <DropdownMenuItem>Delete Student</DropdownMenuItem>

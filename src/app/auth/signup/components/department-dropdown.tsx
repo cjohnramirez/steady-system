@@ -1,49 +1,91 @@
-import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { Tables } from "@/types/supabase";
-import { useState } from "react";
+import { fetchDepartment } from "../actions";
+import { useQuery } from "@tanstack/react-query";
+
+interface FieldMeta {
+  isTouched: boolean;
+  isValid: boolean;
+  errors?: Array<{ message?: string } | undefined>;
+}
+
+interface FieldState<TValue> {
+  value?: TValue | null;
+  meta: FieldMeta;
+}
+
+interface FieldLike<TValue = string> {
+  name: string;
+  state: FieldState<TValue>;
+  handleBlur: () => void;
+  handleChange: (value: TValue) => void;
+}
+
+interface FormDropdownInputProps<TValue = string> {
+  field: FieldLike<TValue>;
+  college: string;
+  enableDescription?: boolean;
+}
 
 export default function DepartmentDropdown({
-  isLoading,
-  departments,
-}: {
-  isLoading: boolean;
-  departments: Tables<"department">[];
-}) {
-  const [selected, setSelected] = useState<string | null>(null);
+  field,
+  college,
+  enableDescription = true,
+}: FormDropdownInputProps) {
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  const { data: departmentData = [], isLoading: isDepartmentLoading } =
+    useQuery({
+      queryKey: ["department", college],
+      queryFn: () => fetchDepartment(college),
+    });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Spinner /> Loading
-            </>
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>Department</FieldLabel>
+      <Select
+        name={field.name}
+        value={field.state.value ?? ""}
+        onValueChange={field.handleChange}
+        disabled={college == ""}
+      >
+        <SelectTrigger id="select-department" aria-invalid={isInvalid}>
+          {isDepartmentLoading && college != "" ? (
+            <div className="flex items-center gap-2">
+              <Spinner />
+              <p>Loading Department</p>
+            </div>
           ) : (
-            selected || "Select Department"
+            <SelectValue placeholder="Select Deparment" />
           )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        {departments?.map((department) => (
-          <DropdownMenuItem
-            key={department.id}
-            onClick={() =>
-              setSelected((department.title && department.title) || "")
-            }
-          >
-            {department.title || "Unnamed"}
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuItem>Nursing</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </SelectTrigger>
+        <SelectContent position="item-aligned">
+          {departmentData.map((department, idx) => (
+            <SelectItem value={department.id} key={idx}>
+              {department.title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {isInvalid ? (
+        <FieldError errors={field.state.meta.errors} />
+      ) : enableDescription ? (
+        <FieldDescription>A department must be chosen</FieldDescription>
+      ) : (
+        <></>
+      )}
+    </Field>
   );
 }

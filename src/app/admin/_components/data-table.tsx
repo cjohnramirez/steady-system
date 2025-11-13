@@ -36,7 +36,7 @@ import {
 } from "@tanstack/react-table";
 import { Download, Filter, SearchIcon, Sidebar } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

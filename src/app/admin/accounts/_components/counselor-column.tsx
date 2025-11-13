@@ -45,14 +45,14 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "counselor_id",
+    accessorKey: "university_id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Counselor ID
+          University ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
@@ -152,7 +152,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
             <DropdownMenuItem
               onClick={() =>
                 navigator.clipboard.writeText(
-                  String(studentAccount.counselor_id),
+                  String(studentAccount.university_id),
                 )
               }
             >

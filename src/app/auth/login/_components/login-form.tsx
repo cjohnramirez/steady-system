@@ -1,6 +1,5 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 import * as z from "zod";
@@ -26,6 +25,7 @@ import {
 import { Eye, EyeClosed } from "lucide-react";
 import { roles } from "@/types/main";
 import LoginFormAction from "../actions";
+import { FormInputField } from "@/components/form-input-field";
 
 const formSchema = z.object({
   email: z.email({ error: "Invalid email" }),
@@ -95,26 +95,9 @@ export default function LoginForm({ role }: { role: roles }) {
       >
         <FieldGroup>
           <form.Field name="email">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder={`${role}@ustp.edu.ph`}
-                  />
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
+            {(field) => (
+              <FormInputField field={field} label="Email" type="email" placeholder="Enter your email" description="Email must be valid"/>
+            )}
           </form.Field>
           <form.Field name="password">
             {(field) => {

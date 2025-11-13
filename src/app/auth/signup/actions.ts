@@ -2,6 +2,8 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
+import z from "zod";
+import { studentSignUpFormSchema } from "./schema";
 
 export async function fetchDepartment(college: string) {
   const supabase = await createClient();
@@ -28,14 +30,14 @@ export async function fetchCollege() {
 }
 
 export default async function SignUpFormAction(
-  formData: FormData,
+  values: z.infer<typeof studentSignUpFormSchema>,
 ): Promise<{ error?: string; success?: string }> {
-  const supabase = await createClient(); // normal users
-  const supabaseAdmin = await createServiceClient(); // superuser
+  const supabase = await createClient(); 
+  const supabaseAdmin = await createServiceClient(); 
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: formData.get("email")?.toString() || "",
-    password: formData.get("password")?.toString() || "",
+    email: values.email,
+    password: values.password,
   });
 
   if (signUpError) {
@@ -68,31 +70,19 @@ export default async function SignUpFormAction(
     return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
 
-  const year_level = Number(formData.get("year_level") || 1);
-  const student_id = Number(formData.get("student_id") || 1);
+  const { college, ...otherValues} = values;
 
   const { error: updateStudentError } = await supabaseAdmin
     .from("student")
     .insert({
-      first_name: formData.get("first_name")?.toString() || "",
-      last_name: formData.get("last_name")?.toString() || "",
-      email: formData.get("email")?.toString() || "",
-      username: formData.get("username")?.toString() || "",
-      department_id: formData.get("department_id")?.toString() || "",
-      year_level: year_level,
-      student_id: student_id,
+      ...otherValues,
+      year_level: Number(values.year_level),
+      university_id: Number(values.university_id),
       user_id: signUpData.user.id,
     });
 
   if (updateStudentError) {
-    console.log("❌ STUDENT INSERT ERROR:", {
-      year_level,
-      student_id,
-      first_name: formData.get("first_name"),
-      last_name: formData.get("last_name"),
-      email: formData.get("email"),
-      department_id: formData.get("department_id"),
-    });
+    console.log("❌ STUDENT INSERT ERROR");
     return { error: `Failed to insert student: ${updateStudentError.message}` };
   }
 

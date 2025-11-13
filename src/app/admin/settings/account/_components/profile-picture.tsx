@@ -2,14 +2,14 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Edit2 } from "lucide-react";
-import { getAdminProfile } from "../actions";
+import { fetchAdminProfile } from "../actions";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfilePicture() {
   const { isLoading } = useQuery({
     queryKey: ["adminProfile"],
-    queryFn: getAdminProfile,
+    queryFn: fetchAdminProfile,
   });
 
   return (

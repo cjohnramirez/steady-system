@@ -66,7 +66,7 @@ export default function NavigationBar() {
           </svg>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="flex items-center gap-4">
-              <div className="h-6 w-6 rounded-full bg-linear-to-t from-brand-light to-brand-normal" />
+              <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
               <p>Username</p>
               <Badge variant="secondary">User Role</Badge>
               <ChevronsUpDown size={20} />

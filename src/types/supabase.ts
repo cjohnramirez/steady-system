@@ -41,7 +41,6 @@ export type Database = {
     Tables: {
       admin: {
         Row: {
-          admin_id: number | null
           avatar: string | null
           email: string | null
           first_name: string | null
@@ -49,11 +48,11 @@ export type Database = {
           is_active: boolean | null
           last_name: string | null
           phone: string | null
+          university_id: number | null
           user_id: string | null
           username: string | null
         }
         Insert: {
-          admin_id?: number | null
           avatar?: string | null
           email?: string | null
           first_name?: string | null
@@ -61,11 +60,11 @@ export type Database = {
           is_active?: boolean | null
           last_name?: string | null
           phone?: string | null
+          university_id?: number | null
           user_id?: string | null
           username?: string | null
         }
         Update: {
-          admin_id?: number | null
           avatar?: string | null
           email?: string | null
           first_name?: string | null
@@ -73,6 +72,7 @@ export type Database = {
           is_active?: boolean | null
           last_name?: string | null
           phone?: string | null
+          university_id?: number | null
           user_id?: string | null
           username?: string | null
         }
@@ -142,6 +142,13 @@ export type Database = {
             columns: ["counselor_id"]
             isOneToOne: false
             referencedRelation: "counselor"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "counselor_with_details"
             referencedColumns: ["id"]
           },
           {
@@ -244,31 +251,34 @@ export type Database = {
         Row: {
           availability_id: string
           college_id: string
-          counselor_id: number | null
           email: string
           first_name: string
           id: string
           last_name: string | null
+          phone: number | null
+          university_id: number | null
           user_id: string | null
         }
         Insert: {
           availability_id: string
           college_id: string
-          counselor_id?: number | null
           email: string
           first_name: string
           id?: string
           last_name?: string | null
+          phone?: number | null
+          university_id?: number | null
           user_id?: string | null
         }
         Update: {
           availability_id?: string
           college_id?: string
-          counselor_id?: number | null
           email?: string
           first_name?: string
           id?: string
           last_name?: string | null
+          phone?: number | null
+          university_id?: number | null
           user_id?: string | null
         }
         Relationships: [
@@ -429,7 +439,8 @@ export type Database = {
           first_name: string
           id: string
           last_name: string | null
-          student_id: number
+          phone: number | null
+          university_id: number
           user_id: string | null
           username: string | null
           year_level: number
@@ -441,7 +452,8 @@ export type Database = {
           first_name: string
           id?: string
           last_name?: string | null
-          student_id: number
+          phone?: number | null
+          university_id: number
           user_id?: string | null
           username?: string | null
           year_level: number
@@ -453,7 +465,8 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string | null
-          student_id?: number
+          phone?: number | null
+          university_id?: number
           user_id?: string | null
           username?: string | null
           year_level?: number
@@ -519,6 +532,7 @@ export type Database = {
           notes: string | null
           scheduled_at: string | null
           status: string | null
+          student_university_id: number | null
         }
         Relationships: []
       }
@@ -539,13 +553,30 @@ export type Database = {
         Row: {
           availability: boolean[] | null
           college: string | null
-          counselor_id: number | null
+          college_id: string | null
           email: string | null
           first_name: string | null
+          id: string | null
           is_not_available: boolean | null
           last_name: string | null
+          university_id: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "counselor_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "college"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "counselor_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["college_id"]
+          },
+        ]
       }
       playlist_with_details: {
         Row: {
@@ -570,7 +601,8 @@ export type Database = {
           first_name: string | null
           id: string | null
           last_name: string | null
-          student_id: number | null
+          university_id: number | null
+          username: string | null
           year_level: number | null
         }
         Relationships: []

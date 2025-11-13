@@ -1,25 +1,14 @@
 "use client";
 
-import { SupabaseClient } from "@supabase/supabase-js";
 import { DataTable } from "../_components/data-table";
 import { appointmentColumns } from "./_components/appointment-column";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchAllAppointments, fetchApprovedAppointments, fetchPendingAppointments } from "./actions";
+import { fetchAllAppointments } from "./actions";
 
-async function fetchCompletedAppointments(supabase: SupabaseClient) {
-  const { data, error } = await supabase
-    .from("appointment_with_details")
-    .select(`*`)
-    .eq("status", "completed");
-
-  if (error) throw error;
-  return data || [];
-}
-
-type TabName = "all" | "pending" | "approved" | "done";
+type TabName = "all" | "pending" | "approved" | "completed" | "cancelled";
 
 export default function AppointmentPage() {
   const supabase = createClient();
@@ -30,49 +19,41 @@ export default function AppointmentPage() {
     queryFn: () => fetchAllAppointments(supabase),
   });
 
-  const { data: pendingData = [], isLoading: isPendingLoading } = useQuery({
-    queryKey: ["appointments", "pending"],
-    queryFn: () => fetchPendingAppointments(supabase),
-  });
-
-  const { data: approvedData = [], isLoading: isApprovedLoading } = useQuery({
-    queryKey: ["appointments", "approved"],
-    queryFn: () => fetchApprovedAppointments(supabase),
-  });
-
-  const { data: completedData = [], isLoading: isCompletedLoading } = useQuery({
-    queryKey: ["appointments", "completed"],
-    queryFn: () => fetchCompletedAppointments(supabase),
-  });
-
   const tabs = {
     all: {
       name: "all" as const,
       data: allData,
       columns: appointmentColumns,
       isLoading: isAllLoading,
-      rowUrl: (id : string) => `/admin/appointments/@modal/${id}`,
+      rowUrl: (id : string) => `/admin/appointments/${id}`,
     },
     pending: {
       name: "pending" as const,
-      data: pendingData,
+      data: allData.filter((a) => a.status === "pending"),
       columns: appointmentColumns,
-      isLoading: isPendingLoading,
-      rowUrl: (id : string) => `/admin/appointment/@modal/${id}`,
+      isLoading: isAllLoading,
+      rowUrl: (id : string) => `/admin/appointments/${id}`,
     },
     approved: {
       name: "approved" as const,
-      data: approvedData,
+      data: allData.filter((a) => a.status === "approved"),
       columns: appointmentColumns,
-      isLoading: isApprovedLoading,
-      rowUrl: (id : string) => `/admin/appointment/@modal/${id}`,
+      isLoading: isAllLoading,
+      rowUrl: (id : string) => `/admin/appointments/${id}`,
     },
-    done: {
-      name: "done" as const,
-      data: completedData,
+    completed: {
+      name: "completed" as const,
+      data: allData.filter((a) => a.status === "completed"),
       columns: appointmentColumns,
-      isLoading: isCompletedLoading,
-      rowUrl: (id : string) => `/admin/appointment/@modal/${id}`,
+      isLoading: isAllLoading,
+      rowUrl: (id : string) => `/admin/appointments/${id}`,
+    },
+    cancelled: {
+      name: "cancelled" as const,
+      data: allData.filter((a) => a.status === "cancelled"),
+      columns: appointmentColumns,
+      isLoading: isAllLoading,
+      rowUrl: (id : string) => `/admin/appointments/${id}`,
     },
   };
 

@@ -6,11 +6,11 @@ import { DataTable } from "@/app/admin/_components/data-table";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { studentColumn } from "./_components/student-column";
-import { adminColumn } from "./_components/admin-column";
-import { counselorColumn } from "./_components/counselor-column";
-import { fetchAdmins, fetchCounselors, fetchStudents } from "./actions";
 
-type TabName = "students" | "admins" | "counselors";
+import { counselorColumn } from "./_components/counselor-column";
+import { fetchCounselors, fetchStudents } from "./actions";
+
+type TabName = "students" | "counselors";
 
 export default function AccountsPage() {
   const supabase = createClient();
@@ -20,11 +20,6 @@ export default function AccountsPage() {
   const { data: students = [], isLoading: isStudentsLoading } = useQuery({
     queryKey: ["students"],
     queryFn: () => fetchStudents(supabase),
-  });
-
-  const { data: admins = [], isLoading: isAdminsLoading } = useQuery({
-    queryKey: ["admins"],
-    queryFn: () => fetchAdmins(supabase),
   });
 
   const { data: counselors = [], isLoading: isCounselorsLoading } = useQuery({
@@ -39,13 +34,6 @@ export default function AccountsPage() {
       columns: studentColumn,
       isLoading: isStudentsLoading,
       rowUrl: (id: string) => `/admin/accounts/student/${id}`,
-    },
-    admins: {
-      name: "admins" as const,
-      data: admins,
-      columns: adminColumn,
-      isLoading: isAdminsLoading,
-      rowUrl: (id: string) => `/admin/accounts/admin/${id}`,
     },
     counselors: {
       name: "counselors" as const,

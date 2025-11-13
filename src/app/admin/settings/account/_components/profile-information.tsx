@@ -3,28 +3,20 @@
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { getAdminProfile, updateAdminProfile } from "../actions";
+import { fetchAdminProfile, updateAdminProfile } from "../actions";
 import { adminProfileFormSchema } from "../schema";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FormInputField } from "@/components/form-input-field";
 
 export default function AdminProfile() {
   const queryClient = useQueryClient();
 
-  const {
-    data: profile,
-    isLoading,
-  } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["adminProfile"],
-    queryFn: getAdminProfile,
+    queryFn: fetchAdminProfile,
   });
 
   const updateMutation = useMutation({
@@ -34,7 +26,7 @@ export default function AdminProfile() {
       toast.success("Profile updated successfully!");
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to update profile");
+      toast.error(err.message || "Profile update failed");
     },
   });
 
@@ -102,137 +94,56 @@ export default function AdminProfile() {
         <FieldGroup>
           <div className="flex gap-8">
             <form.Field name="first_name">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>First Name</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="Enter your first name"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <FormInputField
+                  field={field}
+                  label="Username"
+                  placeholder="Enter your first name"
+                />
+              )}
             </form.Field>
             <form.Field name="last_name">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Last Name</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="Enter your last name"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <FormInputField
+                  field={field}
+                  label="Last name"
+                  placeholder="Enter your last name"
+                />
+              )}
             </form.Field>
             <form.Field name="username">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="Enter your user name"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <FormInputField
+                  field={field}
+                  label="Username"
+                  placeholder="Enter your username"
+                />
+              )}
             </form.Field>
           </div>
           <div className="flex gap-8">
             <form.Field name="email">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="Enter your valid email"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <FormInputField
+                  field={field}
+                  label="Email"
+                  placeholder="Enter your email"
+                />
+              )}
             </form.Field>
             <form.Field name="phone">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Phone Number</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value ?? ""}
-                      onBlur={field.handleBlur}
-                      onChange={(e) =>
-                        field.handleChange(e.target.value.toString())
-                      }
-                      aria-invalid={isInvalid}
-                      placeholder="Enter your valid phone number"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => (
+                <FormInputField
+                  field={field}
+                  label="Username"
+                  placeholder="Enter your phone number"
+                />
+              )}
             </form.Field>
           </div>
         </FieldGroup>
         <div className="flex w-full justify-end">
-          <Button
-            variant="default"
-            className="bg-brand-normal hover:bg-brand-normal/80"
-            disabled={updateMutation.isPending}
-          >
+          <Button disabled={updateMutation.isPending} type="submit">
             {updateMutation.isPending ? <Spinner /> : <></>}
             Save
           </Button>
