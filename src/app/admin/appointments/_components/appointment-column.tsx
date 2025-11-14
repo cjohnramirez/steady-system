@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -92,14 +91,21 @@ export const appointmentColumns: ColumnDef<
     cell: ({ row }) => {
       const status = row.getValue("status") ?? "";
 
-      const statusColor = clsx("text-black", {
-        "bg-blue-200": status === "approved",
-        "bg-amber-200": status === "pending",
-        "bg-green-200": status === "completed",
-        "bg-red-200": status === "cancelled",
+      const statusColor = clsx("h-2 w-2 rounded-full", {
+        "bg-blue-500": status === "approved",
+        "bg-amber-500": status === "pending",
+        "bg-green-500": status === "completed",
+        "bg-red-500": status === "cancelled",
       });
 
-      return <Badge className={statusColor}>{String(status)}</Badge>;
+      return (
+        <div className="flex items-center gap-2">
+          <div className={statusColor}></div>
+          <p>
+            {String(status)[0].toUpperCase() + String(status).slice(1)}
+          </p>
+        </div>
+      );
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;
@@ -116,7 +122,9 @@ export const appointmentColumns: ColumnDef<
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      return <p>{new Date(String(originalRow.scheduled_at)).toLocaleString()}</p>;
+      return (
+        <p>{new Date(String(originalRow.scheduled_at)).toLocaleString()}</p>
+      );
     },
   },
   {

@@ -5,14 +5,10 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tables } from "@/types/supabase";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -20,7 +16,6 @@ import { fetchStudent, updateAppointment } from "../actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { appointmentUpdateFormSchema } from "../schema";
-import z from "zod";
 import { userFormSchema } from "@/app/auth/signup/schema";
 import { FormInputField } from "@/components/form-input-field";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -90,7 +85,6 @@ export default function AppointmentModal({ id }: { id?: string }) {
       console.log("Form values:", formApi.state.values);
       console.log("Form errors:", formApi.state.errors);
     },
-    onSubmit: ({ value }) => {},
   });
 
   const handleFetchStudent = async () => {
@@ -105,7 +99,7 @@ export default function AppointmentModal({ id }: { id?: string }) {
         setSearchLastName(data?.last_name ?? "");
 
         toast.success("Student found");
-      } catch (err) {
+      } catch {
         toast.error("Failed to fetch student");
       } finally {
         setStudentLoading(false);

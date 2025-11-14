@@ -45,7 +45,12 @@ export default function SignUpForm() {
       setIsLoading(true);
 
       try {
-        const res = await SignUpFormAction(form.value);
+
+        const res = await SignUpFormAction({
+          ...form.value,
+          university_id: Number(form.value.university_id),
+          year_level: Number(form.value.year_level),
+        });
 
         if (res?.error) {
           toast.error(res.error);

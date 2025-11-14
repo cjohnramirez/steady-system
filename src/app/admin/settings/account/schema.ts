@@ -9,6 +9,7 @@ export const adminProfileFormSchema = userFormSchema
   })
   .omit({
     password: true,
+    university_id: true
   });
 
 export const adminPasswordFormSchema = z

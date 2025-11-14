@@ -78,6 +78,36 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          id: number
+          page_url: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          id?: number
+          page_url?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          id?: number
+          page_url?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       announcement: {
         Row: {
           announcement_image: string | null
