@@ -63,6 +63,11 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
   const tableData = useMemo(
     () => (isLoading ? Array(30).fill({}) : data),
     [isLoading, data],

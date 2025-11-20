@@ -42,69 +42,39 @@ export type Database = {
       admin: {
         Row: {
           avatar: string | null
-          email: string | null
-          first_name: string | null
+          email: string
+          first_name: string
           id: string
           is_active: boolean | null
           last_name: string | null
           phone: string | null
           university_id: number | null
           user_id: string | null
-          username: string | null
+          username: string
         }
         Insert: {
           avatar?: string | null
-          email?: string | null
-          first_name?: string | null
+          email: string
+          first_name: string
           id?: string
           is_active?: boolean | null
           last_name?: string | null
           phone?: string | null
           university_id?: number | null
           user_id?: string | null
-          username?: string | null
+          username: string
         }
         Update: {
           avatar?: string | null
-          email?: string | null
-          first_name?: string | null
+          email?: string
+          first_name?: string
           id?: string
           is_active?: boolean | null
           last_name?: string | null
           phone?: string | null
           university_id?: number | null
           user_id?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
-      analytics: {
-        Row: {
-          created_at: string | null
-          event_type: string
-          id: number
-          page_url: string | null
-          session_id: string | null
-          user_agent: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          event_type: string
-          id?: number
-          page_url?: string | null
-          session_id?: string | null
-          user_agent?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          event_type?: string
-          id?: number
-          page_url?: string | null
-          session_id?: string | null
-          user_agent?: string | null
-          user_id?: string | null
+          username?: string
         }
         Relationships: []
       }
@@ -288,6 +258,7 @@ export type Database = {
           phone: number | null
           university_id: number | null
           user_id: string | null
+          username: string
         }
         Insert: {
           availability_id: string
@@ -299,6 +270,7 @@ export type Database = {
           phone?: number | null
           university_id?: number | null
           user_id?: string | null
+          username: string
         }
         Update: {
           availability_id?: string
@@ -310,6 +282,7 @@ export type Database = {
           phone?: number | null
           university_id?: number | null
           user_id?: string | null
+          username?: string
         }
         Relationships: [
           {
@@ -380,6 +353,56 @@ export type Database = {
         Update: {
           id?: string
           name?: string | null
+        }
+        Relationships: []
+      }
+      organization: {
+        Row: {
+          abbreviation: string | null
+          contact_id: string | null
+          id: string
+          name: string | null
+          office_location: string | null
+        }
+        Insert: {
+          abbreviation?: string | null
+          contact_id?: string | null
+          id?: string
+          name?: string | null
+          office_location?: string | null
+        }
+        Update: {
+          abbreviation?: string | null
+          contact_id?: string | null
+          id?: string
+          name?: string | null
+          office_location?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "organization_contact"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_contact: {
+        Row: {
+          contact_detail: string | null
+          id: string
+          platform: string | null
+        }
+        Insert: {
+          contact_detail?: string | null
+          id?: string
+          platform?: string | null
+        }
+        Update: {
+          contact_detail?: string | null
+          id?: string
+          platform?: string | null
         }
         Relationships: []
       }
@@ -472,7 +495,7 @@ export type Database = {
           phone: number | null
           university_id: number
           user_id: string | null
-          username: string | null
+          username: string
           year_level: number
         }
         Insert: {
@@ -485,7 +508,7 @@ export type Database = {
           phone?: number | null
           university_id: number
           user_id?: string | null
-          username?: string | null
+          username: string
           year_level: number
         }
         Update: {
@@ -498,7 +521,7 @@ export type Database = {
           phone?: number | null
           university_id?: number
           user_id?: string | null
-          username?: string | null
+          username?: string
           year_level?: number
         }
         Relationships: [

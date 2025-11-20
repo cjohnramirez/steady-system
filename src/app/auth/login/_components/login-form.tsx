@@ -26,6 +26,7 @@ import { Eye, EyeClosed } from "lucide-react";
 import { roles } from "@/types/main";
 import LoginFormAction from "../actions";
 import { FormInputField } from "@/components/form-input-field";
+import { useUserStore } from "@/lib/stores/auth-store";
 
 const formSchema = z.object({
   email: z.email({ error: "Invalid email" }),
@@ -66,11 +67,12 @@ export default function LoginForm({ role }: { role: roles }) {
 
         if (res?.success) {
           toast.success(res.success);
+          useUserStore.getState().setUserName(res.data?.userName || "");
+          useUserStore.getState().setUserRole(role || "");
+          console.log(res.data?.userName)
         }
 
         router.push("/");
-      } catch {
-        toast.error("Authentication unsuccessful");
       } finally {
         setIsLoading(false);
       }
@@ -96,7 +98,13 @@ export default function LoginForm({ role }: { role: roles }) {
         <FieldGroup>
           <form.Field name="email">
             {(field) => (
-              <FormInputField field={field} label="Email" type="email" placeholder="Enter your email" description="Email must be valid"/>
+              <FormInputField
+                field={field}
+                label="Email"
+                type="email"
+                placeholder="Enter your email"
+                description="Email must be valid"
+              />
             )}
           </form.Field>
           <form.Field name="password">

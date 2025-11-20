@@ -3,13 +3,19 @@
 import { useSearchParams } from "next/navigation";
 import { CircleOff } from "lucide-react";
 import { Suspense } from "react";
+import OrganizationInfo from "./_components/organization-info";
 
 interface SettingSection {
   name: string;
   section: React.ReactNode;
 }
 
-const settingSectionObj: SettingSection[] = [];
+const settingSectionObj: SettingSection[] = [
+  {
+    name: "Organization Info",
+    section: <OrganizationInfo />
+  }
+];
 
 export default function SystemSettingsPage() {
   const searchParams = useSearchParams();

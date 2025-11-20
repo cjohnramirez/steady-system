@@ -1,1 +1,3 @@
-export type roles = "student" | "admin" | "counselor";
+import { Database } from "./supabase";
+
+export type roles = Database["public"]["Enums"]["app_role"];

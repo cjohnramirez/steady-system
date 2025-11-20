@@ -1,5 +1,9 @@
+"use server";
+
 import { roles } from "@/types/main";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
+import { createServiceClient } from "@/utils/supabase/service";
+import { error } from "console";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtCustomPayload {
@@ -12,13 +16,19 @@ interface JwtCustomPayload {
 export default async function LoginFormAction(
   formData: FormData,
   role: roles,
-): Promise<{ error?: string; success?: string }> {
-  const supabase = createClient();
+): Promise<{
+  error?: string;
+  success?: string;
+  data?: { userName: string };
+}> {
+  const supabase = await createClient();
+  const supabaseAdmin = await createServiceClient();
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({
-    email: formData.get("email")?.toString() || "",
-    password: formData.get("password")?.toString() || "",
-  });
+  const { data: userData, error: signInError } =
+    await supabase.auth.signInWithPassword({
+      email: formData.get("email")?.toString() || "",
+      password: formData.get("password")?.toString() || "",
+    });
 
   if (signInError) {
     return { error: signInError.message };
@@ -35,5 +45,25 @@ export default async function LoginFormAction(
     }
   }
 
-  return { success: `Authentication Successful`};
+  if (!userData.user) {
+    return { error: "User data not available" };
+  }
+
+  
+
+  const { data: profileData, error: profileError } = await supabaseAdmin
+    .from(`${role}`)
+    .select("*")
+    .eq("user_id", userData.user!.id)
+    .single();
+
+  if (profileError) {
+    console.log(userData.user.id)
+    return { error: "Failed to retrieve profile data" };
+  }
+
+  return {
+    success: "Authentication Successful",
+    data: { userName: profileData.username },
+  };
 }

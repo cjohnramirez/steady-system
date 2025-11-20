@@ -70,7 +70,7 @@ export default async function SignUpFormAction(
     return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
 
-  const { college, ...otherValues} = values;
+  const { college, password, ...otherValues} = values;
 
   const { error: updateStudentError } = await supabaseAdmin
     .from("student")
@@ -82,7 +82,7 @@ export default async function SignUpFormAction(
     });
 
   if (updateStudentError) {
-    console.log("❌ STUDENT INSERT ERROR");
+    console.log("❌ STUDENT INSERT ERROR", updateStudentError.message);
     return { error: `Failed to insert student: ${updateStudentError.message}` };
   }
 

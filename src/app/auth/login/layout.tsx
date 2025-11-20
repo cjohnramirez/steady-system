@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import Image from "next/image";
 import LoginTabs from "./_components/login-tabs";
@@ -14,10 +14,10 @@ export default function LoginLayout({
 
   return (
     <div className="flex h-full min-h-screen w-full items-center justify-center overflow-y-auto p-4">
-      <div className="flex w-full max-w-6xl flex-col gap-8 rounded-4xl border p-8 md:flex-row">
+      <div className="flex w-full max-w-6xl flex-col gap-8 rounded-4xl border p-8 md:flex-row bg-white">
         <div className="flex flex-col justify-center md:w-1/2">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-pointer">
               <Image src="/icon.png" alt="logo" width={40} height={40} />
               <p>GCS</p>
             </div>

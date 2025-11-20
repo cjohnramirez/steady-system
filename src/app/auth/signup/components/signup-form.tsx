@@ -16,6 +16,7 @@ import CollegeDropdown from "./college-dropdown";
 import DepartmentDropdown from "./department-dropdown";
 import FormPasswordField from "@/components/form-password-field";
 import FormYearLevelField from "@/components/form-year-level-field";
+import Link from "next/link";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -173,6 +174,12 @@ export default function SignUpForm() {
             <p>Submit</p>
           )}
         </Button>
+        <div className="flex justify-center gap-1">
+            <p>Already have an account?</p>
+            <Link href="/auth/login/student" className="underline">
+              Login
+            </Link>
+          </div>
       </form>
     </>
   );

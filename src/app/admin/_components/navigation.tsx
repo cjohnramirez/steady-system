@@ -12,9 +12,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
+import { useUserStore } from "@/lib/stores/auth-store";
 
 type Navigation = {
   name: string;
@@ -44,26 +45,35 @@ const navigationObj: Navigation[] = [
   },
 ];
 
+export async function handleChange() {
+  useUserStore.getState().setUserName("");
+  useUserStore.getState().setUserRole("");
+
+  const supabase = createClient();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.log(error);
+  }
+
+  window.location.reload();
+}
+
 export default function NavigationBar() {
   const pathName = usePathname();
+  const router = useRouter();
 
   return (
     <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b-1 bg-white p-5 pb-0">
       <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Image src="/icon.png" alt="GCS Icon" width={48} height={48} />
-          <p>Guidance and Counseling Services</p>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <line
-              x1="7"
-              y1="20"
-              x2="17"
-              y2="4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
+        <div className="flex items-center gap-10">
+          <div
+            className="flex cursor-pointer items-center gap-4"
+            onClick={() => router.replace("/home")}
+          >
+            <Image src="/icon.png" alt="GCS Icon" width={48} height={48} />
+            <p>Guidance and Counseling Services</p>
+          </div>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="flex items-center gap-4">
               <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
@@ -75,13 +85,7 @@ export default function NavigationBar() {
               <DropdownMenuLabel>Account Options</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={async () => {
-                  const supabase = createClient();
-                  const { error } = await supabase.auth.signOut();
-
-                  if (error) {
-                    console.log(error);
-                  }
-                  console.log("signed out");
+                  await handleChange();
                 }}
               >
                 Log Out
