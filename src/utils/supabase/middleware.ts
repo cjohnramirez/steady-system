@@ -88,14 +88,14 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // if (
-    //   userRole === "student" &&
-    //   request.nextUrl.pathname.startsWith("/auth/login/student")
-    // ) {
-    //   const url = request.nextUrl.clone();
-    //   url.pathname = "/student/profile";
-    //   return NextResponse.redirect(url);
-    // }
+    if (
+      userRole === "student" &&
+      request.nextUrl.pathname.startsWith("/auth/login/student")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/student/profile";
+      return NextResponse.redirect(url);
+    }
 
     if (userRole !== "admin" && request.nextUrl.pathname.startsWith("/admin")) {
       if (

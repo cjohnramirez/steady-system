@@ -45,7 +45,7 @@ export default function NavigationBar() {
             </a>
           ))}
         </section>
-        <section className="space-x-4">
+        <section className="flex space-x-4">
           {isClient && userName != "" ? (
             <>
               <DropdownMenu modal={false}>
@@ -66,6 +66,13 @@ export default function NavigationBar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              {userRole === "admin" && (
+                <Button
+                  onClick={() => router.replace("/admin/dashboard")}
+                >
+                  Go to Admin Dashboard
+                </Button>
+              )}
             </>
           ) : (
             <>

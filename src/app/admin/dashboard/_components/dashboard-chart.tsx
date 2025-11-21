@@ -18,7 +18,7 @@ export default function dashboardChart({
 }: {
   chartData: {
     label: string;
-    value: { date: string; numberOfVisitors: number }[];
+    value: { date: string; number_of_visitors: number }[];
   };
 }) {
   return (
@@ -67,7 +67,7 @@ export default function dashboardChart({
           }
         />
         <Area
-          dataKey="numberOfVisitors"
+          dataKey="number_of_visitors"
           type="natural"
           fill="url(#fillnumberOfVisitors)"
           stroke="var(--color-numberOfVisitors)"

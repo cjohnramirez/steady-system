@@ -10,7 +10,7 @@ export async function fetchOrganizationInfo(): Promise<Tables<"organization"> | 
 
   const { data, error } = await supabase.from("organization").select("*");
 
-  if (error) throw new Error(error.message);
+  if (error) console.error(error.message);
 
   return data[0] ?? null;
 }
@@ -20,12 +20,12 @@ export async function updateOrganizationInfo(
 ): Promise<Tables<"organization"> | null> {
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) throw new Error("Unauthorized");
+  if (!user?.user) console.error("Unauthorized");
 
   const orgInfo = await fetchOrganizationInfo();
 
   if (!orgInfo) {
-    throw new Error("Organization not fetched");
+    console.error("Organization not fetched");
   }
 
   const { data, error } = await supabase
@@ -33,7 +33,7 @@ export async function updateOrganizationInfo(
     .update(values)
     .eq("id", orgInfo?.id);
 
-  if (error) throw new Error(error.message);
+  if (error) console.error(error.message);
   return data?.[0] ?? null;
 }
 
@@ -52,7 +52,7 @@ export async function updateOrganizationContact(
 ): Promise<Tables<"organization_contact"> | null> {
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) throw new Error("Unauthorized");
+  if (!user?.user) console.error("Unauthorized");
 
   await Promise.all(
     values.map(async (value) => {
@@ -61,7 +61,7 @@ export async function updateOrganizationContact(
         .update(value)
         .select();
 
-      if (error) throw new Error(error.message);
+      if (error) console.error(error.message);
       return data?.[0] ?? null;
     }),
   );

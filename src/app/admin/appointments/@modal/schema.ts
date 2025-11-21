@@ -5,6 +5,6 @@ export const appointmentUpdateFormSchema = z.object({
   student_id: z.uuid("Must be a valid student"),
   counselor_id: z.uuid("Must be a valid counselor"),
   scheduled_at: z.string("Must be a valid date"),
-  status: z.enum(["pending", "approved", "completed", "cancelled"]),
+  status: z.string(),
   notes: z.string(),
 });

@@ -19,6 +19,8 @@ export default function AppointmentPage() {
     queryFn: () => fetchAllAppointments(supabase),
   });
 
+  console.log(allData)
+
   const tabs = {
     all: {
       name: "all" as const,

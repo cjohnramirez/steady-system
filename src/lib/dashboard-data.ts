@@ -74,20 +74,7 @@ export const dataLast7Days: { date: string; numberOfVisitors: number }[] = [
   { date: "2025-10-20", numberOfVisitors: 190 },
 ];
 
-export const graphs = [
-  {
-    label: "dataLast3Months",
-    value: dataLast3Months,
-  },
-  {
-    label: "dataLast30Days",
-    value: dataLast30Days,
-  },
-  {
-    label: "dataLast7Days",
-    value: dataLast7Days,
-  },
-];
+
 
 export const stats = {
   totalAppointments: 235,
@@ -95,8 +82,3 @@ export const stats = {
   totalUsers: 47,
 };
 
-export const statsInfo = [
-  { label: "Total Appointments Today", value: stats.totalAppointments },
-  { label: "Pending Appointments", value: stats.pendingAppointments },
-  { label: "Total Users Registered", value: stats.totalUsers },
-];

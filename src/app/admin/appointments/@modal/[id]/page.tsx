@@ -56,7 +56,7 @@ export default function AppointmentModal({ id }: { id?: string }) {
   const updateMutation = useMutation({
     mutationFn: updateAppointment,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["students"] });
+      await queryClient.invalidateQueries({ queryKey: ["appointments"] });
       toast.success("Appointment updated successfully!");
       router.back();
     },
@@ -70,20 +70,24 @@ export default function AppointmentModal({ id }: { id?: string }) {
       id: currentAppointment.id || "",
       student_university_id:
         String(currentAppointment.student_university_id) || "",
-      counselor_id: currentAppointment.last_counselor_name || "",
+      counselor_id: currentAppointment.counselor_id || "",
       scheduled_at: currentAppointment.scheduled_at || "",
       status: currentAppointment.status || "",
       notes: currentAppointment.notes || "",
+      student_id: currentAppointment.student_id || "",
     },
     validators: {
       onChange: appointmentUpdateFormSchema.extend({
         student_university_id: userFormSchema.shape.university_id,
       }),
     },
-    // include this, always!
     onSubmitInvalid: ({ formApi }) => {
       console.log("Form values:", formApi.state.values);
       console.log("Form errors:", formApi.state.errors);
+    },
+    onSubmit: ({ value }) => {
+      handleFetchStudent();
+      updateMutation.mutate(value);
     },
   });
 
@@ -128,7 +132,6 @@ export default function AppointmentModal({ id }: { id?: string }) {
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
-            console.log("it ran here");
           }}
         >
           <form.Field name="student_university_id">

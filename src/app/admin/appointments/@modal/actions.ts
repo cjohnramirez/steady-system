@@ -17,7 +17,7 @@ export async function updateAppointment(
     .select("*")
     .single(); // please include this too!
 
-  if (error) throw new Error(error.message);
+  if (error) console.error(error.message);
   return data || null;
 }
 
@@ -32,6 +32,6 @@ export async function fetchStudent(
     .eq("university_id", id)
     .single(); // please include this too!
 
-  if (error) throw new Error(error.message);
+  if (error) console.error(error.message);
   return data || null;
 }

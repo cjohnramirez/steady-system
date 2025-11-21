@@ -78,6 +78,36 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_daily_login: {
+        Row: {
+          date: string
+          number_of_logins: number
+        }
+        Insert: {
+          date: string
+          number_of_logins?: number
+        }
+        Update: {
+          date?: string
+          number_of_logins?: number
+        }
+        Relationships: []
+      }
+      analytics_daily_visitor: {
+        Row: {
+          date: string
+          number_of_visitors: number
+        }
+        Insert: {
+          date: string
+          number_of_visitors?: number
+        }
+        Update: {
+          date?: string
+          number_of_visitors?: number
+        }
+        Relationships: []
+      }
       announcement: {
         Row: {
           announcement_image: string | null
@@ -141,6 +171,13 @@ export type Database = {
             foreignKeyName: "appointment_counselor_id_fkey"
             columns: ["counselor_id"]
             isOneToOne: false
+            referencedRelation: "appointment_with_details"
+            referencedColumns: ["counselor_id"]
+          },
+          {
+            foreignKeyName: "appointment_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
             referencedRelation: "counselor"
             referencedColumns: ["id"]
           },
@@ -150,6 +187,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "counselor_with_details"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_with_details"
+            referencedColumns: ["student_id"]
           },
           {
             foreignKeyName: "appointment_student_id_fkey"
@@ -359,34 +403,23 @@ export type Database = {
       organization: {
         Row: {
           abbreviation: string | null
-          contact_id: string | null
           id: string
           name: string | null
           office_location: string | null
         }
         Insert: {
           abbreviation?: string | null
-          contact_id?: string | null
           id?: string
           name?: string | null
           office_location?: string | null
         }
         Update: {
           abbreviation?: string | null
-          contact_id?: string | null
           id?: string
           name?: string | null
           office_location?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "organization_contact_id_fkey"
-            columns: ["contact_id"]
-            isOneToOne: false
-            referencedRelation: "organization_contact"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       organization_contact: {
         Row: {
@@ -577,6 +610,7 @@ export type Database = {
     Views: {
       appointment_with_details: {
         Row: {
+          counselor_id: string | null
           first_counselor_name: string | null
           first_student_name: string | null
           id: string | null
@@ -585,6 +619,7 @@ export type Database = {
           notes: string | null
           scheduled_at: string | null
           status: string | null
+          student_id: string | null
           student_university_id: number | null
         }
         Relationships: []
@@ -676,6 +711,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_daily_login: { Args: never; Returns: undefined }
+      increment_daily_visitor: { Args: never; Returns: undefined }
     }
     Enums: {
       app_permission:
@@ -730,6 +767,7 @@ export type Database = {
         | "department.delete"
         | "department.update"
         | "department.insert"
+        | "organization.update"
       app_role: "admin" | "counselor" | "student"
     }
     CompositeTypes: {
@@ -913,6 +951,7 @@ export const Constants = {
         "department.delete",
         "department.update",
         "department.insert",
+        "organization.update",
       ],
       app_role: ["admin", "counselor", "student"],
     },

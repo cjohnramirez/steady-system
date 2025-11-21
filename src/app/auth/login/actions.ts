@@ -41,6 +41,7 @@ export default async function LoginFormAction(
   if (session) {
     const jwt = jwtDecode<JwtCustomPayload>(session.access_token);
     if (jwt.user_role !== role) {
+      supabase.auth.signOut();
       return { error: "Unauthorized access for this role" };
     }
   }
@@ -49,8 +50,6 @@ export default async function LoginFormAction(
     return { error: "User data not available" };
   }
 
-  
-
   const { data: profileData, error: profileError } = await supabaseAdmin
     .from(`${role}`)
     .select("*")
@@ -58,8 +57,16 @@ export default async function LoginFormAction(
     .single();
 
   if (profileError) {
-    console.log(userData.user.id)
+    console.log(userData.user.id);
     return { error: "Failed to retrieve profile data" };
+  }
+
+  const { error: analyticsError } = await supabaseAdmin.rpc(
+    "increment_daily_login",
+  );
+
+  if (analyticsError) {
+    return { error: `Failed to update analytics: ${analyticsError.message}` };
   }
 
   return {

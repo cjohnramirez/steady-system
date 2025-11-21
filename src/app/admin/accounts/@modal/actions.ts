@@ -17,7 +17,7 @@ export async function updateStudentProfile(
     .select("*")
     .single(); // please include this too!
 
-  if (error) throw new Error(error.message);
+  if (error) console.error(error.message);
   return data || null;
 }
 
@@ -33,6 +33,6 @@ export async function updateCounselorProfile(
     .select("*")
     .single(); // please include this too!
 
-  if (error) throw new Error(error.message);
+  if (error) console.error(error.message);
   return data || null;
 }
