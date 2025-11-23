@@ -97,15 +97,15 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    if (
+      userRole !== "student" &&
+      request.nextUrl.pathname.startsWith("/student")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login/student";
+      return NextResponse.redirect(url);
+    }
     if (userRole !== "admin" && request.nextUrl.pathname.startsWith("/admin")) {
-      if (
-        userRole !== "student" &&
-        request.nextUrl.pathname.startsWith("/student")
-      ) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/auth/login/student";
-        return NextResponse.redirect(url);
-      }
 
       if (
         userRole !== "counselor" &&

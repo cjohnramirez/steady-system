@@ -81,10 +81,6 @@ export default function AppointmentModal({ id }: { id?: string }) {
         student_university_id: userFormSchema.shape.university_id,
       }),
     },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log("Form values:", formApi.state.values);
-      console.log("Form errors:", formApi.state.errors);
-    },
     onSubmit: ({ value }) => {
       handleFetchStudent();
       updateMutation.mutate(value);

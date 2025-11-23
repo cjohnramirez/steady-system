@@ -62,11 +62,6 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  })
-
   const tableData = useMemo(
     () => (isLoading ? Array(30).fill({}) : data),
     [isLoading, data],

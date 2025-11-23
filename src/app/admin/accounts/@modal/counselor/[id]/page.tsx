@@ -99,7 +99,6 @@ export default function CounselorModal({ id }: { id?: string }) {
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
-            console.log("it ran here");
           }}
         >
           <div className="row-span-2 h-full w-full">

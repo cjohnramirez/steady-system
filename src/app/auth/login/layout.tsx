@@ -3,7 +3,7 @@
 import Image from "next/image";
 import LoginTabs from "./_components/login-tabs";
 import { roles } from "@/types/main";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export default function LoginLayout({
   children,
@@ -11,13 +11,14 @@ export default function LoginLayout({
   children: React.ReactNode;
 }>) {
   const { role }: { role: roles } = useParams();
+  const router = useRouter()
 
   return (
     <div className="flex h-full min-h-screen w-full items-center justify-center overflow-y-auto p-4">
       <div className="flex w-full max-w-6xl flex-col gap-8 rounded-4xl border p-8 md:flex-row bg-white">
         <div className="flex flex-col justify-center md:w-1/2">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 cursor-pointer">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push("/home")}>
               <Image src="/icon.png" alt="logo" width={40} height={40} />
               <p>GCS</p>
             </div>

@@ -52,9 +52,7 @@ export async function handleChange() {
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
 
-  if (error) {
-    console.log(error);
-  }
+  if (error) throw new Error(error.message);
 
   window.location.reload();
 }

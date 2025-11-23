@@ -41,8 +41,6 @@ export default function SignUpForm() {
       onChange: studentSignUpFormSchema,
     },
     onSubmit: async (form) => {
-      console.log("onSubmit called");
-      console.log("Form values:", form.value);
       setIsLoading(true);
 
       try {
@@ -81,7 +79,6 @@ export default function SignUpForm() {
         className="mt-8 space-y-8"
         onSubmit={(e) => {
           e.preventDefault();
-          console.log("Form submit event triggered");
           form.handleSubmit();
         }}
       >

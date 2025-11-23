@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { navBarObj } from "../_lib/nav-data";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/stores/auth-store";
 import { useEffect, useState } from "react";
@@ -28,7 +27,7 @@ export default function NavigationBar() {
   }, []);
 
   return (
-    <nav className="border-b-1 border-gray-200 bg-white p-6  top-0 sticky z-100">
+    <nav className="border-b-1 border-gray-200 bg-white p-6 top-0 sticky">
       <div className="m-auto flex max-w-[1600px] items-center justify-between gap-4">
         <section
           className="flex cursor-pointer items-center gap-4"
@@ -36,13 +35,6 @@ export default function NavigationBar() {
         >
           <Image src="/icon.png" alt="logo" width={40} height={40} />
           <p>Guidance and Counselling Services</p>
-        </section>
-        <section className="flex items-center gap-10">
-          {navBarObj.map((navBar) => (
-            <a href={navBar.link} key={navBar.title}>
-              {navBar.title}
-            </a>
-          ))}
         </section>
         <section className="flex space-x-4">
           {isClient && userName != "" ? (

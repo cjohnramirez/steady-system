@@ -105,33 +105,4 @@ export const appointmentColumns: ColumnDef<
       );
     },
   },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const appointment = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(appointment.scheduled_at || "")
-              }
-            >
-              Copy Appointment Date
-            </DropdownMenuItem>
-            <DropdownMenuItem>Edit Appointment</DropdownMenuItem>
-            <DropdownMenuItem>Delete Appointment</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
 ];

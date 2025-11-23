@@ -57,7 +57,6 @@ export default async function LoginFormAction(
     .single();
 
   if (profileError) {
-    console.log(userData.user.id);
     return { error: "Failed to retrieve profile data" };
   }
 

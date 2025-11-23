@@ -30,9 +30,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} w-full font-sans text-sm antialiased h-full bg-gray-50 `}
       >
-        <TrackHomePage />
         <Providers>{children}</Providers>
-        <Toaster position="top-right" />
+        <Toaster position="top-right" className="font-normal" />
+        <TrackHomePage />
       </body>
     </html>
   );

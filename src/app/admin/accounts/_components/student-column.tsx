@@ -107,33 +107,4 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
       );
     },
   },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const studentAccount = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(String(studentAccount.university_id))
-              }
-            >
-              Copy University ID
-            </DropdownMenuItem>
-            <DropdownMenuItem>Edit Student</DropdownMenuItem>
-            <DropdownMenuItem>Delete Student</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
 ];

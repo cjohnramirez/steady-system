@@ -41,19 +41,12 @@ export default async function SignUpFormAction(
   });
 
   if (signUpError) {
-    console.error("🧠 SIGNUP ERROR:", signUpError);
     return { error: "Sign up failed" };
   }
 
   if (!signUpData.user?.id) {
-    console.error("❌ User ID missing after signup:", signUpData);
     return { error: "User ID not found" };
   }
-
-  console.log("🧠 DEBUG INSERT user_roles", {
-    user_id: signUpData.user.id,
-    role: "student",
-  });
 
   const userRole: { user_id: string; role: "student" | "admin" | "counselor" } =
     {
@@ -66,7 +59,6 @@ export default async function SignUpFormAction(
     .insert([userRole]);
 
   if (updateRoleError) {
-    console.error("❌ ROLE INSERT ERROR:", updateRoleError);
     return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
 
@@ -82,11 +74,8 @@ export default async function SignUpFormAction(
     });
 
   if (updateStudentError) {
-    console.log("❌ STUDENT INSERT ERROR", updateStudentError.message);
     return { error: `Failed to insert student: ${updateStudentError.message}` };
   }
-
-  console.log("✅ SIGNUP SUCCESS for user:", signUpData.user.id);
 
   return { success: "Sign Up successful" };
 }
