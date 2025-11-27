@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Tables } from "@/types/supabase";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateStudentProfile } from "../../actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
@@ -24,6 +23,7 @@ import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown
 import FormYearLevelField from "@/components/form-year-level-field";
 import { studentUpdateFormSchema } from "../../schema";
 import z from "zod";
+import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
 
 export default function StudentModal({ id }: { id?: string }) {
   const queryClient = useQueryClient();
@@ -34,11 +34,23 @@ export default function StudentModal({ id }: { id?: string }) {
 
   const [college, setCollege] = useState("");
 
-  const students =
-    queryClient.getQueryData<Tables<"student_with_details">[]>(["students"]) ||
-    [];
+  const { data: student } = useQuery({
+    queryKey: ["student", params.id],
+    queryFn: () =>
+      resolvedId ? fetchStudent(resolvedId[0]) : Promise.resolve(undefined),
+    initialData: () => {
+      const allQueries = queryClient.getQueriesData({
+        queryKey: ["students"],
+      });
 
-  const currentStudent = students[Number(resolvedId)];
+      for (const [_key, queryResult] of allQueries) {
+        const listData = (queryResult as any)?.data;
+        const found = listData?.find((a: any) => a.id === params.id);
+        if (found) return found;
+      }
+      return undefined;
+    },
+  })
 
   const updateMutation = useMutation({
     mutationFn: updateStudentProfile,
@@ -54,32 +66,27 @@ export default function StudentModal({ id }: { id?: string }) {
 
   const form = useForm({
     defaultValues: {
-      first_name: currentStudent.first_name ?? "",
-      last_name: currentStudent.last_name ?? "",
-      username: currentStudent.username ?? "",
-      college_id: currentStudent.college_id ?? "",
-      department_id: currentStudent.department_id ?? "",
-      university_id: String(currentStudent.university_id) ?? "",
-      email: currentStudent.email ?? "",
-      year_level: String(currentStudent.year_level) ?? "",
-      id: String(currentStudent.id) ?? "",
+      first_name: student.first_name ?? "",
+      last_name: student.last_name ?? "",
+      username: student.username ?? "",
+      college_id: student.college_id ?? "",
+      department_id: student.department_id ?? "",
+      university_id: String(student.university_id) ?? "",
+      email: student.email ?? "",
+      year_level: String(student.year_level) ?? "",
+      id: String(student.id) ?? "",
     },
     validators: {
       onChange: studentUpdateFormSchema.extend({
         college_id: z.uuid().min(1, "College is required"),
       }),
     },
-    // include this, always!
-    onSubmitInvalid: ({ formApi }) => {
-      console.log("Form values:", formApi.state.values);
-      console.log("Form errors:", formApi.state.errors);
-    },
     onSubmit: ({ value }) => {
       const { college_id, ...submitData } = value;
 
       updateMutation.mutate({
         ...submitData,
-        id: currentStudent.id ?? "",
+        id: student.id ?? "",
         university_id: Number(value.university_id),
         year_level: Number(value.year_level),
       });

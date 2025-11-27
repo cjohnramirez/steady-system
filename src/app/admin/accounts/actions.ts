@@ -1,23 +1,57 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { dataTableParams } from "../appointments/actions";
 
-export async function fetchStudents(supabase: SupabaseClient) {
-  const { data, error } = await supabase
+export async function fetchStudents(
+  supabase: SupabaseClient,
+  params: dataTableParams,
+) {
+  const { page, pageSize, search } = params;
+
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
     .from("student_with_details")
-    .select("*");
+    .select("*", { count: "exact" });
+
+  if (search) {
+    query = query.ilike("username", `%${search}%`);
+  }
+
+  const { data, error, count } = await query
+    .range(from, to)
+    .order("id", { ascending: false });
+
   if (error) throw error;
-  return data || [];
+
+  return {
+    data: data || [],
+    count: count || 0,
+  };
 }
 
-export async function fetchAdmins(supabase: SupabaseClient) {
-  const { data, error } = await supabase.from("admin").select("*");
-  if (error) throw error;
-  return data || [];
-}
+export async function fetchCounselors(supabase: SupabaseClient, params: dataTableParams) {
+  const { page, pageSize, search } = params;
 
-export async function fetchCounselors(supabase: SupabaseClient) {
-  const { data, error } = await supabase
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
     .from("counselor_with_details")
-    .select("*");
+    .select("*", { count: "exact" });
+
+  if (search) {
+    query = query.ilike("username", `%${search}%`);
+  }
+
+  const { data, error, count } = await query
+    .range(from, to)
+    .order("id", { ascending: false });
+
   if (error) throw error;
-  return data || [];
+
+  return {
+    data: data || [],
+    count: count || 0,
+  };
 }

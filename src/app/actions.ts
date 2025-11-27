@@ -7,5 +7,5 @@ export async function updateAnalytics() {
 
   const { error } = await supabaseAdmin.rpc("increment_daily_visitor");
 
-  if (error) console.error("Error incrementing visitors: " + error.message);
+  if (error) throw new Error("Error incrementing visitors: " + error.message);
 }

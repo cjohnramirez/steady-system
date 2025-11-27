@@ -217,8 +217,10 @@ export type Database = {
           article_image: string | null
           author_name: string | null
           content: string
+          emotional_status_id: string | null
           id: string
-          publisher_id: string | null
+          link: string | null
+          publisher_name: string | null
           title: string
         }
         Insert: {
@@ -226,8 +228,10 @@ export type Database = {
           article_image?: string | null
           author_name?: string | null
           content: string
+          emotional_status_id?: string | null
           id?: string
-          publisher_id?: string | null
+          link?: string | null
+          publisher_name?: string | null
           title: string
         }
         Update: {
@@ -235,17 +239,26 @@ export type Database = {
           article_image?: string | null
           author_name?: string | null
           content?: string
+          emotional_status_id?: string | null
           id?: string
-          publisher_id?: string | null
+          link?: string | null
+          publisher_name?: string | null
           title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "article_publisher_id_fkey"
-            columns: ["publisher_id"]
+            foreignKeyName: "article_emotional_status_id_fkey"
+            columns: ["emotional_status_id"]
             isOneToOne: false
-            referencedRelation: "publisher"
+            referencedRelation: "emotional_status"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_emotional_status_id_fkey"
+            columns: ["emotional_status_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["emotional_status_id"]
           },
         ]
       }
@@ -403,21 +416,36 @@ export type Database = {
       organization: {
         Row: {
           abbreviation: string | null
+          day_of_week: boolean[] | null
+          email: string | null
+          end_office_hour: string | null
           id: string
           name: string | null
           office_location: string | null
+          phone: number | null
+          start_office_hour: string | null
         }
         Insert: {
           abbreviation?: string | null
+          day_of_week?: boolean[] | null
+          email?: string | null
+          end_office_hour?: string | null
           id?: string
           name?: string | null
           office_location?: string | null
+          phone?: number | null
+          start_office_hour?: string | null
         }
         Update: {
           abbreviation?: string | null
+          day_of_week?: boolean[] | null
+          email?: string | null
+          end_office_hour?: string | null
           id?: string
           name?: string | null
           office_location?: string | null
+          phone?: number | null
+          start_office_hour?: string | null
         }
         Relationships: []
       }
@@ -480,24 +508,6 @@ export type Database = {
             referencedColumns: ["emotional_status_id"]
           },
         ]
-      }
-      publisher: {
-        Row: {
-          id: string
-          publisher_icon: string | null
-          publisher_name: string
-        }
-        Insert: {
-          id?: string
-          publisher_icon?: string | null
-          publisher_name: string
-        }
-        Update: {
-          id?: string
-          publisher_icon?: string | null
-          publisher_name?: string
-        }
-        Relationships: []
       }
       role_permissions: {
         Row: {
@@ -624,19 +634,6 @@ export type Database = {
         }
         Relationships: []
       }
-      article_with_details: {
-        Row: {
-          added_at: string | null
-          article_image: string | null
-          author_name: string | null
-          content: string | null
-          id: string | null
-          publisher_icon: string | null
-          publisher_name: string | null
-          title: string | null
-        }
-        Relationships: []
-      }
       counselor_with_details: {
         Row: {
           availability: boolean[] | null
@@ -669,13 +666,29 @@ export type Database = {
       playlist_with_details: {
         Row: {
           creator: string | null
+          emotional_status_id: string | null
           emotional_status_name: string | null
           id: string | null
           image: string | null
           link: string | null
           title: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "playlist_emotional_status_id_fkey"
+            columns: ["emotional_status_id"]
+            isOneToOne: false
+            referencedRelation: "emotional_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_emotional_status_id_fkey"
+            columns: ["emotional_status_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["emotional_status_id"]
+          },
+        ]
       }
       student_with_details: {
         Row: {

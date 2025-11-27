@@ -24,47 +24,48 @@ import {
 } from "@/components/ui/table";
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
   useReactTable,
   VisibilityState,
+  PaginationState, 
+  OnChangeFn,
 } from "@tanstack/react-table";
-import { Download, Filter, SearchIcon, Sidebar } from "lucide-react";
+import { Download, SearchIcon, Sidebar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  toolbarExtra?: React.ReactNode;
+  isLoading: boolean;
+  rowUrl: (id: string) => string;
+  rowCount?: number;
+  pagination?: PaginationState;
+  onPaginationChange?: OnChangeFn<PaginationState>;
+  onSearchChange?: (value: string) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   toolbarExtra,
-  searchQuery,
   isLoading,
   rowUrl,
-}: DataTableProps<TData, TValue> & {
-  toolbarExtra?: React.ReactNode;
-  searchQuery: string;
-  isLoading: boolean;
-  rowUrl: (id: string) => string;
-}) {
+  rowCount,
+  pagination,
+  onPaginationChange,
+  onSearchChange,
+}: DataTableProps<TData, TValue>) {
   const router = useRouter();
-
-  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  
+  const [searchTerm, setSearchTerm] = useState("");
 
   const tableData = useMemo(
-    () => (isLoading ? Array(30).fill({}) : data),
-    [isLoading, data],
+    () => (isLoading ? Array(pagination?.pageSize || 10).fill({}) : data),
+    [isLoading, data, pagination?.pageSize]
   );
 
   const tableColumns = useMemo(
@@ -72,43 +73,43 @@ export function DataTable<TData, TValue>({
       isLoading
         ? columns.map((column) => ({
             ...column,
-            cell: () => <Skeleton className="rounded- m-2 h-6 w-full p-2" />,
+            cell: () => <Skeleton className="rounded-md m-2 h-6 w-full p-2" />,
           }))
         : columns,
-    [isLoading, columns],
+    [isLoading, columns]
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: tableData,
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
+    manualPagination: true, 
+    rowCount: rowCount ?? 0, 
     state: {
-      sorting,
-      columnFilters,
       columnVisibility,
+      pagination, 
     },
+    onPaginationChange: onPaginationChange, 
+    onColumnVisibilityChange: setColumnVisibility,
   });
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    if(onSearchChange) onSearchChange(value);
+  };
 
   return (
     <div>
-      <div className="flex justify-between gap-4">
+      <div className="flex justify-between gap-4 mb-4">
         <div>{toolbarExtra}</div>
         <div className="flex gap-4">
           <InputGroup className="bg-white">
             <InputGroupInput
-              placeholder="Input your search query..."
-              value={
-                (table.getColumn(searchQuery)?.getFilterValue() as string) ?? ""
-              }
-              onChange={(event) =>
-                table.getColumn(searchQuery)?.setFilterValue(event.target.value)
-              }
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={handleSearch}
               className="max-w-96"
             />
             <InputGroupAddon>
@@ -119,7 +120,7 @@ export function DataTable<TData, TValue>({
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
                 <Sidebar />
-                Customize Sections
+                Customize
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -136,7 +137,7 @@ export function DataTable<TData, TValue>({
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id.split("_").map((substr) => substr + " ")}
+                      {column.id}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -160,7 +161,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext(),
+                            header.getContext()
                           )}
                     </TableHead>
                   );
@@ -174,18 +175,18 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   onClick={() => {
-                    if (rowUrl) router.push(rowUrl(row.id));
+                    if (rowUrl) router.push(rowUrl(row.original.id));
                   }}
                   onMouseEnter={() => {
-                    if (rowUrl) router.prefetch(rowUrl(row.id));
+                    if (rowUrl) router.prefetch(rowUrl(row.original.id));
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer hover:bg-gray-50"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-3">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext(),
+                        cell.getContext()
                       )}
                     </TableCell>
                   ))}
@@ -204,7 +205,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination table={table}  />
     </div>
   );
 }

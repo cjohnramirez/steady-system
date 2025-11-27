@@ -60,8 +60,8 @@ export default function SignUpForm() {
           toast.success(res.success);
         }
       } catch (error) {
-        console.error("Sign up error:", error);
         toast.error("Sign up unsuccessful");
+        throw new Error("Sign up error");
       } finally {
         setIsLoading(false);
         router.replace("/");

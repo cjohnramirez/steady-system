@@ -10,9 +10,9 @@ export async function fetchOrganizationInfo(): Promise<Tables<"organization"> | 
 
   const { data, error } = await supabase.from("organization").select("*");
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
 
-  return data[0] ?? null;
+  return data && data[0] ? data[0] : null;
 }
 
 export async function updateOrganizationInfo(
@@ -20,20 +20,20 @@ export async function updateOrganizationInfo(
 ): Promise<Tables<"organization"> | null> {
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) console.error("Unauthorized");
+  if (!user?.user) throw new Error("Unauthorized");
 
   const orgInfo = await fetchOrganizationInfo();
 
   if (!orgInfo) {
-    console.error("Organization not fetched");
+    throw new Error("Organization not fetched");
   }
 
   const { data, error } = await supabase
     .from("organization")
     .update(values)
-    .eq("id", orgInfo?.id);
+    .eq("id", orgInfo?.id ?? "");
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
   return data?.[0] ?? null;
 }
 
@@ -52,7 +52,7 @@ export async function updateOrganizationContact(
 ): Promise<Tables<"organization_contact"> | null> {
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) console.error("Unauthorized");
+  if (!user?.user) throw new Error("Unauthorized");
 
   await Promise.all(
     values.map(async (value) => {
@@ -61,7 +61,7 @@ export async function updateOrganizationContact(
         .update(value)
         .select();
 
-      if (error) console.error(error.message);
+      if (error) throw new Error(error.message);
       return data?.[0] ?? null;
     }),
   );

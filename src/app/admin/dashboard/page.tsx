@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import DashboardChart from "./_components/dashboard-chart";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchAppointmentCountAnalytics,
@@ -10,7 +11,6 @@ import {
   fetchVisitorAnalytics,
   fetchVisitorCountAnalytics,
 } from "./actions";
-import { Calendar, TrendingUp } from "lucide-react";
 
 const CHART_TABS = {
   last3Months: { label: "Last 3 Months", days: 90 },
@@ -82,72 +82,107 @@ export default function DashboardPage() {
       label: "Total Appointments Today",
       value: appointmentCount.data ?? 0,
       description: "Number of appointments scheduled for today",
+      isLoading: appointmentCount.isLoading,
     },
     {
       label: "Total Monthly Visitor Count",
       value: visitorCount.data ?? 0,
       description: "Total number of visitors in a month",
+      isLoading: visitorCount.isLoading,
     },
     {
       label: "Total Students Registered",
       value: studentRegisterCount.data ?? 0,
       description: "Total students registered in the system",
+      isLoading: studentRegisterCount.isLoading,
     },
   ];
 
   const active = tabs[activeTab];
+
+  const isStatsLoading = statsInfo.some((item) => item.isLoading);
+
+  const isChartLoading = active.isLoading;
 
   return (
     <div className="text-gray-900">
       <main className="space-y-8">
         {/* KPI cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {statsInfo.map((item, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-gray-200 bg-white p-6"
-            >
-              <div className="flex items-center justify-between">
-                <h3>{item.label}</h3>
-              </div>
-              <div className="text-4xl">{item.value}</div>
-              <div className="mt-5 font-semibold">Short Description</div>
-              <div>{item.description}</div>
-            </div>
-          ))}
+          {isStatsLoading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-gray-200 bg-white p-6 flex flex-col justify-between"
+                >
+                  <Skeleton className="h-6 w-2/3 mb-4" />
+                  <Skeleton className="h-10 w-24 mb-4" />
+                  <Skeleton className="h-5 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-32 mt-2" />
+                </div>
+              ))
+            : statsInfo.map((item, i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-gray-200 bg-white p-6"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3>{item.label}</h3>
+                  </div>
+                  <div className="text-4xl">{item.value}</div>
+                  <div className="mt-5 font-semibold">Short Description</div>
+                  <div>{item.description}</div>
+                </div>
+              ))}
         </div>
 
         {/* Chart */}
         <div className="rounded-xl border border-gray-200 bg-white p-10">
-          <div className="mb-4 flex items-start justify-between">
-            <div className="pb-10">
-              <h3 className="font-semibold">Total Unique Website Visitors</h3>
-              <p>Total for the last 3 months</p>
+          {isChartLoading ? (
+            <div>
+              <div className="mb-4 flex items-start justify-between">
+                <div className="pb-10 w-1/2">
+                  <Skeleton className="h-6 w-2/3 mb-2" />
+                  <Skeleton className="h-4 w-40 mt-2" />
+                </div>
+                <Skeleton className="h-10 w-56" />
+              </div>
+              <Skeleton className="h-64 w-full" />
             </div>
-
-            <Tabs
-              defaultValue={activeTab}
-              onValueChange={(value) => setActiveTab(value as TabKey)}
-            >
-              <TabsList>
-                <TabsTrigger value="last3Months">
-                  {CHART_TABS.last3Months.label}
-                </TabsTrigger>
-                <TabsTrigger value="last30Days">
-                  {CHART_TABS.last30Days.label}
-                </TabsTrigger>
-                <TabsTrigger value="last7Days">
-                  {CHART_TABS.last7Days.label}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          <DashboardChart
-            chartData={{
-              label: CHART_TABS[activeTab].label,
-              value: Array.isArray(active.data) ? active.data : [],
-            }}
-          />
+          ) : (
+            <>
+              <div className="mb-4 flex items-start justify-between">
+                <div className="pb-10">
+                  <h3 className="font-semibold">Total Unique Website Visitors</h3>
+                  <p>
+                    {`Total for the ${CHART_TABS[activeTab].label.toLowerCase()}`}
+                  </p>
+                </div>
+                <Tabs
+                  defaultValue={activeTab}
+                  onValueChange={(value) => setActiveTab(value as TabKey)}
+                >
+                  <TabsList>
+                    <TabsTrigger value="last3Months">
+                      {CHART_TABS.last3Months.label}
+                    </TabsTrigger>
+                    <TabsTrigger value="last30Days">
+                      {CHART_TABS.last30Days.label}
+                    </TabsTrigger>
+                    <TabsTrigger value="last7Days">
+                      {CHART_TABS.last7Days.label}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+              <DashboardChart
+                chartData={{
+                  label: CHART_TABS[activeTab].label,
+                  value: Array.isArray(active.data) ? active.data : [],
+                }}
+              />
+            </>
+          )}
         </div>
       </main>
     </div>

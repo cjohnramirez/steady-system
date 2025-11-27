@@ -21,7 +21,7 @@ export default function NotFound() {
         </div>
         <p className="text-6xl">404 Not Found</p>
         <p className="w-96">
-          Oops, we can't seem to find this page. You are either does not have
+          Oops, we can&apos;t seem to find this page. You are either does not have
           the access or you are just out of luck. Try going back home instead!
         </p>
         <Button

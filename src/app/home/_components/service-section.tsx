@@ -45,7 +45,7 @@ export default function ServiceSection() {
         <p className="mt-5 w-full text-left text-4xl">What We Do</p>
         <p className="w-full text-left">
           The Guidance and Counseling Services offer the following to the
-          university's constituents
+          university&apos;s constituents
         </p>
         <div className="space-y-4 mt-10">
           {servicesObj.map((service) => (
@@ -62,7 +62,7 @@ export default function ServiceSection() {
           ))}
         </div>
       </div>
-      <div className="from-brand-light to-brand-normal relative w-1/2 rounded-4xl bg-linear-to-br h-dvh max-h-[700px]">
+      <div className="bg-white relative w-1/2 rounded-4xl h-dvh max-h-[700px] border-1 border-gray-200">
         <Image
           src={img}
           alt="Authentication image"

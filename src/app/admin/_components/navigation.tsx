@@ -69,7 +69,7 @@ export default function NavigationBar() {
             className="flex cursor-pointer items-center gap-4"
             onClick={() => router.replace("/home")}
           >
-            <Image src="/icon.png" alt="GCS Icon" width={48} height={48} />
+            <Image src="/icon.png" alt="GCS Icon" width={40} height={40} />
             <p>Guidance and Counseling Services</p>
           </div>
           <DropdownMenu modal={false}>

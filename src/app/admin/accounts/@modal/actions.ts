@@ -5,6 +5,21 @@ import z from "zod";
 import { Tables } from "@/types/supabase";
 import { counselorFormSchema, studentUpdateFormSchema } from "./schema";
 
+export async function fetchCounselor(
+  id: string,
+): Promise<Tables<"counselor_with_details"> | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("counselor_with_details")
+    .select("*")
+    .eq("id", id)
+    .single(); 
+
+  if (error) throw new Error(error.message);
+  return data || null;
+}
+
 export async function updateStudentProfile(
   values: z.infer<typeof studentUpdateFormSchema>,
 ): Promise<Tables<"student"> | null> {
@@ -13,11 +28,11 @@ export async function updateStudentProfile(
   const { data, error } = await supabase
     .from("student")
     .update(values)
-    .eq("id", values.id)
+    .eq("user_id", values.id)
     .select("*")
-    .single(); // please include this too!
+    .single(); 
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
   return data || null;
 }
 
@@ -33,6 +48,6 @@ export async function updateCounselorProfile(
     .select("*")
     .single(); // please include this too!
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
   return data || null;
 }

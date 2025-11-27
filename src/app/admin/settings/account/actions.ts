@@ -25,16 +25,16 @@ export async function updateAdminProfile(
 ): Promise<Tables<"admin"> | null> {
   const supabase = await createClient();
   const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) console.error("Unauthorized");
+  if (!user?.user) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
     .from("admin")
     .update(values)
-    .eq("user_id", user.user.id)
+    .eq("user_id", user?.user?.id ?? "")
     .select()
     .single();
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
   return data;
 }
 
@@ -50,7 +50,7 @@ export async function updateAdminPassword(
     password: values.password,
   });
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
 
   const { data } = await supabase
     .from("admin")

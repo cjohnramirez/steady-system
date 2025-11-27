@@ -1,5 +1,6 @@
-import Footer from "./_components/footer";
-import NavigationBar from "./_components/navigation";
+import NavigationBar from "@/components/navigation";
+import { homeNavBarObj } from "./_lib/nav-data";
+import Footer from "@/components/footer";
 
 export default function HomeLayout({
   children,
@@ -8,9 +9,9 @@ export default function HomeLayout({
 }>) {
   return (
     <>
-      <NavigationBar />
+      <NavigationBar navBarObj={homeNavBarObj} />
       <div className="m-auto max-w-[1400px] px-15">{children}</div>
-      <Footer />
+      <Footer navBarObj={homeNavBarObj} />
     </>
   );
 }

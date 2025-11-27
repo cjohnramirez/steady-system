@@ -28,8 +28,8 @@ export default function HomeSection() {
               Book an Appointment
               <ArrowRight />
             </Button>
-            <Button variant="outline" size="cta">
-              See Events, Articles, and More
+            <Button variant="outline" size="cta" onClick={() => router.push("/portal")}>
+              Go to GCS Portal
             </Button>
           </div>
         </div>
@@ -52,13 +52,13 @@ export default function HomeSection() {
           </div>
         </div>
       </div>
-      <div className="from-brand-light to-brand-normal relative h-2/5 rounded-4xl bg-linear-to-br">
+      <div className="relative h-2/5 rounded-4xl">
         <Image
           src={img}
           alt="Authentication image"
           fill
           priority
-          className="rounded-4xl object-cover p-3"
+          className="rounded-4xl object-cover"
         />
       </div>
     </section>

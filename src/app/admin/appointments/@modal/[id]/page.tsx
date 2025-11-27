@@ -9,10 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tables } from "@/types/supabase";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { fetchStudent, updateAppointment } from "../actions";
+import { fetchAppointment, fetchStudent, updateAppointment } from "../actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { appointmentUpdateFormSchema } from "../schema";
@@ -37,21 +36,31 @@ import {
 export default function AppointmentModal({ id }: { id?: string }) {
   const queryClient = useQueryClient();
 
-  const params = useParams();
-  const resolvedId = id ?? params?.id;
-  const router = useRouter();
-
   const [searchFirstName, setSearchFirstName] = useState("");
   const [searchLastName, setSearchLastName] = useState("");
   const [studentLoading, setStudentLoading] = useState(false);
 
-  const appointments =
-    queryClient.getQueryData<Tables<"appointment_with_details">[]>([
-      "appointments",
-      "all",
-    ]) || [];
+  const router = useRouter();
+  const params = useParams();
+  const resolvedId = id ?? params?.id;
 
-  const currentAppointment = appointments[Number(resolvedId)];
+  const { data: appointment } = useQuery({
+    queryKey: ["appointment", params.id],
+    queryFn: () =>
+      resolvedId ? fetchAppointment(resolvedId[0]) : Promise.resolve(undefined),
+    initialData: () => {
+      const allQueries = queryClient.getQueriesData({
+        queryKey: ["appointments"],
+      });
+
+      for (const [_key, queryResult] of allQueries) {
+        const listData = (queryResult as any)?.data;
+        const found = listData?.find((a: any) => a.id === params.id);
+        if (found) return found;
+      }
+      return undefined;
+    },
+  });
 
   const updateMutation = useMutation({
     mutationFn: updateAppointment,
@@ -67,14 +76,13 @@ export default function AppointmentModal({ id }: { id?: string }) {
 
   const form = useForm({
     defaultValues: {
-      id: currentAppointment.id || "",
-      student_university_id:
-        String(currentAppointment.student_university_id) || "",
-      counselor_id: currentAppointment.counselor_id || "",
-      scheduled_at: currentAppointment.scheduled_at || "",
-      status: currentAppointment.status || "",
-      notes: currentAppointment.notes || "",
-      student_id: currentAppointment.student_id || "",
+      id: appointment.id || "",
+      student_university_id: String(appointment.student_university_id) || "",
+      counselor_id: appointment.counselor_id || "",
+      scheduled_at: appointment.scheduled_at || "",
+      status: appointment.status || "",
+      notes: appointment.notes || "",
+      student_id: appointment.student_id || "",
     },
     validators: {
       onChange: appointmentUpdateFormSchema.extend({
@@ -89,10 +97,10 @@ export default function AppointmentModal({ id }: { id?: string }) {
 
   const handleFetchStudent = async () => {
     setStudentLoading(true);
-    if (currentAppointment && currentAppointment.student_university_id) {
+    if (appointment && appointment.student_university_id) {
       try {
         const data = await fetchStudent(
-          Number(form.getFieldValue("student_university_id")),
+          form.getFieldValue("student_university_id"),
         );
 
         setSearchFirstName(data?.first_name ?? "");
@@ -109,7 +117,7 @@ export default function AppointmentModal({ id }: { id?: string }) {
 
   return (
     <Dialog
-      open={Boolean(resolvedId)}
+      open={Boolean(params.id)}
       onOpenChange={(isOpen) => {
         if (!isOpen) router.push("/admin/appointments");
       }}
@@ -148,9 +156,7 @@ export default function AppointmentModal({ id }: { id?: string }) {
               <InputGroup>
                 <InputGroupInput
                   value={
-                    searchFirstName ||
-                    currentAppointment.first_student_name ||
-                    ""
+                    searchFirstName || appointment.first_student_name || ""
                   }
                   disabled={true}
                 />
@@ -167,9 +173,7 @@ export default function AppointmentModal({ id }: { id?: string }) {
               <FieldLabel>Last Name</FieldLabel>
               <InputGroup>
                 <InputGroupInput
-                  value={
-                    searchLastName || currentAppointment.last_student_name || ""
-                  }
+                  value={searchLastName || appointment.last_student_name || ""}
                   disabled={true}
                 />
 

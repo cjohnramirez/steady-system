@@ -19,8 +19,7 @@ export async function fetchVisitorAnalytics(daysFromNow: number) {
     .order("date", { ascending: true });
 
   if (error) {
-    console.error("Failed to retrieve visitor analytics data:", error);
-    return [];
+    throw new Error("Failed to retrieve visitor analytics data:", error);
   }
   return data;
 }
@@ -36,11 +35,10 @@ export async function fetchAppointmentCountAnalytics() {
     .gte("created_at", today);
 
   if (error) {
-    console.error(
+    throw new Error(
       "Failed to retrieve appointment count analytics data :",
       error,
     );
-    return [];
   }
 
   return count ?? 0;
@@ -54,11 +52,10 @@ export async function fetchStudentRegisterCountAnalytics() {
     .select("*", { count: "exact", head: true });
 
   if (error) {
-    console.error(
+    throw new Error(
       "Failed to retrieve student register count analytics data :",
       error,
     );
-    return 0;
   }
 
   return count ?? 0;
@@ -84,8 +81,7 @@ export async function fetchVisitorCountAnalytics() {
     data?.reduce((acc, curr) => acc + (curr.number_of_visitors), 0);
 
   if (error) {
-    console.error("Failed to retrieve visitor count analytics data :", error);
-    return 0;
+    throw new Error("Failed to retrieve visitor count analytics data :", error);
   }
 
   return count ?? 0;

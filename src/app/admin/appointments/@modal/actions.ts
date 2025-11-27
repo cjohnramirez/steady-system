@@ -15,23 +15,38 @@ export async function updateAppointment(
     .update(values)
     .eq("id", values.id)
     .select("*")
-    .single(); // please include this too!
+    .single(); 
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
   return data || null;
 }
 
 export async function fetchStudent(
-  id: number,
-): Promise<Tables<"student"> | null> {
+  id: string,
+): Promise<Tables<"student_with_details"> | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from("student")
+    .from("student_with_details")
     .select("*")
-    .eq("university_id", id)
-    .single(); // please include this too!
+    .eq("id", id)
+    .single(); 
 
-  if (error) console.error(error.message);
+  if (error) throw new Error(error.message);
+  return data || null;
+}
+
+export async function fetchAppointment(
+  id: string,
+): Promise<Tables<"appointment_with_details"> | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("appointment_with_details")
+    .select("*")
+    .eq("id", id)
+    .single(); 
+
+  if (error) throw new Error(error.message);
   return data || null;
 }

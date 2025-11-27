@@ -1,10 +1,43 @@
+"use server";
+
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export async function fetchAllAppointments(supabase: SupabaseClient) {
-  const { data, error } = await supabase
+export type dataTableParams = {
+  page: number;
+  pageSize: number;
+  status: string;
+  search?: string;
+};
+
+export async function fetchAppointments(
+  supabase: SupabaseClient,
+  params: dataTableParams,
+) {
+  const { page, pageSize, status, search } = params;
+
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
     .from("appointment_with_details")
-    .select(`*`);
+    .select("*", { count: "exact" });
+
+  if (status !== "all") {
+    query = query.eq("status", status);
+  }
+
+  if (search) {
+    query = query.ilike("last_student_name", `%${search}%`);
+  }
+
+  const { data, error, count } = await query
+    .range(from, to)
+    .order("id", { ascending: false });
 
   if (error) throw error;
-  return data || [];
+
+  return {
+    data: data || [],
+    count: count || 0,
+  };
 }

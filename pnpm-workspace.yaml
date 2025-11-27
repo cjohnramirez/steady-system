@@ -1,0 +1,12 @@
+packages:
+  - .
+  - apps/**
+  - packages/**
+  - '!**/test/**'
+
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'
+  - core-js
+  - cypress
+  - sharp
+  - unrs-resolver

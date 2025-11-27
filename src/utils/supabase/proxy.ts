@@ -45,7 +45,9 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/auth/login") ||
       request.nextUrl.pathname.startsWith("/auth") ||
       request.nextUrl.pathname.startsWith("/error") ||
-      request.nextUrl.pathname.startsWith("/home")
+      request.nextUrl.pathname.startsWith("/home") || 
+      request.nextUrl.pathname.startsWith("/misc") ||
+      request.nextUrl.pathname.startsWith("/portal")
     ) {
       return supabaseResponse;
     }

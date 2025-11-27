@@ -67,8 +67,13 @@ export default function LoginForm({ role }: { role: roles }) {
 
         if (res?.success) {
           toast.success(res.success);
-          useUserStore.getState().setUserName(res.data?.userName || "");
-          useUserStore.getState().setUserRole(role || "");
+          useUserStore.getState().setUserName(res.data?.userName ?? "");
+          useUserStore.getState().setUserRole(role ?? "");
+          useUserStore
+            .getState()
+            .setEmotionalStatus(res.data?.emotionalStatus ?? "");
+          useUserStore.getState().setId(res.data?.id ?? "");
+          console.log(res.data);
         }
 
         router.push("/");

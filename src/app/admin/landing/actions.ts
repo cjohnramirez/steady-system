@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function fetchArticles(supabase: SupabaseClient) {
   const { data, error } = await supabase
-    .from("article_with_details")
+    .from("article")
     .select(`*`)
     .range(0, 3);
 

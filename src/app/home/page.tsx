@@ -1,5 +1,3 @@
-"use client";
-
 import AboutSection from "./_components/about-section";
 import AnnouncementSection from "./_components/annoucement-section";
 import AppointmentSection from "./_components/appointment-section";

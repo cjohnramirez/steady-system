@@ -9,6 +9,7 @@ import { studentColumn } from "./_components/student-column";
 
 import { counselorColumn } from "./_components/counselor-column";
 import { fetchCounselors, fetchStudents } from "./actions";
+import { PaginationState } from "@tanstack/react-table";
 
 type TabName = "students" | "counselors";
 
@@ -16,28 +17,53 @@ export default function AccountsPage() {
   const supabase = createClient();
 
   const [activeTab, setActiveTab] = useState<TabName>("students");
+  const [search, setSearch] = useState("");
+    const [pagination, setPagination] = useState<PaginationState>({
+      pageIndex: 0,
+      pageSize: 10,
+    });
 
-  const { data: students = [], isLoading: isStudentsLoading } = useQuery({
-    queryKey: ["students"],
-    queryFn: () => fetchStudents(supabase),
+  const { data: students, isLoading: isStudentsLoading } = useQuery({
+    queryKey: ["students", activeTab, pagination.pageIndex, pagination.pageSize, search],
+    queryFn: () => fetchStudents(supabase, {
+        page: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        status: activeTab,
+        search: search,
+      }),
   });
 
-  const { data: counselors = [], isLoading: isCounselorsLoading } = useQuery({
-    queryKey: ["counselors"],
-    queryFn: () => fetchCounselors(supabase),
+  const { data: counselors, isLoading: isCounselorsLoading } = useQuery({
+    queryKey: ["counselors", activeTab, pagination.pageIndex, pagination.pageSize, search],
+    queryFn: () => fetchCounselors(supabase, {
+        page: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        status: activeTab,
+        search: search,
+      }),
   });
+
+  const studentsData = students?.data || [];
+  const totalStudents = students?.count || 0;
+
+  console.log(studentsData)
+
+  const counselorsData = counselors?.data || [];
+  const totalCounselors = counselors?.count || 0;
 
   const tabs = {
     students: {
-      name: "students" as const,
-      data: students,
+      name: "students",
+      data: studentsData,
+      count: totalStudents,
       columns: studentColumn,
       isLoading: isStudentsLoading,
       rowUrl: (id: string) => `/admin/accounts/student/${id}`,
     },
     counselors: {
-      name: "counselors" as const,
-      data: counselors,
+      name: "counselors",
+      data: counselorsData,
+      count: totalCounselors,
       columns: counselorColumn,
       isLoading: isCounselorsLoading,
       rowUrl: (id: string) => `/admin/accounts/counselor/${id}`,
@@ -54,6 +80,13 @@ export default function AccountsPage() {
         data={active.data}
         searchQuery="first_name"
         rowUrl={active.rowUrl}
+        rowCount={active.count}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        onSearchChange={(val) => {
+            setSearch(val);
+            setPagination(p => ({ ...p, pageIndex: 0 })); 
+        }}
         toolbarExtra={
           <Tabs
             value={activeTab}
@@ -68,6 +101,7 @@ export default function AccountsPage() {
             </TabsList>
           </Tabs>
         }
+        
       />
     </>
   );

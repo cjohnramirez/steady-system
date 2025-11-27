@@ -19,8 +19,10 @@ export default async function LoginFormAction(
 ): Promise<{
   error?: string;
   success?: string;
-  data?: { userName: string };
+  data?: { userName: string; emotionalStatus?: string; id: string };
 }> {
+  let emotionalStatus: string | undefined;
+
   const supabase = await createClient();
   const supabaseAdmin = await createServiceClient();
 
@@ -50,26 +52,61 @@ export default async function LoginFormAction(
     return { error: "User data not available" };
   }
 
-  const { data: profileData, error: profileError } = await supabaseAdmin
-    .from(`${role}`)
-    .select("*")
-    .eq("user_id", userData.user!.id)
-    .single();
+  console.log(role)
 
-  if (profileError) {
-    return { error: "Failed to retrieve profile data" };
+  if (role === "student") {
+    const { data: studentProfileData, error: studentProfileError } =
+      await supabaseAdmin
+        .from("student_with_details")
+        .select("*")
+        .eq("id", userData.user!.id)
+        .single();
+
+    if (!studentProfileError && studentProfileData) {
+      emotionalStatus = studentProfileData.emotional_status ?? "";
+    }
+
+    const { error: analyticsError } = await supabaseAdmin.rpc(
+      "increment_daily_login",
+    );
+
+    if (analyticsError) {
+      return { error: `Failed to update analytics: ${analyticsError.message}` };
+    }
+
+    return {
+      success: "Authentication Successful",
+      data: {
+        userName: studentProfileData?.username ?? "",
+        emotionalStatus,
+        id: userData.user.id,
+      },
+    };
+  } else {
+    const { data: profileData, error: profileError } = await supabaseAdmin
+      .from(`${role}`)
+      .select("*")
+      .eq("user_id", userData.user!.id)
+      .single();
+
+    if (profileError) {
+      return { error: "Failed to retrieve profile data" };
+    }
+
+    const { error: analyticsError } = await supabaseAdmin.rpc(
+      "increment_daily_login",
+    );
+
+    if (analyticsError) {
+      return { error: `Failed to update analytics: ${analyticsError.message}` };
+    }
+
+    return {
+      success: "Authentication Successful",
+      data: {
+        userName: profileData.username,
+        id: userData.user.id,
+      },
+    };
   }
-
-  const { error: analyticsError } = await supabaseAdmin.rpc(
-    "increment_daily_login",
-  );
-
-  if (analyticsError) {
-    return { error: `Failed to update analytics: ${analyticsError.message}` };
-  }
-
-  return {
-    success: "Authentication Successful",
-    data: { userName: profileData.username },
-  };
 }

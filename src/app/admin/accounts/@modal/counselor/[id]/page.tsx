@@ -10,9 +10,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tables } from "@/types/supabase";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { updateCounselorProfile } from "../../actions";
+import { fetchCounselor, updateCounselorProfile } from "../../actions";
 import { toast } from "sonner";
 import { counselorFormSchema } from "../../schema";
 import z from "zod";
@@ -29,12 +29,23 @@ export default function CounselorModal({ id }: { id?: string }) {
   const resolvedId = id ?? params?.id;
   const router = useRouter();
 
-  const counselors =
-    queryClient.getQueryData<Tables<"counselor_with_details">[]>([
-      "counselors",
-    ]) || [];
+  const { data: counselor } = useQuery({
+    queryKey: ["counselor", params.id],
+    queryFn: () =>
+      resolvedId ? fetchCounselor(resolvedId[0]) : Promise.resolve(undefined),
+    initialData: () => {
+      const allQueries = queryClient.getQueriesData({
+        queryKey: ["counselors"],
+      });
 
-  const currentCounselor = counselors[Number(resolvedId)];
+      for (const [_key, queryResult] of allQueries) {
+        const listData = (queryResult as any)?.data;
+        const found = listData?.find((a: any) => a.id === params.id);
+        if (found) return found;
+      }
+      return undefined;
+    },
+  })
 
   const updateMutation = useMutation({
     mutationFn: updateCounselorProfile,
@@ -50,27 +61,22 @@ export default function CounselorModal({ id }: { id?: string }) {
 
   const form = useForm({
       defaultValues: {
-        id: String(currentCounselor.id) ?? "",
-        email: currentCounselor.email ?? "",
-        first_name: currentCounselor.first_name ?? "",
-        last_name: currentCounselor.last_name ?? "",
-        university_id: String(currentCounselor.university_id) ?? "",
-        college_id: String(currentCounselor.college_id) ?? "",
+        id: String(counselor.id) ?? "",
+        email: counselor.email ?? "",
+        first_name: counselor.first_name ?? "",
+        last_name: counselor.last_name ?? "",
+        university_id: String(counselor.university_id) ?? "",
+        college_id: String(counselor.college_id) ?? "",
       },
       validators: {
         onChange: counselorFormSchema.extend({
           college_id: z.uuid().min(1, "College is required"),
         }),
       },
-      // include this, always!
-      onSubmitInvalid: ({ formApi }) => {
-        console.log("Form values:", formApi.state.values);
-        console.log("Form errors:", formApi.state.errors);
-      },
       onSubmit: ({ value }) => {
         updateMutation.mutate({
           ...value,
-          id: currentCounselor.id ?? "",
+          id: counselor.id ?? "",
           college_id: value.college_id,
           university_id: Number(value.university_id),
         });

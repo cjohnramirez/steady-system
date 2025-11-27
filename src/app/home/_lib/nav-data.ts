@@ -3,10 +3,17 @@ export type NavBar = {
   link: string;
 };
 
-export const navBarObj: NavBar[] = [
+export const homeNavBarObj: NavBar[] = [
   { title: "Home", link: "#home" },
   { title: "About Us", link: "#about" },
   { title: "Our Services", link: "#service" },
   { title: "Announcements", link: "#announcement" },
   { title: "Appointment", link: "#appointment" },
+];
+
+export const portalNavBarObj: NavBar[] = [
+  { title: "Home", link: "#home" },
+  { title: "Announcements", link: "#announcements" },
+  { title: "Articles", link: "#articles" },
+  { title: "Playlists", link: "#playlists" },
 ];
