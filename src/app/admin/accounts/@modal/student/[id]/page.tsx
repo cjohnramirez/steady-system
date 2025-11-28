@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { updateStudentProfile } from "../../actions";
+import { fetchEmotionalStatus, updateStudentProfile } from "../../actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Edit2 } from "lucide-react";
@@ -22,8 +22,20 @@ import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown";
 import FormYearLevelField from "@/components/form-year-level-field";
 import { studentUpdateFormSchema } from "../../schema";
-import z from "zod";
 import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function StudentModal({ id }: { id?: string }) {
   const queryClient = useQueryClient();
@@ -33,6 +45,7 @@ export default function StudentModal({ id }: { id?: string }) {
   const router = useRouter();
 
   const [college, setCollege] = useState("");
+  const [selectEmotionalStatus, setSelectEmotionalStatus] = useState("");
 
   const { data: student } = useQuery({
     queryKey: ["student", params.id],
@@ -50,7 +63,13 @@ export default function StudentModal({ id }: { id?: string }) {
       }
       return undefined;
     },
-  })
+  });
+
+  const { data: emotionalStatus = [], isLoading: isEmotionalStatusLoading } =
+    useQuery({
+      queryKey: ["emotional-status"],
+      queryFn: () => fetchEmotionalStatus(),
+    });
 
   const updateMutation = useMutation({
     mutationFn: updateStudentProfile,
@@ -69,30 +88,32 @@ export default function StudentModal({ id }: { id?: string }) {
       first_name: student.first_name ?? "",
       last_name: student.last_name ?? "",
       username: student.username ?? "",
-      college_id: student.college_id ?? "",
       department_id: student.department_id ?? "",
-      university_id: String(student.university_id) ?? "",
+      university_id: student.university_id ?? "",
       email: student.email ?? "",
-      year_level: String(student.year_level) ?? "",
-      id: String(student.id) ?? "",
+      year_level: student.year_level ?? "",
+      id: student.id ?? "",
+      phone: student.phone ?? "",
+      emotional_status_id: selectEmotionalStatus ?? "",
+      college_id: student.college_id  ?? college ?? "",
     },
     validators: {
-      onChange: studentUpdateFormSchema.extend({
-        college_id: z.uuid().min(1, "College is required"),
-      }),
+      onChange: studentUpdateFormSchema,
     },
     onSubmit: ({ value }) => {
-      const { college_id, ...submitData } = value;
-
-      updateMutation.mutate({
-        ...submitData,
-        id: student.id ?? "",
-        university_id: Number(value.university_id),
-        year_level: Number(value.year_level),
-      });
-      
+      updateMutation.mutate(value);
+      console.log(value)
+    },
+    onSubmitInvalid: ({ formApi }) => {
+      console.log("Form submit invalid", formApi.state.errors);
+      console.log(
+        "Form validation failed. Please check your inputs.",
+        formApi.state.values,
+      );
     },
   });
+
+  const emotionalStatusData = emotionalStatus ?? [];
 
   return (
     <Dialog
@@ -176,6 +197,59 @@ export default function StudentModal({ id }: { id?: string }) {
                   enableDescription={false}
                 />
               )}
+            </form.Field>
+          </div>
+          <div>
+            <form.Field name="emotional_status_id">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.errors && field.state.meta.errors.length > 0;
+                const enableDescription = false;
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>
+                      Emotional Status
+                    </FieldLabel>
+                    <Select
+                      name={field.name}
+                      value={field.state.value ?? ""}
+                      onValueChange={(value) => {
+                        field.handleChange(value);
+                        setSelectEmotionalStatus(value);
+                      }}
+                    >
+                      <SelectTrigger
+                        id="select-emotional-status"
+                        aria-invalid={isInvalid}
+                      >
+                        <SelectValue placeholder="Select Emotional Status" />
+                      </SelectTrigger>
+                      <SelectContent position="item-aligned">
+                        {emotionalStatusData.map((emotionalStatus, idx) => (
+                          <SelectItem
+                            value={emotionalStatus.id}
+                            key={idx}
+                            onClick={() => {
+                              setSelectEmotionalStatus(emotionalStatus.id);
+                            }}
+                          >
+                            {emotionalStatus.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isInvalid ? (
+                      <FieldError errors={field.state.meta.errors} />
+                    ) : enableDescription ? (
+                      <FieldDescription>
+                        An emotional status must be chosen
+                      </FieldDescription>
+                    ) : (
+                      <></>
+                    )}
+                  </Field>
+                );
+              }}
             </form.Field>
           </div>
           <div className="h-full w-full">

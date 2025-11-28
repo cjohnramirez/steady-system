@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { PaginationState } from "@tanstack/react-table";
 import { useState } from "react";
 import { fetchStudentAppointment } from "../actions";
-import { useUserStore } from "@/lib/stores/auth-store";
+import { useUserStore } from "@/hooks/auth-store";
 import { studentAppointmentColumns } from "./student-appointment-column";
 
 export default function StudentAppointmentSection() {
@@ -40,8 +40,6 @@ export default function StudentAppointmentSection() {
   const studentAppointmentData = studentAppointment?.data || [];
   const rowUrl = (id: string) => `/student/appointment/${id}`;
   const rowCount = studentAppointment?.count || 0;
-
-  console.log(studentAppointmentData, getStudentID);
 
   return (
     <DataTable

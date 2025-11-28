@@ -3,7 +3,6 @@
 import { roles } from "@/types/main";
 import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
-import { error } from "console";
 import { jwtDecode } from "jwt-decode";
 
 interface JwtCustomPayload {
@@ -19,7 +18,12 @@ export default async function LoginFormAction(
 ): Promise<{
   error?: string;
   success?: string;
-  data?: { userName: string; emotionalStatus?: string; id: string };
+  data?: {
+    userName: string;
+    emotionalStatus?: string;
+    id: string;
+    firstName?: string;
+  };
 }> {
   let emotionalStatus: string | undefined;
 
@@ -51,8 +55,6 @@ export default async function LoginFormAction(
   if (!userData.user) {
     return { error: "User data not available" };
   }
-
-  console.log(role)
 
   if (role === "student") {
     const { data: studentProfileData, error: studentProfileError } =
@@ -104,8 +106,9 @@ export default async function LoginFormAction(
     return {
       success: "Authentication Successful",
       data: {
+        firstName: profileData.first_name,
         userName: profileData.username,
-        id: userData.user.id,
+        id: profileData.id,
       },
     };
   }

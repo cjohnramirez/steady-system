@@ -11,7 +11,7 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import AnnouncementTile from "./announcement-tile";
-import { useUserStore } from "@/lib/stores/auth-store";
+import { useUserStore } from "@/hooks/auth-store";
 import Link from "next/link";
 import PlaylistTile from "./playlist-tile";
 

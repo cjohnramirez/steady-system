@@ -41,38 +41,38 @@ export type Database = {
     Tables: {
       admin: {
         Row: {
-          avatar: string | null
+          avatar: string
           email: string
           first_name: string
           id: string
-          is_active: boolean | null
-          last_name: string | null
-          phone: string | null
-          university_id: number | null
+          is_active: boolean
+          last_name: string
+          phone: string
+          university_id: number
           user_id: string | null
           username: string
         }
         Insert: {
-          avatar?: string | null
+          avatar?: string
           email: string
           first_name: string
           id?: string
-          is_active?: boolean | null
-          last_name?: string | null
-          phone?: string | null
-          university_id?: number | null
+          is_active?: boolean
+          last_name?: string
+          phone?: string
+          university_id?: number
           user_id?: string | null
           username: string
         }
         Update: {
-          avatar?: string | null
+          avatar?: string
           email?: string
           first_name?: string
           id?: string
-          is_active?: boolean | null
-          last_name?: string | null
-          phone?: string | null
-          university_id?: number | null
+          is_active?: boolean
+          last_name?: string
+          phone?: string
+          university_id?: number
           user_id?: string | null
           username?: string
         }
@@ -110,8 +110,8 @@ export type Database = {
       }
       announcement: {
         Row: {
-          announcement_image: string | null
-          description: string | null
+          announcement_image: string
+          description: string
           end_date: string
           id: string
           location: string
@@ -119,8 +119,8 @@ export type Database = {
           title: string
         }
         Insert: {
-          announcement_image?: string | null
-          description?: string | null
+          announcement_image?: string
+          description?: string
           end_date: string
           id?: string
           location: string
@@ -128,8 +128,8 @@ export type Database = {
           title: string
         }
         Update: {
-          announcement_image?: string | null
-          description?: string | null
+          announcement_image?: string
+          description?: string
           end_date?: string
           id?: string
           location?: string
@@ -141,29 +141,32 @@ export type Database = {
       appointment: {
         Row: {
           counselor_id: string | null
-          created_at: string | null
+          created_at: string
           id: string
-          notes: string | null
+          notes: string
+          reason: string
           scheduled_at: string
-          status: string | null
+          status: string
           student_id: string | null
         }
         Insert: {
           counselor_id?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
-          notes?: string | null
-          scheduled_at: string
-          status?: string | null
+          notes?: string
+          reason?: string
+          scheduled_at?: string
+          status?: string
           student_id?: string | null
         }
         Update: {
           counselor_id?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
-          notes?: string | null
+          notes?: string
+          reason?: string
           scheduled_at?: string
-          status?: string | null
+          status?: string
           student_id?: string | null
         }
         Relationships: [
@@ -187,6 +190,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "counselor_with_details"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointment_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["counselor_id"]
           },
           {
             foreignKeyName: "appointment_student_id_fkey"
@@ -213,36 +223,36 @@ export type Database = {
       }
       article: {
         Row: {
-          added_at: string | null
-          article_image: string | null
-          author_name: string | null
+          added_at: string
+          article_image: string
+          author_name: string
           content: string
-          emotional_status_id: string | null
+          emotional_status_id: string
           id: string
-          link: string | null
-          publisher_name: string | null
+          link: string
+          publisher_name: string
           title: string
         }
         Insert: {
-          added_at?: string | null
-          article_image?: string | null
-          author_name?: string | null
+          added_at?: string
+          article_image?: string
+          author_name?: string
           content: string
-          emotional_status_id?: string | null
+          emotional_status_id: string
           id?: string
-          link?: string | null
-          publisher_name?: string | null
+          link?: string
+          publisher_name?: string
           title: string
         }
         Update: {
-          added_at?: string | null
-          article_image?: string | null
-          author_name?: string | null
+          added_at?: string
+          article_image?: string
+          author_name?: string
           content?: string
-          emotional_status_id?: string | null
+          emotional_status_id?: string
           id?: string
-          link?: string | null
-          publisher_name?: string | null
+          link?: string
+          publisher_name?: string
           title?: string
         }
         Relationships: [
@@ -264,42 +274,45 @@ export type Database = {
       }
       availability: {
         Row: {
-          day_of_week: boolean[] | null
+          day_of_week: boolean[]
+          end_time: string
           id: string
           is_active: boolean
-          is_recurring: boolean | null
+          start_time: string
         }
         Insert: {
-          day_of_week?: boolean[] | null
+          day_of_week?: boolean[]
+          end_time?: string
           id?: string
           is_active?: boolean
-          is_recurring?: boolean | null
+          start_time?: string
         }
         Update: {
-          day_of_week?: boolean[] | null
+          day_of_week?: boolean[]
+          end_time?: string
           id?: string
           is_active?: boolean
-          is_recurring?: boolean | null
+          start_time?: string
         }
         Relationships: []
       }
       college: {
         Row: {
-          abbreviation: string | null
-          full_name: string | null
-          icon: string | null
+          abbreviation: string
+          full_name: string
+          icon: string
           id: string
         }
         Insert: {
-          abbreviation?: string | null
-          full_name?: string | null
-          icon?: string | null
+          abbreviation?: string
+          full_name?: string
+          icon?: string
           id?: string
         }
         Update: {
-          abbreviation?: string | null
-          full_name?: string | null
-          icon?: string | null
+          abbreviation?: string
+          full_name?: string
+          icon?: string
           id?: string
         }
         Relationships: []
@@ -307,37 +320,37 @@ export type Database = {
       counselor: {
         Row: {
           availability_id: string
-          college_id: string
+          avatar: string
           email: string
           first_name: string
           id: string
-          last_name: string | null
-          phone: number | null
-          university_id: number | null
+          last_name: string
+          phone: string
+          university_id: number
           user_id: string | null
           username: string
         }
         Insert: {
           availability_id: string
-          college_id: string
+          avatar?: string
           email: string
           first_name: string
           id?: string
-          last_name?: string | null
-          phone?: number | null
-          university_id?: number | null
+          last_name?: string
+          phone: string
+          university_id: number
           user_id?: string | null
           username: string
         }
         Update: {
           availability_id?: string
-          college_id?: string
+          avatar?: string
           email?: string
           first_name?: string
           id?: string
-          last_name?: string | null
-          phone?: number | null
-          university_id?: number | null
+          last_name?: string
+          phone?: string
+          university_id?: number
           user_id?: string | null
           username?: string
         }
@@ -349,35 +362,24 @@ export type Database = {
             referencedRelation: "availability"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "counselor_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "college"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "counselor_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "student_with_details"
-            referencedColumns: ["college_id"]
-          },
         ]
       }
       department: {
         Row: {
           college_id: string
+          counselor_id: string | null
           id: string
           title: string
         }
         Insert: {
           college_id: string
+          counselor_id?: string | null
           id?: string
           title: string
         }
         Update: {
           college_id?: string
+          counselor_id?: string | null
           id?: string
           title?: string
         }
@@ -396,99 +398,127 @@ export type Database = {
             referencedRelation: "student_with_details"
             referencedColumns: ["college_id"]
           },
+          {
+            foreignKeyName: "department_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_with_details"
+            referencedColumns: ["counselor_id"]
+          },
+          {
+            foreignKeyName: "department_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "counselor"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "counselor_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_counselor_id_fkey"
+            columns: ["counselor_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["counselor_id"]
+          },
         ]
       }
       emotional_status: {
         Row: {
           id: string
-          name: string | null
+          name: string
         }
         Insert: {
           id?: string
-          name?: string | null
+          name: string
         }
         Update: {
           id?: string
-          name?: string | null
+          name?: string
         }
         Relationships: []
       }
       organization: {
         Row: {
-          abbreviation: string | null
-          day_of_week: boolean[] | null
-          email: string | null
-          end_office_hour: string | null
+          abbreviation: string
+          day_of_week: boolean[]
+          email: string
+          end_office_hour: string
           id: string
-          name: string | null
-          office_location: string | null
-          phone: number | null
-          start_office_hour: string | null
+          name: string
+          office_location: string
+          phone: number
+          start_office_hour: string
         }
         Insert: {
-          abbreviation?: string | null
-          day_of_week?: boolean[] | null
-          email?: string | null
-          end_office_hour?: string | null
+          abbreviation: string
+          day_of_week?: boolean[]
+          email: string
+          end_office_hour?: string
           id?: string
-          name?: string | null
-          office_location?: string | null
-          phone?: number | null
-          start_office_hour?: string | null
+          name: string
+          office_location: string
+          phone: number
+          start_office_hour?: string
         }
         Update: {
-          abbreviation?: string | null
-          day_of_week?: boolean[] | null
-          email?: string | null
-          end_office_hour?: string | null
+          abbreviation?: string
+          day_of_week?: boolean[]
+          email?: string
+          end_office_hour?: string
           id?: string
-          name?: string | null
-          office_location?: string | null
-          phone?: number | null
-          start_office_hour?: string | null
+          name?: string
+          office_location?: string
+          phone?: number
+          start_office_hour?: string
         }
         Relationships: []
       }
       organization_contact: {
         Row: {
-          contact_detail: string | null
+          contact_detail: string
           id: string
-          platform: string | null
+          platform: string
         }
         Insert: {
-          contact_detail?: string | null
+          contact_detail: string
           id?: string
-          platform?: string | null
+          platform: string
         }
         Update: {
-          contact_detail?: string | null
+          contact_detail?: string
           id?: string
-          platform?: string | null
+          platform?: string
         }
         Relationships: []
       }
       playlist: {
         Row: {
-          creator: string | null
-          emotional_status_id: string | null
+          creator: string
+          emotional_status_id: string
           id: string
-          image: string | null
+          image: string
           link: string
           title: string
         }
         Insert: {
-          creator?: string | null
-          emotional_status_id?: string | null
+          creator?: string
+          emotional_status_id: string
           id?: string
-          image?: string | null
+          image?: string
           link: string
           title: string
         }
         Update: {
-          creator?: string | null
-          emotional_status_id?: string | null
+          creator?: string
+          emotional_status_id?: string
           id?: string
-          image?: string | null
+          image?: string
           link?: string
           title?: string
         }
@@ -529,39 +559,42 @@ export type Database = {
       }
       student: {
         Row: {
-          department_id: string | null
+          avatar: string
+          department_id: string
           email: string
           emotional_status_id: string | null
           first_name: string
           id: string
-          last_name: string | null
-          phone: number | null
+          last_name: string
+          phone: string | null
           university_id: number
           user_id: string | null
           username: string
           year_level: number
         }
         Insert: {
-          department_id?: string | null
+          avatar?: string
+          department_id: string
           email: string
           emotional_status_id?: string | null
           first_name: string
           id?: string
-          last_name?: string | null
-          phone?: number | null
+          last_name?: string
+          phone?: string | null
           university_id: number
           user_id?: string | null
           username: string
           year_level: number
         }
         Update: {
-          department_id?: string | null
+          avatar?: string
+          department_id?: string
           email?: string
           emotional_status_id?: string | null
           first_name?: string
           id?: string
-          last_name?: string | null
-          phone?: number | null
+          last_name?: string
+          phone?: string | null
           university_id?: number
           user_id?: string | null
           username?: string
@@ -627,6 +660,7 @@ export type Database = {
           last_counselor_name: string | null
           last_student_name: string | null
           notes: string | null
+          reason: string | null
           scheduled_at: string | null
           status: string | null
           student_id: string | null
@@ -636,32 +670,21 @@ export type Database = {
       }
       counselor_with_details: {
         Row: {
-          availability: boolean[] | null
-          college: string | null
-          college_id: string | null
+          day_of_week: boolean[] | null
+          department_name: string | null
           email: string | null
+          end_time: string | null
           first_name: string | null
           id: string | null
-          is_not_available: boolean | null
+          is_active: boolean | null
           last_name: string | null
+          phone: string | null
+          start_time: string | null
           university_id: number | null
+          user_id: string | null
+          username: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "counselor_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "college"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "counselor_college_id_fkey"
-            columns: ["college_id"]
-            isOneToOne: false
-            referencedRelation: "student_with_details"
-            referencedColumns: ["college_id"]
-          },
-        ]
+        Relationships: []
       }
       playlist_with_details: {
         Row: {
@@ -692,8 +715,11 @@ export type Database = {
       }
       student_with_details: {
         Row: {
-          college: string | null
           college_id: string | null
+          college_name: string | null
+          counselor_first_name: string | null
+          counselor_id: string | null
+          counselor_last_name: string | null
           department: string | null
           department_id: string | null
           email: string | null
@@ -702,7 +728,9 @@ export type Database = {
           first_name: string | null
           id: string | null
           last_name: string | null
+          phone: string | null
           university_id: number | null
+          user_id: string | null
           username: string | null
           year_level: number | null
         }

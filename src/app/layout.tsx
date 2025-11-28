@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 import { Toaster } from "sonner";
 import TrackHomePage from "@/components/tracker";
+import ConfirmModal from "@/components/confirm-modal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <Providers>{children}</Providers>
         <Toaster position="top-right" className="font-normal" />
+        <ConfirmModal />
         <TrackHomePage />
       </body>
     </html>

@@ -37,10 +37,14 @@ export default function AdminProfile() {
       email: profile?.email ?? "",
       username: profile?.username ?? "",
       phone: profile?.phone ?? "",
+      university_id: profile?.university_id ? String(profile.university_id) : "",
     },
     validators: { onChange: adminProfileFormSchema },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      updateMutation.mutate({
+        ...value,
+        university_id: Number(value.university_id),
+      });
     },
   });
 

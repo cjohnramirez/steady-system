@@ -46,8 +46,6 @@ export default function AccountsPage() {
   const studentsData = students?.data || [];
   const totalStudents = students?.count || 0;
 
-  console.log(studentsData)
-
   const counselorsData = counselors?.data || [];
   const totalCounselors = counselors?.count || 0;
 
@@ -72,13 +70,14 @@ export default function AccountsPage() {
 
   const active = tabs[activeTab];
 
+  console.log(active.data)
+
   return (
     <>
       <DataTable
         isLoading={active.isLoading}
         columns={active.columns}
         data={active.data}
-        searchQuery="first_name"
         rowUrl={active.rowUrl}
         rowCount={active.count}
         pagination={pagination}

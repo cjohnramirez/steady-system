@@ -44,7 +44,7 @@ export default function HomeSection() {
           <div className="h-full rounded-xl border border-gray-200 bg-white">
             <Link
               className="flex h-full items-center gap-4 rounded-xl px-6 py-8"
-              href=""
+              href="/portal#articles"
             >
               <ArrowUpRight
                 className="rounded-full border border-gray-200 p-2"
@@ -59,7 +59,7 @@ export default function HomeSection() {
           <div className="h-full w-full rounded-xl border border-gray-200 bg-white">
             <Link
               className="flex h-full items-center gap-4 rounded-xl px-6 py-8"
-              href=""
+              href="/portal#announcements"
             >
               <ArrowUpRight
                 className="rounded-full border border-gray-200 p-2"
@@ -74,7 +74,7 @@ export default function HomeSection() {
           <div className="h-full rounded-xl border border-gray-200 bg-white">
             <Link
               className="flex h-full items-center gap-4 rounded-xl px-6 py-8"
-              href=""
+              href="/portal#playlists"
             >
               <ArrowUpRight
                 className="rounded-full border border-gray-200 p-2"

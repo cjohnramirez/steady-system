@@ -45,7 +45,7 @@ export default function CounselorModal({ id }: { id?: string }) {
       }
       return undefined;
     },
-  })
+  });
 
   const updateMutation = useMutation({
     mutationFn: updateCounselorProfile,
@@ -60,29 +60,39 @@ export default function CounselorModal({ id }: { id?: string }) {
   });
 
   const form = useForm({
-      defaultValues: {
-        id: String(counselor.id) ?? "",
-        email: counselor.email ?? "",
-        first_name: counselor.first_name ?? "",
-        last_name: counselor.last_name ?? "",
-        university_id: String(counselor.university_id) ?? "",
-        college_id: String(counselor.college_id) ?? "",
-      },
-      validators: {
-        onChange: counselorFormSchema.extend({
-          college_id: z.uuid().min(1, "College is required"),
-        }),
-      },
-      onSubmit: ({ value }) => {
-        updateMutation.mutate({
-          ...value,
-          id: counselor.id ?? "",
-          college_id: value.college_id,
-          university_id: Number(value.university_id),
-        });
-      },
-    });
-
+    defaultValues: {
+      id: String(counselor.id) ?? "",
+      email: counselor.email ?? "",
+      first_name: counselor.first_name ?? "",
+      last_name: counselor.last_name ?? "",
+      university_id:
+        typeof counselor.university_id === "number"
+          ? counselor.university_id
+          : Number(counselor.university_id) || 0,
+      college_id: String(counselor.college_id) ?? "",
+      username: counselor.username ?? "",
+      phone: counselor.phone ?? "",
+    },
+    validators: {
+      onChange: counselorFormSchema.extend({
+        college_id: z.uuid({ message: "College is required" }),
+      }),
+    },
+    onSubmit: ({
+      value,
+    }: {
+      value: z.infer<typeof counselorFormSchema> & { college_id: string };
+    }) => {
+      updateMutation.mutate({
+        ...value,
+        id: counselor.id ?? "",
+        college_id: value.college_id,
+        university_id: value.university_id,
+        username: value.username,
+        phone: value.phone,
+      });
+    },
+  });
 
   return (
     <Dialog
@@ -150,10 +160,7 @@ export default function CounselorModal({ id }: { id?: string }) {
           <div className="h-full w-full">
             <form.Field name="college_id">
               {(field) => (
-                <CollegeDropdown
-                  field={field}
-                  enableDescription={false}
-                />
+                <CollegeDropdown field={field} enableDescription={false} />
               )}
             </form.Field>
           </div>

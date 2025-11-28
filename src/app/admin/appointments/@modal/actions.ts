@@ -1,12 +1,12 @@
 "use server";
 
 import z from "zod";
-import { appointmentUpdateFormSchema } from "./schema";
 import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/server";
+import { appointmentFormSchema } from "./schema";
 
 export async function updateAppointment(
-  values: z.infer<typeof appointmentUpdateFormSchema>,
+  values: z.infer<typeof appointmentFormSchema>,
 ): Promise<Tables<"appointment"> | null> {
   const supabase = await createClient();
 

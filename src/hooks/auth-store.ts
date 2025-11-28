@@ -19,7 +19,7 @@ export const useUserStore = create<User>()(
       id: "",
       userRole: "",
       userName: "",
-      emotionalStatus: "tired", // remove this in production
+      emotionalStatus: "tired", 
       setId: (newId: string) => set({ id: newId }),
       setUserRole: (newUserRole: roles | "") => set({ userRole: newUserRole }),
       setUserName: (newUserName: string) => set({ userName: newUserName }),

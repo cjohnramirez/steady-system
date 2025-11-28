@@ -14,7 +14,18 @@ export async function fetchCounselor(
     .from("counselor_with_details")
     .select("*")
     .eq("id", id)
-    .single(); 
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data || null;
+}
+
+export async function fetchEmotionalStatus(): Promise<
+  Tables<"emotional_status">[] | null
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.from("emotional_status").select("*");
 
   if (error) throw new Error(error.message);
   return data || null;
@@ -25,12 +36,16 @@ export async function updateStudentProfile(
 ): Promise<Tables<"student"> | null> {
   const supabase = await createClient();
 
+  const { college_id, ...rest } = values;
+
   const { data, error } = await supabase
     .from("student")
-    .update(values)
+    .update(rest)
     .eq("user_id", values.id)
     .select("*")
-    .single(); 
+    .maybeSingle();
+
+    console.log(data)
 
   if (error) throw new Error(error.message);
   return data || null;

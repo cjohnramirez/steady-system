@@ -9,7 +9,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter, useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateStudentProfile } from "@/app/admin/accounts/@modal/actions";
 import { toast } from "sonner";
@@ -31,7 +30,11 @@ interface StudentModalProps {
   id: string;
 }
 
-export default function StudentProfileModal({ open, setOpen, id }: StudentModalProps) {
+export default function StudentProfileModal({
+  open,
+  setOpen,
+  id,
+}: StudentModalProps) {
   const queryClient = useQueryClient();
   const [college, setCollege] = useState("");
 
@@ -39,7 +42,6 @@ export default function StudentProfileModal({ open, setOpen, id }: StudentModalP
     queryKey: ["student-user"],
     queryFn: () => fetchStudent(id),
   });
-  
 
   const updateMutation = useMutation({
     mutationFn: updateStudentProfile,
@@ -65,20 +67,27 @@ export default function StudentProfileModal({ open, setOpen, id }: StudentModalP
       email: student?.email || "",
       year_level: String(student?.year_level || ""),
       id: String(student?.id),
+      phone: student?.phone ? String(student.phone) : "",
+      emotional_status_id: student?.emotional_status_id || "",
     },
     validators: {
       onChange: studentUpdateFormSchema.extend({
         college_id: z.uuid({ message: "College is required" }),
+        university_id: z
+          .string()
+          .min(1, { message: "University ID is required" }),
+        year_level: z.string().min(1, { message: "Year level is required" }),
       }),
     },
-    onSubmit: ({ value }) => {
-      const { college_id, ...rest } = value;
-      console.log(rest)
+    onSubmit: async ({ value }) => {
       updateMutation.mutate({
-        ...rest,
+        ...value,
         id: student?.id || "",
         university_id: Number(value.university_id),
         year_level: Number(value.year_level),
+        phone: value.phone,
+        college_id: value.college_id,
+        emotional_status_id: value.emotional_status_id,
       });
     },
   });
@@ -147,28 +156,42 @@ export default function StudentProfileModal({ open, setOpen, id }: StudentModalP
               )}
             </form.Field>
           </div>
-          <div className="h-full w-full">
-            <form.Field name="college_id">
-              {(field) => (
-                <CollegeDropdown
-                  field={field}
-                  setCollege={setCollege}
-                  enableDescription={false}
-                />
-              )}
-            </form.Field>
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <div className="h-full w-full">
+              <form.Field name="college_id">
+                {(field) => (
+                  <CollegeDropdown
+                    field={field}
+                    setCollege={setCollege}
+                    enableDescription={false}
+                  />
+                )}
+              </form.Field>
+            </div>
+            <div className="h-full w-full pb-4">
+              <form.Field name="department_id">
+                {(field) => (
+                  <DepartmentDropdown
+                    field={field}
+                    college={college}
+                    enableDescription={false}
+                  />
+                )}
+              </form.Field>
+            </div>
+            <div className="h-full w-full pb-4">
+              <form.Field name="phone">
+                {(field) => (
+                  <FormInputField
+                    label="Phone Number"
+                    placeholder="Enter a valid phone number"
+                    field={field}
+                  />
+                )}
+              </form.Field>
+            </div>
           </div>
-          <div className="h-full w-full pb-4">
-            <form.Field name="department_id">
-              {(field) => (
-                <DepartmentDropdown
-                  field={field}
-                  college={college}
-                  enableDescription={false}
-                />
-              )}
-            </form.Field>
-          </div>
+
           <div className="h-full w-full">
             <form.Field name="university_id">
               {(field) => (
@@ -207,13 +230,13 @@ export default function StudentProfileModal({ open, setOpen, id }: StudentModalP
           </Button>
           <DialogClose asChild>
             <Button
-            variant="outline"
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

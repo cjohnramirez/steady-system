@@ -87,7 +87,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
 
       const availabilityArray = row.getValue("availability") ?? "";
 
-      const isActive = originalRow.is_not_available;
+      const isActive = originalRow.is_active;
 
       const status =
         isActive === true

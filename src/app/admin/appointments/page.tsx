@@ -13,7 +13,7 @@ type TabName = "all" | "pending" | "approved" | "completed" | "cancelled";
 
 export default function AppointmentPage() {
   const supabase = createClient();
-  
+
   const [activeTab, setActiveTab] = useState<TabName>("all");
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({
@@ -22,7 +22,13 @@ export default function AppointmentPage() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["appointments", activeTab, pagination.pageIndex, pagination.pageSize, search],
+    queryKey: [
+      "appointments",
+      activeTab,
+      pagination.pageIndex,
+      pagination.pageSize,
+      search,
+    ],
     queryFn: () =>
       fetchAppointments(supabase, {
         page: pagination.pageIndex,
@@ -36,7 +42,13 @@ export default function AppointmentPage() {
   const appointmentData = data?.data || [];
   const totalCount = data?.count || 0;
 
-  const tabsList: TabName[] = ["all", "pending", "approved", "completed", "cancelled"];
+  const tabsList: TabName[] = [
+    "all",
+    "pending",
+    "approved",
+    "completed",
+    "cancelled",
+  ];
 
   return (
     <div>
@@ -49,15 +61,15 @@ export default function AppointmentPage() {
         pagination={pagination}
         onPaginationChange={setPagination}
         onSearchChange={(val) => {
-            setSearch(val);
-            setPagination(p => ({ ...p, pageIndex: 0 })); 
+          setSearch(val);
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
         }}
         toolbarExtra={
           <Tabs
             value={activeTab}
             onValueChange={(v) => {
               setActiveTab(v as TabName);
-              setPagination(p => ({ ...p, pageIndex: 0 }));
+              setPagination((p) => ({ ...p, pageIndex: 0 }));
             }}
           >
             <TabsList>

@@ -2,19 +2,20 @@
 
 import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
 import { Button } from "@/components/ui/button";
-import { useUserStore } from "@/lib/stores/auth-store";
+import { useUserStore } from "@/hooks/auth-store";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpDown, ArrowUpRight, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useState } from "react";
 import StudentProfileModal from "./profile-modal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfileSection() {
   const getStudentID = useUserStore.getState().id;
   const [open, setOpen] = useState(false);
 
-  const { data: studentData } = useQuery({
+  const { data: studentData, isLoading } = useQuery({
     queryKey: ["student-user"],
     queryFn: () => fetchStudent(getStudentID),
   });
@@ -96,21 +97,32 @@ export default function ProfileSection() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            {[
-              { label: "Username", value: studentData?.username },
-              { label: "First Name", value: studentData?.first_name },
-              { label: "Last Name", value: studentData?.last_name },
-              { label: "Email", value: studentData?.email },
-              { label: "College", value: studentData?.college },
-              { label: "Department", value: studentData?.department },
-              { label: "Year Level", value: studentData?.year_level },
-              { label: "University ID", value: studentData?.university_id },
-            ].map((item) => (
-              <div key={item.label} className="rounded-xl border-1 px-4 py-2">
-                <p className="font-medium">{item.label}</p>
-                <p>{item.value}</p>
-              </div>
-            ))}
+            {isLoading ? (
+              <>
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="rounded-xl border-1 px-4 py-2 space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                ))}
+              </>
+            ) : (
+              [
+                { label: "Username", value: studentData?.username },
+                { label: "First Name", value: studentData?.first_name },
+                { label: "Last Name", value: studentData?.last_name },
+                { label: "Email", value: studentData?.email },
+                { label: "College", value: studentData?.college_name },
+                { label: "Department", value: studentData?.department },
+                { label: "Year Level", value: studentData?.year_level },
+                { label: "University ID", value: studentData?.university_id },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl border-1 px-4 py-2">
+                  <p className="font-medium">{item.label}</p>
+                  <p>{item.value}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

@@ -26,7 +26,7 @@ import { Eye, EyeClosed } from "lucide-react";
 import { roles } from "@/types/main";
 import LoginFormAction from "../actions";
 import { FormInputField } from "@/components/form-input-field";
-import { useUserStore } from "@/lib/stores/auth-store";
+import { useUserStore } from "@/hooks/auth-store";
 
 const formSchema = z.object({
   email: z.email({ error: "Invalid email" }),
@@ -73,7 +73,6 @@ export default function LoginForm({ role }: { role: roles }) {
             .getState()
             .setEmotionalStatus(res.data?.emotionalStatus ?? "");
           useUserStore.getState().setId(res.data?.id ?? "");
-          console.log(res.data);
         }
 
         router.push("/");

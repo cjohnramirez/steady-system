@@ -14,8 +14,6 @@ import { useParams, useRouter } from "next/navigation";
 import { fetchAppointment, fetchStudent, updateAppointment } from "../actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
-import { appointmentUpdateFormSchema } from "../schema";
-import { userFormSchema } from "@/app/auth/signup/schema";
 import { FormInputField } from "@/components/form-input-field";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import {
@@ -32,6 +30,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { appointmentFormSchema, appointmentInsertFormSchema } from "../schema";
 
 export default function AppointmentModal({ id }: { id?: string }) {
   const queryClient = useQueryClient();
@@ -77,17 +76,16 @@ export default function AppointmentModal({ id }: { id?: string }) {
   const form = useForm({
     defaultValues: {
       id: appointment.id || "",
-      student_university_id: String(appointment.student_university_id) || "",
+      university_id: appointment.student_university_id || "",
       counselor_id: appointment.counselor_id || "",
       scheduled_at: appointment.scheduled_at || "",
       status: appointment.status || "",
       notes: appointment.notes || "",
       student_id: appointment.student_id || "",
+      reason: ""
     },
     validators: {
-      onChange: appointmentUpdateFormSchema.extend({
-        student_university_id: userFormSchema.shape.university_id,
-      }),
+      onChange: appointmentFormSchema
     },
     onSubmit: ({ value }) => {
       handleFetchStudent();
@@ -97,10 +95,10 @@ export default function AppointmentModal({ id }: { id?: string }) {
 
   const handleFetchStudent = async () => {
     setStudentLoading(true);
-    if (appointment && appointment.student_university_id) {
+    if (appointment && appointment.university_id) {
       try {
         const data = await fetchStudent(
-          form.getFieldValue("student_university_id"),
+          form.getFieldValue("university_id"),
         );
 
         setSearchFirstName(data?.first_name ?? "");
@@ -138,11 +136,11 @@ export default function AppointmentModal({ id }: { id?: string }) {
             form.handleSubmit();
           }}
         >
-          <form.Field name="student_university_id">
+          <form.Field name="university_id">
             {(field) => (
               <FormInputField
-                label="Student University ID"
-                placeholder="Enter student university ID"
+                label="University ID"
+                placeholder="Enter university ID"
                 field={field}
               />
             )}

@@ -71,6 +71,7 @@ export default async function SignUpFormAction(
       year_level: Number(values.year_level),
       university_id: Number(values.university_id),
       user_id: signUpData.user.id,
+      phone: String(values.phone)
     });
 
   if (updateStudentError) {

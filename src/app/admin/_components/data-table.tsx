@@ -73,7 +73,7 @@ export function DataTable<TData, TValue>({
       isLoading
         ? columns.map((column) => ({
             ...column,
-            cell: () => <Skeleton className="rounded-md m-2 h-6 w-full p-2" />,
+            cell: () => <Skeleton className="rounded-md m-1 h-4 w-full p-2" />,
           }))
         : columns,
     [isLoading, columns]

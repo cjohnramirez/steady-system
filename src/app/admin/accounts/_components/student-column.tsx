@@ -75,12 +75,12 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
     },
   },
   {
-    accessorKey: "college",
+    accessorKey: "college_name",
     header: "College",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college")}
+          {row.getValue("college_name")}
         </div>
       );
     },

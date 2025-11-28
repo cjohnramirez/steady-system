@@ -10,8 +10,7 @@ import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
-import AnnouncementTile from "./announcement-tile";
-import { useUserStore } from "@/lib/stores/auth-store";
+import { useUserStore } from "@/hooks/auth-store";
 import ArticleTile from "./article-tile";
 import Link from "next/link";
 
@@ -42,8 +41,6 @@ export default function ArticleSection() {
         userEmotionalStatus,
       ),
   });
-
-  console.log(articles)
 
   const list: Tables<"article">[] = articles?.data || [];
   const count = articles?.count;

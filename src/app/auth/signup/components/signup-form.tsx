@@ -1,15 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  FieldGroup,
-} from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import SignUpFormAction from "../actions"; 
+import SignUpFormAction from "../actions";
 import { studentSignUpFormSchema } from "../schema";
 import { FormInputField } from "@/components/form-input-field";
 import CollegeDropdown from "./college-dropdown";
@@ -36,19 +34,21 @@ export default function SignUpForm() {
       password: "",
       university_id: "",
       username: "",
+      phone: "",
+      emotional_status_id: "",
     },
     validators: {
       onChange: studentSignUpFormSchema,
     },
     onSubmit: async (form) => {
       setIsLoading(true);
-
       try {
-
         const res = await SignUpFormAction({
           ...form.value,
           university_id: Number(form.value.university_id),
           year_level: Number(form.value.year_level),
+          phone: form.value.phone,
+          emotional_status_id: form.value.emotional_status_id,
         });
 
         if (res?.error) {
@@ -172,11 +172,11 @@ export default function SignUpForm() {
           )}
         </Button>
         <div className="flex justify-center gap-1">
-            <p>Already have an account?</p>
-            <Link href="/auth/login/student" className="underline">
-              Login
-            </Link>
-          </div>
+          <p>Already have an account?</p>
+          <Link href="/auth/login/student" className="underline">
+            Login
+          </Link>
+        </div>
       </form>
     </>
   );

@@ -36,8 +36,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (request.nextUrl.pathname === "/"){
-    return supabaseResponse
+  if (request.nextUrl.pathname === "/") {
+    return supabaseResponse;
   }
 
   if (!user) {
@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/auth/login") ||
       request.nextUrl.pathname.startsWith("/auth") ||
       request.nextUrl.pathname.startsWith("/error") ||
-      request.nextUrl.pathname.startsWith("/home") || 
+      request.nextUrl.pathname.startsWith("/home") ||
       request.nextUrl.pathname.startsWith("/misc") ||
       request.nextUrl.pathname.startsWith("/portal")
     ) {
@@ -107,18 +107,20 @@ export async function updateSession(request: NextRequest) {
       url.pathname = "/auth/login/student";
       return NextResponse.redirect(url);
     }
+
+    if (
+      userRole !== "counselor" &&
+      request.nextUrl.pathname.startsWith("/counselor")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login/counselor";
+      return NextResponse.redirect(url);
+    }
+
     if (userRole !== "admin" && request.nextUrl.pathname.startsWith("/admin")) {
-
-      if (
-        userRole !== "counselor" &&
-        request.nextUrl.pathname.startsWith("/counselor")
-      ) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/auth/login/counselor";
-        return NextResponse.redirect(url);
-      }
-
-      return supabaseResponse;
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login/admin";
+      return NextResponse.redirect(url);
     }
 
     return supabaseResponse;
