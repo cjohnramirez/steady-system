@@ -6,7 +6,7 @@ export async function fetchArticles(supabase: SupabaseClient) {
     .select(`*`)
     .range(0, 3);
 
-  if (error) throw error;
+  if (error) throw new Error("Error fetching articles: ", error);
   return data || [];
 }
 
@@ -16,7 +16,7 @@ export async function fetchPlaylist(supabase: SupabaseClient) {
     .select(`*`)
     .range(0, 3);
 
-  if (error) throw error;
+  if (error) throw new Error("Error fetching playlists: ", error);
   return data || [];
 }
 
@@ -26,6 +26,6 @@ export async function fetchAnnouncements(supabase: SupabaseClient) {
     .select(`*`)
     .range(0, 3);
 
-  if (error) throw error;
+  if (error) throw new Error("Error fetching announcements: ", error);
   return data || [];
 }

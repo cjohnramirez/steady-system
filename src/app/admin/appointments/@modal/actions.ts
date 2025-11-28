@@ -29,7 +29,7 @@ export async function fetchStudent(
   const { data, error } = await supabase
     .from("student_with_details")
     .select("*")
-    .eq("id", id)
+    .eq("user_id", id)
     .single(); 
 
   if (error) throw new Error(error.message);

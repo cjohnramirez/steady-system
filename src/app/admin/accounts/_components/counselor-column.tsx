@@ -69,12 +69,12 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     },
   },
   {
-    accessorKey: "college",
-    header: "College",
+    accessorKey: "username",
+    header: "Username",
     cell: ({ row }) => {
       return (
         <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college")}
+          {row.getValue("username")}
         </div>
       );
     },
@@ -103,7 +103,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
 
       return (
         <Badge className={statusColor}>
-          {status === true ? "Available" : "Not Available"}
+          {status === true ? "Available" : "Uncertain"}
         </Badge>
       );
     },

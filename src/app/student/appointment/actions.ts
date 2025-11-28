@@ -1,12 +1,37 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AppointmentCounselor } from "./page";
-import z from "zod";
-import { appointmentFormSchema } from "@/app/admin/appointments/@modal/schema";
+import { Tables } from "@/types/supabase";
 
 export async function insertAppointment(
   supabase: SupabaseClient,
-  values: z.infer<typeof appointmentFormSchema>,
-) {}
+  userId: string,
+  payload: {
+    counselor_id: string;
+    scheduled_at: string;
+    reason: string;
+    notes: string;
+  },
+) {
+  const { data: student, error: studentError } = await supabase
+    .from("student_with_details")
+    .select("*")
+    .eq("user_id", userId)
+    .single();
+
+  if (studentError) throw new Error(String(studentError));
+
+  const { error } = await supabase.from("appointment").insert({
+    id: crypto.randomUUID(),
+    student_id: student.id,
+    counselor_id: payload.counselor_id,
+    scheduled_at: payload.scheduled_at,
+    reason: payload.reason,
+    notes: payload.notes,
+    status: "pending",
+  });
+
+  if (error) throw new Error(error.message);
+}
 
 export async function fetchAppointmentCounselor(
   studentId: string,
@@ -15,7 +40,7 @@ export async function fetchAppointmentCounselor(
   const { data: student, error: studentError } = await supabase
     .from("student_with_details")
     .select("*")
-    .eq("id", studentId)
+    .eq("user_id", studentId)
     .single();
 
   if (studentError) throw new Error(String(studentError));
@@ -23,7 +48,7 @@ export async function fetchAppointmentCounselor(
   const { data: counselor, error: counselorError } = await supabase
     .from("counselor_with_details")
     .select("*")
-    .eq("id", student.counselor_id)
+    .eq("department_id", student.department_id)
     .single();
 
   if (counselorError) throw new Error(String(counselorError));

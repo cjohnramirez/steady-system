@@ -1,11 +1,21 @@
+"use client";
+
+import { useUserStore } from "@/hooks/auth-store";
 import ProfileSection from "./_components/profile-section";
 import StudentAppointmentSection from "./_components/student-appointment-section";
+import { useEffect, useState } from "react";
 
 export default function StudentPage() {
+  const [username, setUsername] = useState<string | undefined>("");
+
+  useEffect(() => {
+    setUsername(useUserStore.getState().userName);
+  }, []);
+
   return (
     <div className="space-y-6 p-10">
       <div className="space-y-2">
-        <p className="text-4xl">Welcome, student!</p>
+        <p className="text-4xl">Welcome, {username ?? ""}</p>
         <p>
           This is your personalized dashboard, with your profile and
           appointments

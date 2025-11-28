@@ -141,7 +141,7 @@ export type Database = {
       appointment: {
         Row: {
           counselor_id: string | null
-          created_at: string
+          created_at: string | null
           id: string
           notes: string
           reason: string
@@ -151,7 +151,7 @@ export type Database = {
         }
         Insert: {
           counselor_id?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           notes?: string
           reason?: string
@@ -161,7 +161,7 @@ export type Database = {
         }
         Update: {
           counselor_id?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           notes?: string
           reason?: string
@@ -605,6 +605,13 @@ export type Database = {
             foreignKeyName: "student_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
+            referencedRelation: "counselor_with_details"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "student_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
             referencedRelation: "department"
             referencedColumns: ["id"]
           },
@@ -671,6 +678,7 @@ export type Database = {
       counselor_with_details: {
         Row: {
           day_of_week: boolean[] | null
+          department_id: string | null
           department_name: string | null
           email: string | null
           end_time: string | null

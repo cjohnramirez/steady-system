@@ -11,7 +11,7 @@ import { studentAppointmentColumns } from "./student-appointment-column";
 
 export default function StudentAppointmentSection() {
   const supabase = createClient();
-  const getStudentID = useUserStore.getState().id;
+  const getUserID = useUserStore.getState().id;
 
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({
@@ -33,7 +33,7 @@ export default function StudentAppointmentSection() {
           pageSize: pagination.pageSize,
           search: search,
           supabase,
-          id: getStudentID,
+          id: getUserID,
         }),
     });
 
@@ -46,7 +46,6 @@ export default function StudentAppointmentSection() {
       isLoading={isStudentAppointmentLoading}
       columns={studentAppointmentColumns}
       data={studentAppointmentData}
-      rowUrl={rowUrl}
       rowCount={rowCount}
       pagination={pagination}
       onPaginationChange={setPagination}
@@ -57,7 +56,10 @@ export default function StudentAppointmentSection() {
       toolbarExtra={
         <div className="h-full items-center">
           <p className="font-medium">Appointment</p>
-          <p>You can edit some details about your appointments if you wished to do so</p>
+          <p>
+            You can edit some details about your appointments if you wished to
+            do so
+          </p>
         </div>
       }
     />

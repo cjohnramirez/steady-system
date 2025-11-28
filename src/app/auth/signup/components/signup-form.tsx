@@ -15,13 +15,16 @@ import DepartmentDropdown from "./department-dropdown";
 import FormPasswordField from "@/components/form-password-field";
 import FormYearLevelField from "@/components/form-year-level-field";
 import Link from "next/link";
+import EmotionalStatusDropdown from "./emotional-status-dropdown";
 
 export default function SignUpForm() {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [college, setCollege] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [college, setCollege] = useState("");
+  const [emotionalStatus, setEmotionalStatus] = useState("");
 
   const form = useForm({
     defaultValues: {
@@ -156,6 +159,27 @@ export default function SignUpForm() {
                   label="University ID"
                   placeholder="Enter your university ID"
                   description="Enter a valid university ID (student)"
+                />
+              )}
+            </form.Field>
+          </div>
+          <div  className="flex gap-6">
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <EmotionalStatusDropdown
+                  field={field}
+                  emotionalStatus={emotionalStatus}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
+            <form.Field name="phone">
+              {(field) => (
+                <FormInputField
+                  field={field}
+                  label="Phone"
+                  placeholder="Enter your phone"
+                  description="Enter a valid phone number"
                 />
               )}
             </form.Field>

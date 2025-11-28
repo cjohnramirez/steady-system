@@ -14,7 +14,7 @@ export async function fetchDepartment(college: string) {
       .select(`*`)
       .eq("college_id", college);
 
-    if (error) throw error;
+    if (error) throw new Error("Error fetching department: ", error);
     return data || [];
   }
   return [];
@@ -25,7 +25,7 @@ export async function fetchCollege() {
 
   const { data, error } = await supabase.from("college").select(`*`);
 
-  if (error) throw error;
+  if (error) throw new Error("Error fetching college: ", error);
   return data || [];
 }
 

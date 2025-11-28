@@ -28,7 +28,7 @@ import {
   getCoreRowModel,
   useReactTable,
   VisibilityState,
-  PaginationState, 
+  PaginationState,
   OnChangeFn,
 } from "@tanstack/react-table";
 import { Download, SearchIcon, Sidebar } from "lucide-react";
@@ -40,7 +40,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   toolbarExtra?: React.ReactNode;
   isLoading: boolean;
-  rowUrl: (id: string) => string;
+  rowUrl?: (id: string) => string;
   rowCount?: number;
   pagination?: PaginationState;
   onPaginationChange?: OnChangeFn<PaginationState>;
@@ -60,12 +60,12 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const tableData = useMemo(
     () => (isLoading ? Array(pagination?.pageSize || 10).fill({}) : data),
-    [isLoading, data, pagination?.pageSize]
+    [isLoading, data, pagination?.pageSize],
   );
 
   const tableColumns = useMemo(
@@ -73,10 +73,10 @@ export function DataTable<TData, TValue>({
       isLoading
         ? columns.map((column) => ({
             ...column,
-            cell: () => <Skeleton className="rounded-md m-1 h-4 w-full p-2" />,
+            cell: () => <Skeleton className="m-1 h-4 w-full rounded-md p-2" />,
           }))
         : columns,
-    [isLoading, columns]
+    [isLoading, columns],
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -84,25 +84,25 @@ export function DataTable<TData, TValue>({
     data: tableData,
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
-    manualPagination: true, 
-    rowCount: rowCount ?? 0, 
+    manualPagination: true,
+    rowCount: rowCount ?? 0,
     state: {
       columnVisibility,
-      pagination, 
+      pagination,
     },
-    onPaginationChange: onPaginationChange, 
+    onPaginationChange: onPaginationChange,
     onColumnVisibilityChange: setColumnVisibility,
   });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    if(onSearchChange) onSearchChange(value);
+    if (onSearchChange) onSearchChange(value);
   };
 
   return (
     <div>
-      <div className="flex justify-between gap-4 mb-4">
+      <div className="mb-4 flex justify-between gap-4">
         <div>{toolbarExtra}</div>
         <div className="flex gap-4">
           <InputGroup className="bg-white">
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -180,13 +180,15 @@ export function DataTable<TData, TValue>({
                   onMouseEnter={() => {
                     if (rowUrl) router.prefetch(rowUrl(row.original.id));
                   }}
-                  className="cursor-pointer hover:bg-gray-50"
+                  className={
+                    rowUrl ? `cursor-pointer` : `` + `hover:bg-gray-50`
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-3">
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -205,7 +207,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table}  />
+      <DataTablePagination table={table} />
     </div>
   );
 }

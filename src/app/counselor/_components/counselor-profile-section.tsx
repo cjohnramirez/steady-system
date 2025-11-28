@@ -1,22 +1,14 @@
 "use client";
 
-import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
 import { Button } from "@/components/ui/button";
-import { useUserStore } from "@/hooks/auth-store";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, ArrowUpRight, Edit2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { toast } from "sonner";
-import Link from "next/link";
-import { useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/types/supabase";
 
 export default function CounselorProfileSection({
   counselorProfile,
-  isLoading,
 }: {
-  counselorProfile: Tables<"counselor_with_details">;
-  isLoading: boolean;
+  counselorProfile: Tables<"counselor_with_details"> | undefined;
 }) {
   return (
     <div className="col-span-2 rounded-2xl border border-gray-200 bg-white p-8">

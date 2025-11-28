@@ -1,5 +1,6 @@
 import { Mail } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 type TeamMember = {
   id: number;
@@ -80,10 +81,10 @@ export default function MeetTheDevelopers() {
                 <p className="font-medium">{member.name}</p>
                 <p>{member.role}</p>
               </div>
-              <div className="border-1 flex rounded-2xl items-center gap-4 px-4 py-2">
+              <a className="border-1 flex rounded-2xl items-center gap-4 px-4 py-2" href={`mailto:${member.email}`}>
                 <Mail strokeWidth={1.25}/>
                 <p>{member.email}</p>
-              </div>
+              </a>
             </div>
           </div>
         ))}

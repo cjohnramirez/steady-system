@@ -10,31 +10,38 @@ import Link from "next/link";
 import { useState } from "react";
 import StudentProfileModal from "./profile-modal";
 import { Skeleton } from "@/components/ui/skeleton";
+import EmotionalStatusDropdown from "./emotional-status-dropdown";
 
 export default function ProfileSection() {
-  const getStudentID = useUserStore.getState().id;
+  const userID = useUserStore.getState().id;
   const [open, setOpen] = useState(false);
 
   const { data: studentData, isLoading } = useQuery({
     queryKey: ["student-user"],
-    queryFn: () => fetchStudent(getStudentID),
+    queryFn: () => fetchStudent(userID),
   });
+
+  const [emotionalStatus, setEmotionalStatus] = useState("");
+  console.log(userID)
 
   return (
     <>
       {open && (
-        <StudentProfileModal open={open} setOpen={setOpen} id={getStudentID} />
+        <StudentProfileModal open={open} setOpen={setOpen} id={userID} />
       )}
 
       <div className="grid grid-cols-2 grid-rows-3 gap-4 rounded-2xl border border-gray-200 bg-white p-5">
         <div className="col-span-2 m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5">
-          <div className="text-5xl">😊</div>
-          <div className="space-y-2">
-            <p>You are Happy!</p>
-            <Button variant="outline">
-              <ArrowUpDown strokeWidth={1.25} />
-              <p>Change Mood</p>
-            </Button>
+          <div className="flex space-y-2">
+            <EmotionalStatusDropdown
+              setEmotionalStatus={setEmotionalStatus}
+              emotionalStatus={
+                emotionalStatus !== ""
+                  ? emotionalStatus
+                  : (studentData?.emotional_status_id ?? "")
+              }
+              user_id={userID}
+            />
           </div>
         </div>
         <Link
@@ -100,7 +107,10 @@ export default function ProfileSection() {
             {isLoading ? (
               <>
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="rounded-xl border-1 px-4 py-2 space-y-2">
+                  <div
+                    key={i}
+                    className="space-y-2 rounded-xl border-1 px-4 py-2"
+                  >
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-4 w-32" />
                   </div>

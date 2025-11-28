@@ -19,7 +19,9 @@ export async function updateOrganizationInfo(
   values: z.infer<typeof organizationInfoFormSchema>,
 ): Promise<Tables<"organization"> | null> {
   const supabase = await createClient();
+
   const { data: user } = await supabase.auth.getUser();
+
   if (!user?.user) throw new Error("Unauthorized");
 
   const orgInfo = await fetchOrganizationInfo();
@@ -33,7 +35,7 @@ export async function updateOrganizationInfo(
     .update(values)
     .eq("id", orgInfo?.id ?? "");
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error("Error updating organization data: ", error);
   return data?.[0] ?? null;
 }
 
@@ -42,29 +44,9 @@ export async function fetchOrganizationContact(): Promise<
 > {
   const supabase = await createClient();
 
-  const { data } = await supabase.from("organization_contact").select("*");
+  const { data, error } = await supabase.from("organization_contact").select("*");
+
+   if (error) throw new Error("Error fetching organization data: ", error);
 
   return data ?? null;
-}
-
-export async function updateOrganizationContact(
-  values: Partial<Tables<"organization_contact">>[],
-): Promise<Tables<"organization_contact"> | null> {
-  const supabase = await createClient();
-  const { data: user } = await supabase.auth.getUser();
-  if (!user?.user) throw new Error("Unauthorized");
-
-  await Promise.all(
-    values.map(async (value) => {
-      const { data, error } = await supabase
-        .from("organization_contact")
-        .update(value)
-        .select();
-
-      if (error) throw new Error(error.message);
-      return data?.[0] ?? null;
-    }),
-  );
-
-  return null;
 }

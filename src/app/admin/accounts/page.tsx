@@ -70,8 +70,6 @@ export default function AccountsPage() {
 
   const active = tabs[activeTab];
 
-  console.log(active.data)
-
   return (
     <>
       <DataTable

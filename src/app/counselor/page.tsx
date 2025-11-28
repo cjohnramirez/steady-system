@@ -15,7 +15,7 @@ import {
 
 export default function CounselorPage() {
   const supabase = createClient();
-  const { id: counselorID, userName: counselorUsername } =
+  const { id: userID, userName: counselorUsername } =
     useUserStore.getState();
 
   const [search, setSearch] = useState("");
@@ -24,7 +24,7 @@ export default function CounselorPage() {
 
   const { data: counts } = useQuery({
     queryKey: ["count-counselor-appointments"],
-    queryFn: () => countCounselorAppointments(supabase, counselorID),
+    queryFn: () => countCounselorAppointments(supabase, userID),
   });
 
   const { data: appointments, isLoading: isLoadingAppointments } = useQuery({
@@ -33,7 +33,7 @@ export default function CounselorPage() {
       fetchCounselorAppointments(
         pagination.pageIndex,
         pagination.pageSize,
-        counselorID,
+        userID,
         search,
         supabase,
         status,
@@ -43,10 +43,8 @@ export default function CounselorPage() {
   const { data: counselorProfile, isLoading: isLoadingCounselorProfile } =
     useQuery({  
       queryKey: ["counselor-profile"],
-      queryFn: () => fetchCounselorProfile({ id: counselorID, supabase }),
+      queryFn: () => fetchCounselorProfile({ id: userID, supabase }),
     });
-
-  if (!counselorProfile) return;
 
   return (
     <div className="space-y-6 p-10">
@@ -66,7 +64,6 @@ export default function CounselorPage() {
           />
           <CounselorProfileSection
             counselorProfile={counselorProfile}
-            isLoading={isLoadingCounselorProfile}
           />
         </div>
         <CounselorAppointmentSection

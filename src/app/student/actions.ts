@@ -18,10 +18,18 @@ export async function fetchStudentAppointment({
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
+  const { data: studentData, error: studentError } = await supabase
+    .from("student")
+    .select("*")
+    .eq("user_id", id)
+    .single();
+
+  if (studentError) throw studentError;
+
   let query = supabase
     .from("appointment_with_details")
     .select("*", { count: "exact" })
-    .eq("student_id", id);
+    .eq("student_id", studentData.id);
 
   if (search) {
     query = query.ilike("last_counselor_name", `%${search}%`);

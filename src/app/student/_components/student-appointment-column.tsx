@@ -18,29 +18,6 @@ export const studentAppointmentColumns: ColumnDef<
   Tables<"appointment_with_details">
 >[] = [
   {
-    accessorKey: "last_student_name",
-    header: ({ column }) => {
-      return (
-        <button
-          onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
-          className="flex items-center gap-2"
-        >
-          Student Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </button>
-      );
-    },
-    cell: ({ row }) => {
-      const originalRow = row.original;
-
-      return (
-        <p>
-          {originalRow.first_student_name}, {originalRow.last_student_name}
-        </p>
-      );
-    },
-  },
-  {
     accessorKey: "counselor_id",
     header: ({ column }) => {
       return (
@@ -79,9 +56,7 @@ export const studentAppointmentColumns: ColumnDef<
       return (
         <div className="flex items-center gap-2">
           <div className={statusColor}></div>
-          <p>
-            {String(status)[0].toUpperCase() + String(status).slice(1)}
-          </p>
+          <p>{String(status)[0].toUpperCase() + String(status).slice(1)}</p>
         </div>
       );
     },
@@ -93,6 +68,20 @@ export const studentAppointmentColumns: ColumnDef<
   {
     accessorKey: "notes",
     header: "Notes",
+    cell: ({ row }) => {
+      const notes = row.getValue("notes");
+      return (
+        <p>
+          {notes && String(notes).trim() !== "" ? (
+            String(notes)
+          ) : (
+            <span className="text-muted-foreground">
+              No notes provided
+            </span>
+          )}
+        </p>
+      );
+    },
   },
   {
     accessorKey: "scheduled_at",
@@ -101,7 +90,67 @@ export const studentAppointmentColumns: ColumnDef<
       const originalRow = row.original;
 
       return (
-        <p>{new Date(String(originalRow.scheduled_at)).toLocaleString()}</p>
+        <p>
+          {originalRow.scheduled_at
+            ? new Date(String(originalRow.scheduled_at)).toLocaleString(
+                "en-US",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                },
+              )
+            : ""}
+        </p>
+      );
+    },
+  },
+  {
+    header: "Actions",
+    cell: ({ row }) => {
+      const originalRow = row.original;
+
+      return (
+        <div className="flex items-center gap-2">
+          {originalRow.status === "pending" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Add your cancel logic here
+                // e.g. call a mutation or show a confirmation dialog
+              }}
+            >
+              Cancel Request
+            </Button>
+          )}
+          {originalRow.status === "approved" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Add your cancel logic here
+                // e.g. call a mutation or show a confirmation dialog
+              }}
+            >
+              Create Another
+            </Button>
+          )}
+          {originalRow.status === "cancelled" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Add your cancel logic here
+                // e.g. call a mutation or show a confirmation dialog
+              }}
+            >
+              Re-request
+            </Button>
+          )}
+        </div>
       );
     },
   },

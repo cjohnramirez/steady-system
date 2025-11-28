@@ -49,21 +49,27 @@ export async function fetchArticlesByEmotion(
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  const { data: statusData, error: statusError } = await supabase
-    .from("emotional_status")
-    .select("id")
-    .eq("name", emotionalStatus.toLowerCase())
-    .maybeSingle();
+  let query;
+  let emotionalStatusId: number | null = null;
 
-  if (statusError) throw statusError;
-  if (!statusData) return { data: [], count: 0 };
+  if (emotionalStatus !== "") {
+    const { data: statusData, error: statusError } = await supabase
+      .from("emotional_status")
+      .select("id")
+      .eq("name", emotionalStatus.toLowerCase())
+      .maybeSingle();
 
-  const emotionalStatusId = statusData.id;
+    if (statusError) throw statusError;
+    if (!statusData) return { data: [], count: 0 };
 
-  let query = supabase
-    .from("article")
-    .select("*", { count: "exact" })
-    .eq("emotional_status_id", emotionalStatusId);
+    emotionalStatusId = statusData.id;
+  }
+
+  query = supabase.from("article").select("*", { count: "exact" });
+
+  if (emotionalStatusId !== null) {
+    query = query.eq("emotional_status_id", emotionalStatusId);
+  }
 
   if (search) {
     query = query.ilike("title", `%${search}%`);
@@ -84,7 +90,7 @@ export async function fetchArticlesByEmotion(
 export async function fetchPlaylistByEmotion(
   supabase: SupabaseClient,
   search: string,
-  emotionalStatus: string
+  emotionalStatus: string,
 ) {
   const { data: statusData, error: statusError } = await supabase
     .from("emotional_status")
@@ -106,8 +112,9 @@ export async function fetchPlaylistByEmotion(
     query = query.ilike("title", `%${search}%`);
   }
 
-  const { data, error, count } = await query
-    .order("title", { ascending: false });
+  const { data, error, count } = await query.order("title", {
+    ascending: false,
+  });
 
   if (error) throw error;
 

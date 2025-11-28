@@ -6,10 +6,12 @@ import DateTimeSection from "./_components/date-time-section";
 import NotesSection from "./_components/notes-section";
 import ReasonSection from "./_components/reason-section";
 import { createClient } from "@/utils/supabase/client";
-import { fetchAppointmentCounselor } from "./actions";
+import { fetchAppointmentCounselor, insertAppointment } from "./actions";
 import { useUserStore } from "@/hooks/auth-store";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export type AppointmentCounselor = {
   departmentName: string;
@@ -25,34 +27,44 @@ export default function AppointmentPage() {
   const [selectReason, setSelectReason] = useState("Academic");
   const [date, setDate] = useState<Date | undefined>();
   const [notes, setNotes] = useState("");
-  const getStudentID = useUserStore.getState().id;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getUserID = useUserStore.getState().id;
 
   const supabase = createClient();
-
-  console.log(date?.toISOString());
 
   const {
     data: appointmentCounselor,
     isLoading: isAppointmentCounselorLoading,
   } = useQuery<AppointmentCounselor>({
     queryKey: ["appointment-counselor"],
-    queryFn: () => fetchAppointmentCounselor(getStudentID, supabase),
+    queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
   });
 
   const appointmentCounselorName = appointmentCounselor?.counselorName ?? "";
   const appointmentDepartmentName = appointmentCounselor?.departmentName ?? "";
 
-  const handleSubmit = (): void => {
-    console.log({
-      student_id: getStudentID,
-      counselor_id: appointmentCounselor?.counselorID,
-      scheduled_at: date?.toISOString(),
-      status: "pending",
-      notes: notes,
-      created_at: new Date(),
-      reason: selectReason
-    });
-  }
+  const mutation = useMutation({
+    mutationFn: async () => {
+      setIsLoading(true);
+      if (!appointmentCounselor || !date) throw new Error("Missing fields");
+
+      return insertAppointment(supabase, getUserID, {
+        counselor_id: appointmentCounselor.counselorID,
+        scheduled_at: date.toISOString(),
+        reason: selectReason,
+        notes: notes,
+      });
+    },
+    onSuccess: () => {
+      toast.success("Appointment added successfully");
+      setIsLoading(false);
+    },
+    onError: () => {
+      toast.error("Failed to add appointment");
+      setIsLoading(false);
+    },
+  });
 
   return (
     <div className="space-y-6 p-10">
@@ -84,7 +96,10 @@ export default function AppointmentPage() {
       </div>
       <div className="flex justify-end space-x-4">
         <Button variant="outline">Cancel</Button>
-        <Button type="submit" onClick={handleSubmit}>Book an Appointment</Button>
+        <Button type="submit" onClick={() => mutation.mutate()}>
+          {isLoading ? <Spinner /> : <></>}
+          Book an Appointment
+        </Button>
       </div>
     </div>
   );

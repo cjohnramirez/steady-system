@@ -61,7 +61,7 @@ export default async function LoginFormAction(
       await supabaseAdmin
         .from("student_with_details")
         .select("*")
-        .eq("id", userData.user!.id)
+        .eq("user_id", userData.user!.id)
         .single();
 
     if (!studentProfileError && studentProfileData) {
@@ -79,7 +79,7 @@ export default async function LoginFormAction(
     return {
       success: "Authentication Successful",
       data: {
-        userName: studentProfileData?.username ?? "",
+        userName: studentProfileData?.username ?? "test",
         emotionalStatus,
         id: userData.user.id,
       },
