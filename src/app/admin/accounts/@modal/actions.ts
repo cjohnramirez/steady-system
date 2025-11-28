@@ -58,8 +58,8 @@ export async function updateStudentProfile(
   const { error } = await supabase
     .from("student")
     .update(rest)
-    .eq("user_id", values.id)
-    .select("*");
+    .eq("id", values.id)
+    .select("*").single();
 
   if (error) throw new Error("Error updating student profile: ", error);
 }
