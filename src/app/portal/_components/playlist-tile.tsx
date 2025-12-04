@@ -59,7 +59,7 @@ export default function PlaylistTile({
               <p>by {playlistData.creator}</p>
             </div>
             <ArrowUpRight
-              className="absolute top-5 right-5 rounded-full border-1 border-gray-200 p-2"
+              className="absolute top-5 right-5 rounded-full border border-gray-200 p-2"
               size={40}
               strokeWidth={1.25}
             />

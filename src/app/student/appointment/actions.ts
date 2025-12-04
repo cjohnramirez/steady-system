@@ -1,5 +1,4 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { AppointmentCounselor } from "./page";
 import { Tables } from "@/types/supabase";
 
 export async function insertAppointment(
@@ -36,7 +35,7 @@ export async function insertAppointment(
 export async function fetchAppointmentCounselor(
   studentId: string,
   supabase: SupabaseClient,
-): Promise<AppointmentCounselor> {
+): Promise<Tables<"counselor_with_details">> {
   const { data: student, error: studentError } = await supabase
     .from("student_with_details")
     .select("*")
@@ -53,13 +52,5 @@ export async function fetchAppointmentCounselor(
 
   if (counselorError) throw new Error(String(counselorError));
 
-  return {
-    departmentName: student.department,
-    counselorName: `${student.counselor_first_name} ${student.counselor_last_name}`,
-    counselorID: counselor.id,
-    dayOfWeek: counselor.day_of_week,
-    startTime: counselor.start_time,
-    endTime: counselor.end_time,
-    isActive: counselor.is_active,
-  };
+  return counselor;
 }

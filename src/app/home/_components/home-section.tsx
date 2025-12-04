@@ -33,10 +33,10 @@ export default function HomeSection() {
             </Button>
           </div>
         </div>
-        <div className="w-1/4 rounded-xl border-1 border-gray-200 bg-white">
+        <div className="w-1/4 rounded-xl border border-gray-200 bg-white">
           <div className="flex items-center gap-4 border-b-1 px-6 py-4">
             <MapPin
-              className="rounded-full border-1 border-gray-200 p-2"
+              className="rounded-full border border-gray-200 p-2"
               size={40}
               strokeWidth={1.25}
             />

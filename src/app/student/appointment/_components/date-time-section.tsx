@@ -6,12 +6,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { AppointmentCounselor } from "../page";
+import { startTransition, useEffect, useState } from "react";
 import { CalendarCheck, Clock, Info } from "lucide-react";
-import { format } from "date-fns";
+import { dateToString, generateTimeSlots } from "@/lib/format";
+import { Tables } from "@/types/supabase";
 
-function getCalendarDisabledDays(counselorData: AppointmentCounselor | null) {
+function getCalendarDisabledDays(
+  counselorData: Tables<"counselor_with_details"> | null,
+) {
   if (!counselorData) return;
 
   return (date: Date): boolean => {
@@ -19,93 +21,91 @@ function getCalendarDisabledDays(counselorData: AppointmentCounselor | null) {
       return true;
     }
     const dayIndex = date.getDay();
-    const isAvailable = counselorData.dayOfWeek[dayIndex];
+    const isAvailable =
+      counselorData && counselorData.day_of_week
+        ? counselorData.day_of_week[dayIndex]
+        : [];
     const isDisabled = !isAvailable;
     return isDisabled;
   };
-}
-
-function generateTimeSlots(startTime: string, endTime: string): string[] {
-  const [startHour, startMinute] = startTime.split(":").map(Number);
-  const [endHour, endMinute] = endTime.split(":").map(Number);
-
-  const start = new Date();
-  start.setHours(startHour, startMinute, 0, 0);
-
-  const end = new Date();
-  end.setHours(endHour, endMinute, 0, 0);
-
-  const slots: string[] = [];
-  while (start < end) {
-    slots.push(format(start, "h:mm a"));
-    start.setMinutes(start.getMinutes() + 30);
-  }
-  return slots;
 }
 
 export default function DateTimeSection({
   counselorData,
   date,
   setDate,
-  isLoading
+  isLoading,
+  isRescheduleModal = false,
+  appointmentData,
 }: {
-  counselorData: AppointmentCounselor | null;
+  counselorData: Tables<"counselor_with_details"> | null;
   date: Date | undefined;
   setDate: (newDate: Date | undefined) => void;
-  isLoading: boolean
+  isLoading: boolean;
+  isRescheduleModal?: boolean;
+  appointmentData?: Tables<"appointment_with_details">;
 }) {
   const [selectedTime, setSelectedTime] = useState<string>("");
 
+  useEffect(() => {
+    if (!appointmentData?.scheduled_at) return;
+
+    startTransition(() => {
+      const scheduledDate = new Date(appointmentData.scheduled_at!);
+      setDate(scheduledDate);
+
+      const timeString = scheduledDate.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      setSelectedTime(timeString);
+    });
+  }, [appointmentData, setDate]);
+
   const timeSlots = counselorData
-    ? generateTimeSlots(counselorData.startTime, counselorData.endTime)
+    ? generateTimeSlots(
+        counselorData.start_time ?? "",
+        counselorData.end_time ?? "",
+      )
     : [];
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
-
-    if (date) {
-      const [h, m] = time.match(/\d+/g)!.map(Number);
-      const isPM = time.includes("PM");
-      const hour = h % 12 + (isPM ? 12 : 0);
-
-      const updatedDate = new Date(date);
-      updatedDate.setHours(hour, m, 0, 0);
-      setDate(updatedDate);
-    }
   };
 
   return (
-    <div className="w-full rounded-2xl border border-gray-200 bg-white p-8">
+    <div
+      className={
+        (isRescheduleModal ? "my-5" : "border border-gray-200 p-8") +
+        " w-full rounded-2xl bg-white"
+      }
+    >
       <p className="font-medium">Select Date and Time</p>
       <div className="mt-5 flex w-full gap-4">
         <Calendar
           mode="single"
-          defaultMonth={date}
+          defaultMonth={date} // This ensures the calendar opens to the correct month
           selected={date}
           onSelect={setDate}
           disabled={getCalendarDisabledDays(counselorData) || isLoading}
-          className="w-1/2 rounded-lg border-1"
+          className="w-1/2 rounded-lg border"
         />
         <div className="flex w-full flex-col space-y-4">
-          <div className="flex items-center gap-4 rounded-xl border-1 p-4">
+          <div className="flex items-center gap-4 rounded-xl border p-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full border p-2">
               <CalendarCheck strokeWidth={1} size={40} />
             </div>
             <div>
               <p className="font-medium">Date</p>
+              {/* Ensure dateToString handles undefined/null gracefully */}
               <p>
-                {date
-                  ? date.toLocaleString(undefined, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "Please select a date"}
+                {date ? dateToString(date.toISOString()) : "No date selected"}
               </p>
             </div>
           </div>
-          <div className="rounded-xl border-1 p-4">
+          <div className="rounded-xl border p-4">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-full border p-2">
                 <Clock strokeWidth={1} size={40} />
@@ -137,9 +137,15 @@ export default function DateTimeSection({
             </div>
             <div>
               <p className="font-medium">Note</p>
-              <p>
-                Availability depends on the counselor and is subject to change
-              </p>
+              {isRescheduleModal ? (
+                <p>
+                  You can change this anytime, and the student will be reminded
+                </p>
+              ) : (
+                <p>
+                  Availability depends on the counselor and is subject to change
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -10,85 +10,64 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { updateStudentProfile } from "@/app/admin/accounts/@modal/actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Edit2 } from "lucide-react";
-import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
-import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown";
-import FormYearLevelField from "@/components/form-year-level-field";
-import { studentUpdateFormSchema } from "@/app/admin/accounts/@modal/schema";
-import z from "zod";
-import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
+import { fetchCounselorProfile, updateCounselorProfile } from "../actions";
+import { createClient } from "@/utils/supabase/client";
+import { counselorUpdateFormSchema } from "../schema";
+import { useUserStore } from "@/hooks/auth-store";
 
-interface StudentModalProps {
+interface CounselorModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  id: string;
+  userID: string;
 }
 
-export default function StudentProfileModal({
+export default function CounselorProfileModal({
   open,
   setOpen,
-  id,
-}: StudentModalProps) {
+  userID,
+}: CounselorModalProps) {
   const queryClient = useQueryClient();
-  const [college, setCollege] = useState("");
+  const supabase = createClient();
 
-  const { data: student } = useQuery({
-    queryKey: ["student-user"],
-    queryFn: () => fetchStudent(id),
+  const { data: counselor } = useQuery({
+    queryKey: ["counselor-profile"],
+    queryFn: () => fetchCounselorProfile(supabase, userID),
   });
 
   const updateMutation = useMutation({
-    mutationFn: updateStudentProfile,
+    mutationFn: updateCounselorProfile,
     onSuccess: async () => {
-      toast.success("Student profile updated successfully!");
+      toast.success("Counselor profile updated successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["student-user"] });
+      queryClient.invalidateQueries({ queryKey: ["counselor-profile"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to update student profile");
+      toast.error(err.message || "Failed to update counselor profile");
     },
   });
 
   const form = useForm({
     defaultValues: {
-      first_name: student?.first_name || "",
-      last_name: student?.last_name || "",
-      username: student?.username || "",
-      college_id: student?.college_id || "",
-      department_id: student?.department_id || "",
-      university_id: String(student?.university_id || ""),
-      email: student?.email || "",
-      year_level: String(student?.year_level || ""),
-      id: String(student?.id),
-      phone: student?.phone ? String(student.phone) : "",
-      emotional_status_id: student?.emotional_status_id || "",
+      first_name: counselor?.first_name || "",
+      last_name: counselor?.last_name || "",
+      username: counselor?.username || "",
+      university_id: String(counselor?.university_id) || "",
+      email: counselor?.email || "",
+      phone: counselor?.phone ? String(counselor.phone) : "",
+      id: userID 
     },
     validators: {
-      onChange: studentUpdateFormSchema.extend({
-        college_id: z.uuid({ message: "College is required" }),
-        university_id: z
-          .string()
-          .min(1, { message: "University ID is required" }),
-        year_level: z.string().min(1, { message: "Year level is required" }),
-      }),
+      onChange: counselorUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate({
-        ...value,
-        id: student?.id || "",
-        university_id: Number(value.university_id),
-        year_level: Number(value.year_level),
-        phone: value.phone,
-        college_id: value.college_id,
-        emotional_status_id: value.emotional_status_id,
-      });
+      updateMutation.mutate(value)
+      useUserStore.setState({ userName: value.username })
     },
   });
 
@@ -156,42 +135,6 @@ export default function StudentProfileModal({
               )}
             </form.Field>
           </div>
-          <div className="col-span-2 flex h-full w-full gap-2">
-            <div className="h-full w-full">
-              <form.Field name="college_id">
-                {(field) => (
-                  <CollegeDropdown
-                    field={field}
-                    setCollege={setCollege}
-                    enableDescription={false}
-                  />
-                )}
-              </form.Field>
-            </div>
-            <div className="h-full w-full pb-4">
-              <form.Field name="department_id">
-                {(field) => (
-                  <DepartmentDropdown
-                    field={field}
-                    college={college}
-                    enableDescription={false}
-                  />
-                )}
-              </form.Field>
-            </div>
-            <div className="h-full w-full pb-4">
-              <form.Field name="phone">
-                {(field) => (
-                  <FormInputField
-                    label="Phone Number"
-                    placeholder="Enter a valid phone number"
-                    field={field}
-                  />
-                )}
-              </form.Field>
-            </div>
-          </div>
-
           <div className="h-full w-full">
             <form.Field name="university_id">
               {(field) => (
@@ -212,11 +155,6 @@ export default function StudentProfileModal({
                   field={field}
                 />
               )}
-            </form.Field>
-          </div>
-          <div className="h-full w-full">
-            <form.Field name="year_level">
-              {(field) => <FormYearLevelField field={field} />}
             </form.Field>
           </div>
         </form>

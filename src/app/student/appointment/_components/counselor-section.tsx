@@ -42,7 +42,7 @@ export default function CounselorSection({
       <p className="font-medium">Your Counselor</p>
       <div className="flex items-center gap-8">
         <div className="w-fit">
-          <div className="from-brand-light to-brand-normal h-30 w-30 rounded-full bg-gradient-to-t" />
+          <div className="from-brand-light to-brand-normal h-30 w-30 rounded-full bg-linear-to-t" />
         </div>
         <div className="flex w-full gap-6">
           <div className="w-1/2 rounded-2xl border p-4">

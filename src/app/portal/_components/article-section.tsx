@@ -7,7 +7,7 @@ import { useState } from "react";
 import { fetchAnnouncementsByDate, fetchArticlesByEmotion } from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";
 import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/hooks/auth-store";
@@ -26,12 +26,7 @@ export default function ArticleSection() {
   const userEmotionalStatus = useUserStore().emotionalStatus;
 
   const { data: articles, isLoading } = useQuery({
-    queryKey: [
-      "articles",
-      pagination.pageIndex,
-      pagination.pageSize,
-      search,
-    ],
+    queryKey: ["articles", pagination.pageIndex, pagination.pageSize, search],
     queryFn: () =>
       fetchArticlesByEmotion(
         supabase,
@@ -52,7 +47,11 @@ export default function ArticleSection() {
           <p className="font-medium">Articles</p>
           <p>
             View all articles, curated based on your emotional status (you can
-            change it <Link href="student/profile/"><u className="cursor-pointer">here</u></Link>)
+            change it{" "}
+            <Link href="student/profile/">
+              <u className="cursor-pointer">here</u>
+            </Link>
+            )
           </p>
         </div>
         <InputGroup className="w-fit bg-white px-2">
@@ -65,19 +64,29 @@ export default function ArticleSection() {
           />
         </InputGroup>
       </div>
-      <div className="grid h-[600px] grid-cols-3 gap-4">
-        {isLoading
-          ? Array.from({ length: 3 }).map((_, idx) => (
-              <ArticleTile key={`skeleton-${idx}`} isLoading={true} />
-            ))
-          : list.map((data, idx) => (
-              <ArticleTile
-                key={data.id || idx}
-                articleData={data}
-                isLoading={false}
-              />
-            ))}
-      </div>
+      {isLoading ? (
+        <div className="grid h-[600px] grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <ArticleTile key={`skeleton-${idx}`} isLoading={true} />
+          ))}
+        </div>
+      ) : list.length > 0 ? (
+        <div className="grid h-[600px] grid-cols-3 gap-4">
+          {list.map((data, idx) => (
+            <ArticleTile
+              key={data.id || idx}
+              articleData={data}
+              isLoading={false}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex h-[600px] w-full items-center justify-center gap-4 rounded-2xl border bg-white">
+          <CircleOff strokeWidth={1.25} />
+          <p>No events for this time period</p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <p>
           Showing {list.length} of {count} result(s)

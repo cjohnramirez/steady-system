@@ -26,7 +26,7 @@ export default function ProfilePicture() {
         {isLoading ? (
           <Skeleton className="h-20 w-20 rounded-full" />
         ) : (
-          <div className="from-brand-light to-brand-normal relative flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-t">
+          <div className="from-brand-light to-brand-normal relative flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-t">
             <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
               <Edit2
                 onClick={() => toast.info("This is an upcoming feature")}

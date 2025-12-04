@@ -95,6 +95,7 @@ export default function CounselorModal({ id }: { id?: string }) {
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={() => router.back()}
+        aria-describedby="counselor-profile-edit"
       >
         <DialogHeader>
           <DialogTitle>Edit Account</DialogTitle>
@@ -108,7 +109,7 @@ export default function CounselorModal({ id }: { id?: string }) {
           }}
         >
           <div className="row-span-2 h-full w-full">
-            <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-t">
+            <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
               <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
                 <Edit2
                   onClick={() => toast.info("This is an upcoming feature")}

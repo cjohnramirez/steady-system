@@ -14,10 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tables } from "@/types/supabase";
-import CounselorAppointmentTile from "./counselor-appointment-tile";
+import CounselorAppointmentTile from "./appointment-tile";
 import { PaginationState } from "@tanstack/react-table";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { strToTitleCase } from "@/lib/format";
 
 const appointmentStatus = [
   { label: "pending", color: "bg-yellow-300" },
@@ -58,7 +59,7 @@ export default function CounselorAppointmentSection({
                   "bg-gray-300"
                 }`}
               />
-              {status}
+              <p>{strToTitleCase(status)}</p>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -68,7 +69,7 @@ export default function CounselorAppointmentSection({
                 onClick={() => setStatus(status.label)}
               >
                 <div className={`h-2 w-2 rounded-full ${status.color}`} />
-                <p>{status.label}</p>
+                <p>{strToTitleCase(status.label)}</p>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -90,10 +91,19 @@ export default function CounselorAppointmentSection({
               <CounselorAppointmentTile key={idx} isLoading={isLoading} />
             ))}
           </div>
-        ) : (
+        ) : appointments.length !== 0 ? (
           appointments.map((appointment, idx) => (
-            <CounselorAppointmentTile appointment={appointment} key={idx} isLoading={isLoading} />
+            <CounselorAppointmentTile
+              appointment={appointment}
+              key={idx}
+              isLoading={isLoading}
+            />
           ))
+        ) : (
+          <div className="flex h-full items-center justify-center rounded-2xl border gap-4">
+            <CircleOff strokeWidth={1.25}/>
+            <p>No appointments found</p>
+          </div>
         )}
       </div>
       <div className="flex items-center justify-between">

@@ -1,14 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { dateToString } from "@/lib/format";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
@@ -91,18 +84,7 @@ export const studentAppointmentColumns: ColumnDef<
 
       return (
         <p>
-          {originalRow.scheduled_at
-            ? new Date(String(originalRow.scheduled_at)).toLocaleString(
-                "en-US",
-                {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                },
-              )
-            : ""}
+          {dateToString(originalRow.scheduled_at ?? "")}
         </p>
       );
     },

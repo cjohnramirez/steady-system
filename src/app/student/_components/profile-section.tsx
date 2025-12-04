@@ -95,7 +95,7 @@ export default function ProfileSection() {
           </Button>
         </div>
         <div className="mt-10 grid w-full grid-cols-[150px_1fr] gap-x-8 gap-y-4">
-          <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-t">
+          <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
             <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
               <Edit2
                 onClick={() => toast.info("This is an upcoming feature")}
@@ -109,7 +109,7 @@ export default function ProfileSection() {
                 {[...Array(8)].map((_, i) => (
                   <div
                     key={i}
-                    className="space-y-2 rounded-xl border-1 px-4 py-2"
+                    className="space-y-2 rounded-xl border px-4 py-2"
                   >
                     <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-4 w-32" />
@@ -127,7 +127,7 @@ export default function ProfileSection() {
                 { label: "Year Level", value: studentData?.year_level },
                 { label: "University ID", value: studentData?.university_id },
               ].map((item) => (
-                <div key={item.label} className="rounded-xl border-1 px-4 py-2">
+                <div key={item.label} className="rounded-xl border px-4 py-2">
                   <p className="font-medium">{item.label}</p>
                   <p>{item.value}</p>
                 </div>

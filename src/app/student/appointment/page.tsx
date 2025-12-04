@@ -12,16 +12,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
-
-export type AppointmentCounselor = {
-  departmentName: string;
-  counselorName: string;
-  counselorID: string;
-  dayOfWeek: boolean[];
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-};
+import { Tables } from "@/types/supabase";
 
 export default function AppointmentPage() {
   const [selectReason, setSelectReason] = useState("Academic");
@@ -36,13 +27,15 @@ export default function AppointmentPage() {
   const {
     data: appointmentCounselor,
     isLoading: isAppointmentCounselorLoading,
-  } = useQuery<AppointmentCounselor>({
+  } = useQuery<Tables<"counselor_with_details">>({
     queryKey: ["appointment-counselor"],
     queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
   });
 
-  const appointmentCounselorName = appointmentCounselor?.counselorName ?? "";
-  const appointmentDepartmentName = appointmentCounselor?.departmentName ?? "";
+
+
+  const appointmentCounselorName = appointmentCounselor?.first_name ?? "";
+  // fetch department of STUDENT
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -50,7 +43,7 @@ export default function AppointmentPage() {
       if (!appointmentCounselor || !date) throw new Error("Missing fields");
 
       return insertAppointment(supabase, getUserID, {
-        counselor_id: appointmentCounselor.counselorID,
+        counselor_id: appointmentCounselor.id ?? "",
         scheduled_at: date.toISOString(),
         reason: selectReason,
         notes: notes,
@@ -83,7 +76,7 @@ export default function AppointmentPage() {
         <div className="w-full space-y-6">
           <CounselorSection
             appointmentCounselorName={appointmentCounselorName}
-            appointmentDepartmentName={appointmentDepartmentName}
+            appointmentDepartmentName={""}
             isLoading={isAppointmentCounselorLoading}
           />
           <DateTimeSection

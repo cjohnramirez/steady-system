@@ -6,7 +6,7 @@ export default function AboutSection() {
   return (
     <section id="about">
       <div className="m-auto flex h-1/2 max-w-[600px] flex-col items-center justify-center space-y-4 py-20 text-center">
-        <div className="rounded-xl border-1 border-gray-200 bg-white px-10 py-2">
+        <div className="rounded-xl border border-gray-200 bg-white px-10 py-2">
           About Us
         </div>
         <p className="mt-5 text-4xl">Who We Are</p>
@@ -23,7 +23,7 @@ export default function AboutSection() {
         </p>
       </div>
       <div className="grid h-3/5 grid-cols-4 grid-rows-2 gap-4">
-        <div className="col-span-2 h-full rounded-2xl border-1 border-gray-200 bg-white">
+        <div className="col-span-2 h-full rounded-2xl border border-gray-200 bg-white">
           <div className="relative flex h-full w-full justify-between p-8">
             <Image
               src="/placeholder.png"
@@ -32,7 +32,7 @@ export default function AboutSection() {
               className="rounded-4xl object-cover p-4"
               sizes=""
             />
-            <div className="z-10 h-fit w-36 rounded-xl border-1 border-gray-200 bg-white px-10 py-2">
+            <div className="z-10 h-fit w-36 rounded-xl border border-gray-200 bg-white px-10 py-2">
               <p className="text-center">Activity</p>
             </div>
             <Link
@@ -40,7 +40,7 @@ export default function AboutSection() {
               href=""
             >
               <ArrowUpRight
-                className="rounded-full border-1 border-gray-200 p-2"
+                className="rounded-full border border-gray-200 p-2"
                 size={40}
                 strokeWidth={1.25}
               />
@@ -51,7 +51,7 @@ export default function AboutSection() {
             </Link>
           </div>
         </div>
-        <div className="col-span-2 row-span-2 flex h-full items-center rounded-2xl border-1 border-gray-200 bg-white">
+        <div className="col-span-2 row-span-2 flex h-full items-center rounded-2xl border border-gray-200 bg-white">
           <div className="relative flex h-full w-full flex-col justify-between p-8">
             <Image
               src="/placeholder.png"
@@ -60,7 +60,7 @@ export default function AboutSection() {
               className="rounded-4xl object-cover p-4"
               sizes=""
             />
-            <div className="z-10 w-36 rounded-xl border-1 border-gray-200 bg-white px-10 py-2">
+            <div className="z-10 w-36 rounded-xl border border-gray-200 bg-white px-10 py-2">
               <p className="text-center">Activity</p>
             </div>
             <Link
@@ -68,7 +68,7 @@ export default function AboutSection() {
               href=""
             >
               <ArrowUpRight
-                className="rounded-full border-1 border-gray-200 p-2"
+                className="rounded-full border border-gray-200 p-2"
                 size={40}
                 strokeWidth={1.25}
               />
@@ -82,13 +82,13 @@ export default function AboutSection() {
             </Link>
           </div>
         </div>
-        <div className="h-full rounded-2xl border-1 border-gray-200">
+        <div className="h-full rounded-2xl border border-gray-200">
           <Link
             className="flex h-full flex-col justify-between rounded-2xl bg-white px-6 py-8"
             href=""
           >
             <ArrowUpRight
-              className="rounded-full border-1 border-gray-200 p-2"
+              className="rounded-full border border-gray-200 p-2"
               size={40}
               strokeWidth={1.25}
             />
@@ -99,13 +99,13 @@ export default function AboutSection() {
           </Link>
         </div>
 
-        <div className="h-full rounded-2xl border-1 border-gray-200">
+        <div className="h-full rounded-2xl border border-gray-200">
           <Link
             className="flex h-full flex-col justify-between rounded-2xl bg-white px-6 py-8"
             href=""
           >
             <ArrowUpRight
-              className="rounded-full border-1 border-gray-200 p-2"
+              className="rounded-full border border-gray-200 p-2"
               size={40}
               strokeWidth={1.25}
             />

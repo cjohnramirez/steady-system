@@ -2,15 +2,11 @@
 
 import { useUserStore } from "@/hooks/auth-store";
 import ProfileSection from "./_components/profile-section";
-import StudentAppointmentSection from "./_components/student-appointment-section";
+import StudentAppointmentSection from "./_components/appointment-section";
 import { useEffect, useState } from "react";
 
 export default function StudentPage() {
-  const [username, setUsername] = useState<string | undefined>("");
-
-  useEffect(() => {
-    setUsername(useUserStore.getState().userName);
-  }, []);
+  const username = useUserStore.getState().userName ?? "";
 
   return (
     <div className="space-y-6 p-10">

@@ -7,7 +7,7 @@ import { useState } from "react";
 import { fetchAnnouncementsByDate } from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";
 import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import AnnouncementTile from "./announcement-tile";
@@ -84,22 +84,28 @@ export default function AnnouncementSection() {
           />
         </InputGroup>
       </div>
-      <div className="grid h-[600px] grid-cols-3 gap-4">
-        {isLoading
-          ? Array.from({ length: 3 }).map((_, idx) => (
-              <AnnouncementTile
-                key={`skeleton-${idx}`} 
-                isLoading={true}
-              />
-            ))
-          : list.map((data, idx) => (
-              <AnnouncementTile
-                key={data.id || idx}
-                announcementData={data}
-                isLoading={false}
-              />
-            ))}
-      </div>
+      {isLoading ? (
+        <div className="grid h-[600px] grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <AnnouncementTile key={`skeleton-${idx}`} isLoading={true} />
+          ))}
+        </div>
+      ) : list.length === 0 ? (
+        <div className="flex h-[600px] w-full items-center justify-center gap-4 rounded-2xl border bg-white">
+          <CircleOff strokeWidth={1.25} />
+          <p>No events for this time period</p>
+        </div>
+      ) : (
+        <div className="grid h-[600px] grid-cols-3 gap-4">
+          {list.map((data, idx) => (
+            <AnnouncementTile
+              key={data.id || idx}
+              announcementData={data}
+              isLoading={false}
+            />
+          ))}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <p>
           Showing {list.length} of {count} result(s)

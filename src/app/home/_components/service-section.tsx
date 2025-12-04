@@ -39,7 +39,7 @@ export default function ServiceSection() {
   return (
     <section className="flex gap-5 mt-20" id="service">
       <div className="items-left flex h-full w-1/2 flex-col justify-center space-y-4 mr-20 my-auto">
-        <div className="w-fit rounded-xl border-1 border-gray-200 bg-white px-10 py-2">
+        <div className="w-fit rounded-xl border border-gray-200 bg-white px-10 py-2">
           Services
         </div>
         <p className="mt-5 w-full text-left text-4xl">What We Do</p>
@@ -51,7 +51,7 @@ export default function ServiceSection() {
           {servicesObj.map((service) => (
             <div
               key={service.title}
-              className="flex gap-4 rounded-2xl border-1 border-gray-200 bg-white p-6"
+              className="flex gap-4 rounded-2xl border border-gray-200 bg-white p-6"
             >
               {service.icon}
               <div>
@@ -62,7 +62,7 @@ export default function ServiceSection() {
           ))}
         </div>
       </div>
-      <div className="bg-white relative w-1/2 rounded-4xl h-dvh max-h-[700px] border-1 border-gray-200">
+      <div className="bg-white relative w-1/2 rounded-4xl h-dvh max-h-[700px] border border-gray-200">
         <Image
           src={img}
           alt="Authentication image"

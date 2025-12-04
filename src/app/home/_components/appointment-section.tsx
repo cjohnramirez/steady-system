@@ -10,7 +10,7 @@ export default function AppointmentSection() {
   return (
     <section id="appointment">
       <div className="m-auto flex h-1/2 max-w-[600px] flex-col items-center justify-center space-y-4 py-20 text-center">
-        <div className="rounded-xl border-1 border-gray-200 bg-white px-10 py-2">
+        <div className="rounded-xl border border-gray-200 bg-white px-10 py-2">
           Appointment
         </div>
         <p className="mt-5 text-4xl">Book an Appointment</p>

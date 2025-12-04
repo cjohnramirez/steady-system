@@ -18,7 +18,7 @@ import { NavBar } from "../app/home/_lib/nav-data";
 
 export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
   const router = useRouter();
-  const userName = useUserStore.getState().userName;
+  const [userName, setUserName] = useState(useUserStore.getState().userName);
   const userRole = useUserStore.getState().userRole;
 
   const [isClient, setIsClient] = useState(false);
@@ -27,8 +27,15 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = useUserStore.subscribe((state) => {
+      setUserName(state.userName);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-100 border-b-1 border-gray-200 bg-white p-6">
+    <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white p-6">
       <div className="m-auto flex max-w-[1600px] items-center justify-between gap-4">
         <section
           className="flex cursor-pointer items-center gap-4"

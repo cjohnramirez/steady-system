@@ -5,31 +5,30 @@ import { Button } from "@/components/ui/button";
 import { useConfirmStore } from "@/hooks/confirm-store";
 
 export default function ConfirmModal() {
-  const { isOpen, options, closeConfirm } = useConfirmStore();
+  const { isOpen, title, message, resolve, close } = useConfirmStore();
+
+  const handleCancel = () => {
+    resolve?.(false);
+    close();
+  };
 
   const handleConfirm = () => {
-    options.onConfirm?.();
-    closeConfirm();
+    resolve?.(true);
+    close();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeConfirm}>
-      <DialogContent>
+    <Dialog open={isOpen} onOpenChange={handleCancel}>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>{options.title || "Are you sure?"}</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        <p className="text-sm text-muted-foreground">
-          {options.message || "This action cannot be undone."}
-        </p>
+        <p className="">{message}</p>
 
         <DialogFooter>
-          <Button variant="outline" onClick={closeConfirm}>
-            {options.cancelText || "Cancel"}
-          </Button>
-          <Button onClick={handleConfirm}>
-            {options.confirmText || "Confirm"}
-          </Button>
+          <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+          <Button onClick={handleConfirm}>Confirm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

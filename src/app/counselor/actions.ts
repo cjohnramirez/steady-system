@@ -2,6 +2,24 @@
 
 import { Tables } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { counselorUpdateFormSchema } from "./schema";
+import { createClient } from "@/utils/supabase/client";
+import z from "zod";
+
+export async function fetchCounselorAppointment(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<Tables<"appointment_with_details">> {
+  const { data, error } = await supabase
+    .from("appointment_with_details")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data;
+}
 
 export async function fetchCounselorAppointments(
   page: number,
@@ -77,13 +95,10 @@ export async function countCounselorAppointments(
 }
 
 // fetch profile of counselor
-export async function fetchCounselorProfile({
-  supabase,
-  id,
-}: {
-  supabase: SupabaseClient;
-  id: string;
-}): Promise<Tables<"counselor_with_details">> {
+export async function fetchCounselorProfile(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<Tables<"counselor_with_details">> {
   const { data: counselorProfileData, error: counselorProfileError } =
     await supabase
       .from("counselor_with_details")
@@ -99,3 +114,39 @@ export async function fetchCounselorProfile({
 
   return counselorProfileData;
 }
+
+export async function fetchCounselorDeparments(
+  supabase: SupabaseClient,
+  userID: string,
+): Promise<Tables<"department">[]> {
+  const { data: counselorDeparmentData, error: counselorDepartmentError } =
+    await supabase
+      .from("department")
+      .select("*")
+      .eq("counselor_id", userID);
+
+  if (counselorDepartmentError) throw counselorDepartmentError;
+
+  if (!counselorDeparmentData) {
+    throw new Error("Counselor departments not found.");
+  }
+
+  return counselorDeparmentData ?? [];
+}
+
+export async function updateCounselorProfile(
+  values: z.infer<typeof counselorUpdateFormSchema>,
+) {
+  const supabase = createClient()
+
+  const { id, ...rest} = values
+
+  const { error } = await supabase
+    .from("counselor")
+    .update(rest)
+    .eq("id", id)
+    .select("*").single();
+
+  if (error) throw new Error("Error updating counselor profile: ", error);
+}
+

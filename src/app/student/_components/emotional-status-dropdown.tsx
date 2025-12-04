@@ -19,6 +19,7 @@ import {
 } from "@/app/admin/accounts/@modal/actions";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { strToTitleCase } from "@/lib/format";
 
 export default function EmotionalStatusDropdown({
   emotionalStatus,
@@ -72,7 +73,7 @@ export default function EmotionalStatusDropdown({
           {emotionalStatusData &&
             emotionalStatusData.map((emotion, idx) => (
               <SelectItem value={emotion.id} key={idx}>
-                {emotion.name}
+                {strToTitleCase(emotion.name)}
               </SelectItem>
             ))}
         </SelectContent>

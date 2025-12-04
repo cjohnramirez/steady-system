@@ -1,7 +1,3 @@
-// fetch number of appointments, approved and pending
-// show the fetched data
-// optional: graph the number of appointments per day
-
 export default function MetricSection({
   totalAppointments,
   pendingAppointments,
@@ -17,21 +13,21 @@ export default function MetricSection({
         <p className="font-medium">Metric</p>
         <p>View some insightful information here.</p>
       </div>
-      <div className="flex gap-3 rounded-2xl border-1 p-3">
-        <div className="flex-2 rounded-2xl border-1 p-3 text-center">
+      <div className="flex gap-3 rounded-2xl border p-3">
+        <div className="flex-2 rounded-2xl border p-3 text-center">
           <p>Total Appointments</p>
           <p className="text-3xl">{totalAppointments}</p>
         </div>
-        <div className="flex-1 rounded-2xl border-1 p-3 text-center">
+        <div className="flex-1 rounded-2xl border p-3 text-center">
           <p>Approved</p>
           <p className="text-3xl">{approvedAppointments}</p>
         </div>
-        <div className="flex-1 rounded-2xl border-1 p-3 text-center">
+        <div className="flex-1 rounded-2xl border p-3 text-center">
           <p>Pending</p>
           <p className="text-3xl">{pendingAppointments}</p>
         </div>
       </div>
-      <div className="rounded-2xl border-1 p-5 text-center">
+      <div className="rounded-2xl border p-5 text-center">
         <p>Graph will be shown here</p>
       </div>
     </section>

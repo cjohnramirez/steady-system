@@ -1,23 +1,32 @@
 import { create } from "zustand";
 
-type ConfirmOptions = {
-  title?: string;
-  message?: string;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm?: () => void;
-};
-
 type ConfirmState = {
   isOpen: boolean;
-  options: ConfirmOptions;
-  openConfirm: (options: ConfirmOptions) => void;
-  closeConfirm: () => void;
+  title: string;
+  message: string;
+  resolve?: (value: boolean) => void;
+  confirm: (title: string, message: string) => Promise<boolean>;
+  close: () => void;
 };
 
 export const useConfirmStore = create<ConfirmState>((set) => ({
   isOpen: false,
-  options: {},
-  openConfirm: (options) => set({ isOpen: true, options }),
-  closeConfirm: () => set({ isOpen: false, options: {} }),
+  title: "",
+  message: "",
+  resolve: undefined,
+
+  confirm: (title, message) => {
+    return new Promise((resolve) => {
+      set({
+        isOpen: true,
+        title,
+        message,
+        resolve,
+      });
+    });
+  },
+
+  close: () => {
+    set({ isOpen: false });
+  },
 }));

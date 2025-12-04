@@ -56,7 +56,7 @@ export const teamMembers: TeamMember[] = [
 
 export default function PrivacyPolicy() {
   return (
-    <main className="my-10 w-full rounded-4xl border-1 bg-white">
+    <main className="my-10 w-full rounded-4xl border bg-white">
       <section className="flex items-center justify-between border-b-1">
         <div className="space-y-2 p-10">
           <p className="text-6xl">Privacy Policy</p>
@@ -136,14 +136,14 @@ export default function PrivacyPolicy() {
         </p>
         <div className="flex gap-4">
           <a
-            className="flex w-fit items-center gap-4 rounded-3xl border-1 px-4 py-2"
+            className="flex w-fit items-center gap-4 rounded-3xl border px-4 py-2"
             href="mailto:codebridge.llc@gmail.com"
           >
             <Mail strokeWidth={1.25} />
             <p>codebridge.llc@gmail.com</p>
           </a>
           <div
-            className="flex w-fit items-center gap-4 rounded-3xl border-1 px-4 py-2"
+            className="flex w-fit items-center gap-4 rounded-3xl border px-4 py-2"
           >
             <Clock2 strokeWidth={1.25} />
             <p>Last Updated on November 27, 2025</p>

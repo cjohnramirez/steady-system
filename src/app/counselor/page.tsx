@@ -1,12 +1,12 @@
 "use client";
 
 import { createClient } from "@/utils/supabase/client";
-import CounselorAppointmentSection from "./_components/counselor-appointment-section";
-import CounselorProfileSection from "./_components/counselor-profile-section";
+import CounselorAppointmentSection from "./_components/appointment-section";
+import CounselorProfileSection from "./_components/profile-section";
 import MetricSection from "./_components/metric-section";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/hooks/auth-store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchCounselorAppointments,
   fetchCounselorProfile,
@@ -15,8 +15,13 @@ import {
 
 export default function CounselorPage() {
   const supabase = createClient();
-  const { id: userID, userName: counselorUsername } =
-    useUserStore.getState();
+  const userID = useUserStore.getState().id;
+
+  const [username, setUsername] = useState<string | undefined>("");
+
+  useEffect(() => {
+    setUsername(useUserStore.getState().userName);
+  }, []);
 
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 3 });
@@ -41,15 +46,15 @@ export default function CounselorPage() {
   });
 
   const { data: counselorProfile, isLoading: isLoadingCounselorProfile } =
-    useQuery({  
+    useQuery({
       queryKey: ["counselor-profile"],
-      queryFn: () => fetchCounselorProfile({ id: userID, supabase }),
+      queryFn: () => fetchCounselorProfile(supabase, userID),
     });
 
   return (
     <div className="space-y-6 p-10">
       <div className="space-y-2">
-        <p className="text-4xl">Welcome, {counselorUsername}</p>
+        <p className="text-4xl">Welcome, {username}</p>
         <p>
           This is your personalized dashboard, with your profile and
           appointments
@@ -62,9 +67,7 @@ export default function CounselorPage() {
             pendingAppointments={String(counts?.pendingCount ?? "")}
             approvedAppointments={String(counts?.approvedCount ?? "")}
           />
-          <CounselorProfileSection
-            counselorProfile={counselorProfile}
-          />
+          <CounselorProfileSection counselorProfile={counselorProfile} />
         </div>
         <CounselorAppointmentSection
           status={status}
