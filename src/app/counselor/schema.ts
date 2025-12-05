@@ -17,4 +17,3 @@ export const counselorUpdateFormSchema = z.object({
     .regex(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
   id: z.string(),
 });
-

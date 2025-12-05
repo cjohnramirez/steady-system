@@ -1,6 +1,6 @@
 // fetch number of appointments, approved and pending and fetch appointments of counselor
 
-import { Tables } from "@/types/supabase";
+import { Tables, TablesUpdate } from "@/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { counselorUpdateFormSchema } from "./schema";
 import { createClient } from "@/utils/supabase/client";
@@ -150,3 +150,32 @@ export async function updateCounselorProfile(
   if (error) throw new Error("Error updating counselor profile: ", error);
 }
 
+export async function updateCounselorAvailability(
+  values: TablesUpdate<"availability">
+) {
+
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from("availability")
+    .update(values)
+    .eq("id", values.id)
+    .select("*").single();
+
+  if (error) throw new Error("Error updating counselor availability: ", error);
+}
+
+export async function updateAppointment(
+  values: TablesUpdate<"appointment">
+) {
+
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from("appointment")
+    .update(values)
+    .eq("id", values.id)
+    .select("*").single();
+
+  if (error) throw new Error("Error updating appointment: ", error);
+}

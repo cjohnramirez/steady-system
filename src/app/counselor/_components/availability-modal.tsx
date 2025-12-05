@@ -9,10 +9,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { fetchCounselorAppointment, fetchCounselorProfile } from "../actions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchCounselorProfile,
+  updateCounselorAvailability,
+} from "../actions";
 import { createClient } from "@/utils/supabase/client";
-import DateTimeSection from "@/app/student/appointment/_components/date-time-section";
 import { startTransition, useEffect, useState } from "react";
 import { useUserStore } from "@/hooks/auth-store";
 import { Tables } from "@/types/supabase";
@@ -24,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { parseISO } from "date-fns";
 import { useConfirmStore } from "@/hooks/confirm-store";
 import { toast } from "sonner";
 
@@ -60,28 +61,59 @@ export default function AvailabilityModal({
   counselorProfile,
 }: AvailabilityModalProps) {
   const { confirm } = useConfirmStore();
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+  const userID = useUserStore.getState().id;
 
-  const [dayOfWeek, setDayOfWeek] = useState<Boolean[]>([]);
+  const [dayOfWeek, setDayOfWeek] = useState<boolean[]>([]);
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
   const [isActive, setIsActive] = useState<string>("");
+
+  const { data: counselor } = useQuery({
+    queryKey: ["counselor-profile"],
+    queryFn: () => fetchCounselorProfile(supabase, userID),
+  });
 
   useEffect(() => {
     if (!counselorProfile) return;
 
     startTransition(() => {
       setDayOfWeek(counselorProfile.day_of_week ?? Array(7).fill(false));
-      setStartTime(
-        counselorProfile.start_time ? toAMPM(counselorProfile.start_time) : "",
-      );
-      setEndTime(
-        counselorProfile.end_time ? toAMPM(counselorProfile.end_time) : "",
-      );
+
+      const startTimeFormatted = counselorProfile.start_time
+        ? toAMPM(counselorProfile.start_time)
+        : "";
+        
+      const endTimeFormatted = counselorProfile.end_time
+        ? toAMPM(counselorProfile.end_time)
+        : "";
+
+      setStartTime(startTimeFormatted);
+      setEndTime(endTimeFormatted);
+
+      console.log("Start time: ", startTimeFormatted);
+      console.log("End time: ", endTimeFormatted);
+
+      console.log(counselorProfile);
+
       setIsActive(String(counselorProfile.is_active));
     });
   }, [counselorProfile]);
 
   const timeSlots = generateTimeSlots("06:00", "20:30");
+
+  const updateMutation = useMutation({
+    mutationFn: updateCounselorAvailability,
+    onSuccess: async () => {
+      toast.success("Counselor profile updated successfully!");
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["counselor-profile"] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to update counselor profile");
+    },
+  });
 
   const handleSubmit = async () => {
     const ok = await confirm(
@@ -89,13 +121,20 @@ export default function AvailabilityModal({
       "This action cannot be undone.",
     );
 
-    if (!ok) toast.error("Appointment error");
+    if (!ok) return;
 
-    console.log("Appointment changed!", {
-      dayOfWeek,
-      startTime: ampmTo24(startTime),
-      endTime: ampmTo24(endTime),
-      isActive,
+    const start24 = startTime ? ampmTo24(startTime) : "";
+    const end24 = endTime ? ampmTo24(endTime) : "";
+
+    console.log("Start time: ", start24);
+    console.log("End time: ", end24);
+
+    updateMutation.mutate({
+      day_of_week: dayOfWeek,
+      start_time: start24,
+      end_time: end24,
+      is_active: isActive === "null" ? null : isActive === "true",
+      id: counselor?.availability_id ?? "",
     });
   };
 
@@ -126,7 +165,7 @@ export default function AvailabilityModal({
             {counselorProfile &&
               DAY_NAMES.map((day, idx) => (
                 <Button
-                  key={day}
+                  key={idx}
                   variant={dayOfWeek[idx] ? "default" : "outline"}
                   onClick={() => {
                     setDayOfWeek((prev) => {
@@ -149,14 +188,17 @@ export default function AvailabilityModal({
                 <p className="font-medium">Start Time</p>
                 <Select
                   value={startTime}
-                  onValueChange={(val) => setStartTime(val)}
+                  onValueChange={(val) => {
+                    setStartTime(val);
+                    console.log("Selected Time: ", val);
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a start time" />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeSlots.map((slot) => (
-                      <SelectItem key={slot} value={slot}>
+                    {timeSlots.map((slot, idx) => (
+                      <SelectItem key={idx} value={slot}>
                         {slot}
                       </SelectItem>
                     ))}
@@ -167,14 +209,17 @@ export default function AvailabilityModal({
                 <p className="font-medium">End Time</p>
                 <Select
                   value={endTime}
-                  onValueChange={(val) => setEndTime(val)}
+                  onValueChange={(val) => {
+                    setEndTime(val);
+                    console.log("Selected Time: ", val);
+                  }}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select an end time" />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeSlots.map((slot) => (
-                      <SelectItem key={slot} value={slot}>
+                    {timeSlots.map((slot, idx) => (
+                      <SelectItem key={idx} value={slot}>
                         {slot}
                       </SelectItem>
                     ))}

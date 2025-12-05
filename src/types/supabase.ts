@@ -277,21 +277,21 @@ export type Database = {
           day_of_week: boolean[]
           end_time: string
           id: string
-          is_active: boolean
+          is_active: boolean | null
           start_time: string
         }
         Insert: {
           day_of_week?: boolean[]
           end_time?: string
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           start_time?: string
         }
         Update: {
           day_of_week?: boolean[]
           end_time?: string
           id?: string
-          is_active?: boolean
+          is_active?: boolean | null
           start_time?: string
         }
         Relationships: []
@@ -671,6 +671,7 @@ export type Database = {
       }
       counselor_with_details: {
         Row: {
+          availability_id: string | null
           day_of_week: boolean[] | null
           email: string | null
           end_time: string | null
@@ -684,7 +685,15 @@ export type Database = {
           user_id: string | null
           username: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "counselor_availability_id_fkey"
+            columns: ["availability_id"]
+            isOneToOne: false
+            referencedRelation: "availability"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       playlist_with_details: {
         Row: {

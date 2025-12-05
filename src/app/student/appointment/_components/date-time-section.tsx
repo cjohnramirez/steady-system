@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { startTransition, useEffect, useState } from "react";
 import { CalendarCheck, Clock, Info } from "lucide-react";
-import { dateToString, generateTimeSlots } from "@/lib/format";
+import { dateToString, generateTimeSlots, toAMPM } from "@/lib/format";
 import { Tables } from "@/types/supabase";
 
 function getCalendarDisabledDays(
@@ -49,19 +49,18 @@ export default function DateTimeSection({
 
   useEffect(() => {
     if (!appointmentData?.scheduled_at) return;
-
+    const scheduledDate = new Date(appointmentData.scheduled_at!);
+    
     startTransition(() => {
-      const scheduledDate = new Date(appointmentData.scheduled_at!);
       setDate(scheduledDate);
 
-      const timeString = scheduledDate.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
+      const hours = String(scheduledDate.getHours()).padStart(2, "0");
+      const minutes = String(scheduledDate.getMinutes()).padStart(2, "0");
+      const timeString = toAMPM(`${hours}:${minutes}:00`);
 
       setSelectedTime(timeString);
     });
+
   }, [appointmentData, setDate]);
 
   const timeSlots = counselorData
@@ -70,10 +69,26 @@ export default function DateTimeSection({
         counselorData.end_time ?? "",
       )
     : [];
+    
+    const handleTimeSelect = (time: string) => {
+      setSelectedTime(time);
+      if (!date) return;
 
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
-  };
+      const match = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!match) return;
+
+      const [, hour, minute, period] = match;
+      let h = parseInt(hour, 10);
+      const m = parseInt(minute, 10);
+
+      if (period.toUpperCase() === "PM" && h !== 12) h += 12;
+      if (period.toUpperCase() === "AM" && h === 12) h = 0;
+
+      const newDate = new Date(date);
+      newDate.setHours(h, m, 0, 0);
+
+      setDate(newDate);
+    };
 
   return (
     <div
@@ -99,7 +114,6 @@ export default function DateTimeSection({
             </div>
             <div>
               <p className="font-medium">Date</p>
-              {/* Ensure dateToString handles undefined/null gracefully */}
               <p>
                 {date ? dateToString(date.toISOString()) : "No date selected"}
               </p>

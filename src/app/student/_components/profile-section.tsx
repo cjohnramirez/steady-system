@@ -22,7 +22,6 @@ export default function ProfileSection() {
   });
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
-  console.log(userID)
 
   return (
     <>

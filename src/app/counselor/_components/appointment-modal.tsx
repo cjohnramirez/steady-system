@@ -37,7 +37,7 @@ export default function CounselorAppointmentModal({
   const isNotesEmpty = counselorAppointment?.notes?.length === 0;
 
   return (
-    <Dialog
+    <> <Dialog
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
@@ -92,22 +92,7 @@ export default function CounselorAppointmentModal({
           </div>
         </div>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            Cancel Appointment
-          </Button>
           <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                setOpen(false);
-              }}
-            >
-              Reschedule
-            </Button>
             <DialogClose asChild>
               <Button
                 variant="outline"
@@ -121,6 +106,7 @@ export default function CounselorAppointmentModal({
           </div>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog></>
+   
   );
 }

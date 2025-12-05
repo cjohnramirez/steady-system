@@ -8,8 +8,6 @@ import { useState } from "react";
 import CounselorAppointmentModal from "./appointment-modal";
 import { dateToString } from "@/lib/format";
 import RescheduleModal from "./reschedule-modal";
-import { useConfirmStore } from "@/hooks/confirm-store";
-import { toast } from "sonner";
 
 export default function CounselorAppointmentTile({
   appointment,
@@ -20,17 +18,6 @@ export default function CounselorAppointmentTile({
 }) {
   const [openAppointment, setOpenAppointment] = useState(false);
   const [openReschedule, setOpenReschedule] = useState(false);
-
-  const { confirm } = useConfirmStore();
-
-  const handleDelete = async () => {
-    const ok = await confirm(
-      "Cancel this appointment?",
-      "This action cannot be undone.",
-    );
-
-    if (ok) toast.success("Appointment cancelled");
-  };
 
   if (isLoading)
     return (
@@ -126,8 +113,10 @@ export default function CounselorAppointmentTile({
           >
             Reschedule
           </Button>
-          <Button variant="outline" onClick={handleDelete}>
-            Cancel Appointment
+          <Button variant="outline" onClick={() => {
+              setOpenAppointment(true);
+            }}>
+            View Appointment
           </Button>
         </div>
       </div>
