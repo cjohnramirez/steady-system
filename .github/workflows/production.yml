@@ -83,6 +83,9 @@ jobs:
         with:
           version: latest
 
+      - name: Install Dependencies
+        run: pnpm install
+
       - name: Install Vercel CLI
         run: pnpm add -g vercel@latest
 
