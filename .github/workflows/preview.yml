@@ -1,4 +1,5 @@
 name: GCS Management System and Landing Page Production Deployment
+
 on:
   push:
     branches: [dev]
@@ -14,16 +15,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: latest
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
       - name: Install Dependencies
         run: pnpm install
@@ -43,39 +44,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: latest
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
 
       - name: Install Dependencies
         run: pnpm install
 
       - name: Run TypeScript Type Checking
         run: pnpm type-check
-
-  deploy:
-    name: Deploy to Vercel
-    needs: type-check
-    runs-on: ubuntu-latest
-    if: success()
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
