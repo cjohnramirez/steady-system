@@ -1,0 +1,54 @@
+import { format } from "date-fns";
+
+export function dateToString(dateString?: string): string {
+  if (!dateString) return "No schedule";
+  return new Date(dateString).toLocaleString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+export function strToTitleCase(str: string) {
+  return str.replace(
+    /\w\S*/g,
+    (text) => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase(),
+  );
+}
+
+// Date and Time parsing shit, for Supabase and NextJS compatibility
+export function generateTimeSlots(
+  startTime: string,
+  endTime: string,
+): string[] {
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+
+  const start = new Date();
+  start.setHours(startHour, startMinute, 0, 0);
+
+  const end = new Date();
+  end.setHours(endHour, endMinute, 0, 0);
+
+  const slots: string[] = [];
+  while (start < end) {
+    slots.push(format(start, "h:mm a"));
+    start.setMinutes(start.getMinutes() + 30);
+  }
+  return slots;
+}
+
+export function ampmTo24(time: string): string {
+  const [h, m] = time.match(/\d+/g)!.map(Number);
+  const isPM = time.toUpperCase().includes("PM");
+  const hour = (h % 12) + (isPM ? 12 : 0);
+  return `${hour.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
+}
+
+export function toAMPM(time24: string): string {
+  const [h, m] = time24.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  return `${hour}:${m.toString().padStart(2, "0")} ${period}`;
+}

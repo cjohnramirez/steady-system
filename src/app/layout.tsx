@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers";
+import { Toaster } from "sonner";
+import TrackHomePage from "@/components/tracker";
+import ConfirmModal from "@/components/confirm-modal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} w-full font-sans text-sm antialiased h-full bg-gray-50 `}
       >
-        {children}
+        <Providers>{children}</Providers>
+        <Toaster position="top-left" className="font-normal" />
+        <ConfirmModal />
+        <TrackHomePage />
       </body>
     </html>
   );
