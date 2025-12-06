@@ -33,7 +33,7 @@ jobs:
         run: pnpm lint
 
       - name: Run Prettier
-        run: pnpm format -- --check
+        run: pnpm format --check
 
   type-check:
     name: TypeScript Type Checking
