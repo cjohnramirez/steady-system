@@ -47,8 +47,8 @@ export default function AnnoucementTile({
       </div>
       <div className="flex flex-1 flex-col justify-between gap-4 p-4">
         <div>
-          <p className="font-medium">{annoucementTile.title}</p>
-          <p className="text-sm">{annoucementTile.description}</p>
+          <p className="font-medium line-clamp-1">{annoucementTile.title}</p>
+            <p className="text-sm line-clamp-2">{annoucementTile.description}</p>
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">

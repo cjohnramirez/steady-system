@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { strToTitleCase } from "@/lib/format";
 import { Tables } from "@/types/supabase";
 import Image from "next/image";
 
@@ -52,7 +53,7 @@ export default function PlaylistTile({
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
-            <p>{playlistTile.emotional_status_name}</p>
+            <p>{strToTitleCase(playlistTile.emotional_status_name ?? "")}</p>
           </div>
         </div>
       </div>

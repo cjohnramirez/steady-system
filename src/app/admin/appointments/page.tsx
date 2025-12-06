@@ -56,7 +56,6 @@ export default function AppointmentPage() {
         columns={appointmentColumns}
         data={appointmentData}
         isLoading={isLoading}
-        rowUrl={(id: string) => `/admin/appointments/${id}`}
         rowCount={totalCount}
         pagination={pagination}
         onPaginationChange={setPagination}

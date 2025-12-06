@@ -1,16 +1,16 @@
 "use client";
 
-import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
+import { fetchStudent } from "@/app/admin/accounts/@modal/actions";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/hooks/auth-store";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpDown, ArrowUpRight, Edit2 } from "lucide-react";
+import { ArrowUpRight, Edit2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useState } from "react";
 import StudentProfileModal from "./profile-modal";
 import { Skeleton } from "@/components/ui/skeleton";
-import EmotionalStatusDropdown from "./emotional-status-dropdown";
+import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 
 export default function ProfileSection() {
   const userID = useUserStore.getState().id;
@@ -32,7 +32,7 @@ export default function ProfileSection() {
       <div className="grid grid-cols-2 grid-rows-3 gap-4 rounded-2xl border border-gray-200 bg-white p-5">
         <div className="col-span-2 m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5">
           <div className="flex space-y-2">
-            <EmotionalStatusDropdown
+            <FormEmotionalStatusField
               setEmotionalStatus={setEmotionalStatus}
               emotionalStatus={
                 emotionalStatus !== ""

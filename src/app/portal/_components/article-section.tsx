@@ -1,10 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaginationState } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";import { PaginationState } from "@tanstack/react-table";
 import { useState } from "react";
-import { fetchAnnouncementsByDate, fetchArticlesByEmotion } from "../actions";
+import { fetchArticlesByEmotion } from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
 import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";

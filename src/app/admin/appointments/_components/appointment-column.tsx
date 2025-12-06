@@ -1,31 +1,22 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
 export const appointmentColumns: ColumnDef<
   Tables<"appointment_with_details">
 >[] = [
   {
-    accessorKey: "last_student_name",
+    accessorKey: "id",
     header: ({ column }) => {
       return (
         <button
           onClick={() => column.toggleSorting(column.getIsSorted() == "asc")}
           className="flex items-center gap-2"
         >
-          Student Name
+          Appointment ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </button>
       );
@@ -35,7 +26,7 @@ export const appointmentColumns: ColumnDef<
 
       return (
         <p>
-          {originalRow.first_student_name}, {originalRow.last_student_name}
+          {originalRow.id}
         </p>
       );
     },
@@ -89,10 +80,6 @@ export const appointmentColumns: ColumnDef<
       if (!filterValue?.length) return true;
       return filterValue.includes(row.getValue(columnId));
     },
-  },
-  {
-    accessorKey: "notes",
-    header: "Notes",
   },
   {
     accessorKey: "scheduled_at",

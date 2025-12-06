@@ -1,16 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaginationState } from "@tanstack/react-table";
 import { useState } from "react";
-import { fetchAnnouncementsByDate, fetchPlaylistByEmotion } from "../actions";
+import { fetchPlaylistByEmotion } from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { Tables } from "@/types/supabase";
-import { Button } from "@/components/ui/button";
-import AnnouncementTile from "./announcement-tile";
 import { useUserStore } from "@/hooks/auth-store";
 import Link from "next/link";
 import PlaylistTile from "./playlist-tile";
@@ -54,7 +50,7 @@ export default function PlaylistSection() {
           />
         </InputGroup>
       </div>
-      <div className="grid h-[160px] grid-cols-3 gap-4">
+      <div className="grid h-40 grid-cols-3 gap-4">
         {isLoading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <PlaylistTile key={`skeleton-${idx}`} isLoading={true} />

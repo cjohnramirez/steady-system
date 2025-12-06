@@ -24,7 +24,7 @@ export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [college, setCollege] = useState("");
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const [emotionalStatus, _setEmotionalStatus] = useState("");
 
   const form = useForm({
     defaultValues: {

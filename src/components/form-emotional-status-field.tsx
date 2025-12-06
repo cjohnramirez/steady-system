@@ -1,9 +1,4 @@
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -21,14 +16,16 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { strToTitleCase } from "@/lib/format";
 
-export default function EmotionalStatusDropdown({
+export default function FormEmotionalStatusField({
   emotionalStatus,
   setEmotionalStatus,
   user_id,
+  enableDescription = true,
 }: {
   emotionalStatus: string;
   setEmotionalStatus: (emotionalStatus: string) => void;
-  user_id: string;
+  user_id?: string;
+  enableDescription?: boolean;
 }) {
   const {
     data: emotionalStatusData = [],
@@ -40,7 +37,7 @@ export default function EmotionalStatusDropdown({
 
   const mutation = useMutation({
     mutationFn: (newStatus: string) => {
-      return updateStudentEmotionalStatus(user_id, newStatus);
+      return updateStudentEmotionalStatus(user_id ?? "", newStatus);
     },
     onSuccess: () => {
       toast.success("Emotional status updated!");
@@ -52,13 +49,16 @@ export default function EmotionalStatusDropdown({
 
   const handleEmotionalStatusChange = (newStatus: string) => {
     setEmotionalStatus(newStatus);
-    mutation.mutate(newStatus);
+    if (user_id) mutation.mutate(newStatus);
   };
 
   return (
     <Field>
       <FieldLabel>Emotional Status</FieldLabel>
-      <Select value={emotionalStatus ?? ""} onValueChange={handleEmotionalStatusChange}>
+      <Select
+        value={emotionalStatus ?? ""}
+        onValueChange={handleEmotionalStatusChange}
+      >
         <SelectTrigger id="select-emotional-status">
           {isEmotionalStatusLoading ? (
             <div className="flex items-center gap-2">
@@ -78,7 +78,9 @@ export default function EmotionalStatusDropdown({
             ))}
         </SelectContent>
       </Select>
-      <FieldDescription>An emotional status must be chosen</FieldDescription>
+      {enableDescription && (
+        <FieldDescription>An emotional status must be chosen</FieldDescription>
+      )}
     </Field>
   );
 }

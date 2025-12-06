@@ -1,4 +1,4 @@
-import { Clock12, Clock2, Mail } from "lucide-react";
+import { Clock2, Mail } from "lucide-react";
 import Image from "next/image";
 
 type TeamMember = {
@@ -57,7 +57,7 @@ export const teamMembers: TeamMember[] = [
 export default function PrivacyPolicy() {
   return (
     <main className="my-10 w-full rounded-4xl border bg-white">
-      <section className="flex items-center justify-between border-b-1">
+      <section className="flex items-center justify-between border-b">
         <div className="space-y-2 p-10">
           <p className="text-6xl">Privacy Policy</p>
           <p className="w-4/5">

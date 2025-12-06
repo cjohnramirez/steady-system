@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/types/supabase";
-import { ArrowUpRight, Clock2Icon, MapPin } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
 export default function PlaylistTile({

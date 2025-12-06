@@ -3,7 +3,6 @@
 import { useUserStore } from "@/hooks/auth-store";
 import ProfileSection from "./_components/profile-section";
 import StudentAppointmentSection from "./_components/appointment-section";
-import { useEffect, useState } from "react";
 
 export default function StudentPage() {
   const username = useUserStore.getState().userName ?? "";

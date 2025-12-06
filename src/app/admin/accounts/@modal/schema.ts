@@ -3,9 +3,9 @@ import z from "zod";
 export const studentUpdateFormSchema = z.object({
   department_id: z.uuid().min(1, "Please select a valid department"),
   year_level: z
-    .number()
-    .min(1, "Year level must be between 1 and 5")
-    .max(5, "Year level must be between 1 and 5"),
+      .string()
+      .regex(/^[1-5]$/, "Year level must be between 1 and 5")
+      .transform((str) => parseInt(str)),
   emotional_status_id: z.uuid().min(1, "Please select an emotional status"),
   email: z.email("Please enter a valid email address"),
   first_name: z.string().min(2, "First name must be at least two characters"),

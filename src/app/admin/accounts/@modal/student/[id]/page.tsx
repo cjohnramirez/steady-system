@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchEmotionalStatus, updateStudentProfile } from "../../actions";
+import { updateStudentProfile } from "../../actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Edit2 } from "lucide-react";
@@ -22,49 +22,25 @@ import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown";
 import FormYearLevelField from "@/components/form-year-level-field";
 import { studentUpdateFormSchema } from "../../schema";
-import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import EmotionalStatusDropdown from "@/app/auth/signup/components/emotional-status-dropdown";
+import { fetchStudent } from "../../actions";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
-export default function StudentModal({ id }: { id?: string }) {
+export default function StudentModal() {
   const queryClient = useQueryClient();
 
-  const params = useParams();
-  const resolvedId = id ?? params?.id;
   const router = useRouter();
-
+  
   const [college, setCollege] = useState("");
-  const [selectEmotionalStatus, setSelectEmotionalStatus] = useState("");
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const [emotionalStatus] = useState("");
 
-  const { data: student } = useQuery({
-    queryKey: ["student", params.id],
-    queryFn: () =>
-      resolvedId ? fetchStudent(resolvedId[0]) : Promise.resolve(undefined),
-    initialData: () => {
-      const allQueries = queryClient.getQueriesData({
-        queryKey: ["students"],
-      });
+  const { id } = useParams();
+  const resolvedId = id as string;
 
-      for (const [_key, queryResult] of allQueries) {
-        const listData = (queryResult as any)?.data;
-        const found = listData?.find((a: any) => a.id === params.id);
-        if (found) return found;
-      }
-      return undefined;
-    },
+  const { data: student, isLoading } = useQuery({
+    queryKey: ["student", resolvedId],
+    queryFn: () => fetchStudent(resolvedId),
   });
 
   const updateMutation = useMutation({
@@ -81,25 +57,30 @@ export default function StudentModal({ id }: { id?: string }) {
 
   const form = useForm({
     defaultValues: {
-      first_name: student.first_name ?? "",
-      last_name: student.last_name ?? "",
-      username: student.username ?? "",
-      department_id: student.department_id ?? "",
-      university_id: student.university_id ?? "",
-      email: student.email ?? "",
-      year_level: student.year_level ?? "",
-      id: student.id ?? "",
-      phone: student.phone ?? "",
-      emotional_status_id: selectEmotionalStatus ?? "",
-      college_id: student.college_id ?? college ?? "",
+      first_name: student?.first_name ?? "",
+      last_name: student?.last_name ?? "",
+      username: student?.username ?? "",
+      department_id: student?.department_id ?? "",
+      university_id: Number(student?.university_id) ?? 0,
+      email: student?.email ?? "",
+      year_level: String(student?.year_level) ?? "",
+      id: student?.id ?? "",
+      phone: student?.phone ?? "",
+      emotional_status_id: student?.emotional_status_id ?? "",
+      college_id: student?.college_id ?? "",
     },
     validators: {
       onChange: studentUpdateFormSchema,
     },
     onSubmit: ({ value }) => {
-      updateMutation.mutate(value);
+      updateMutation.mutate({
+        ...value,
+        year_level: Number(value.year_level),
+      });
     },
   });
+
+  if (isLoading) return
 
   return (
     <Dialog
@@ -117,14 +98,14 @@ export default function StudentModal({ id }: { id?: string }) {
           <DialogTitle>Edit Account</DialogTitle>
         </DialogHeader>
         <form
-          className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-2 pt-5"
+          className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
           id="update-student-profile-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
-          <div className="row-span-2 h-full w-full">
+          <div className="row-span-4 h-full w-full">
             <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
               <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
                 <Edit2
@@ -163,7 +144,7 @@ export default function StudentModal({ id }: { id?: string }) {
               )}
             </form.Field>
           </div>
-          <div className="h-full w-full">
+          <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="college_id">
               {(field) => (
                 <CollegeDropdown
@@ -173,8 +154,6 @@ export default function StudentModal({ id }: { id?: string }) {
                 />
               )}
             </form.Field>
-          </div>
-          <div className="h-full w-full pb-4">
             <form.Field name="department_id">
               {(field) => (
                 <DepartmentDropdown
@@ -185,7 +164,7 @@ export default function StudentModal({ id }: { id?: string }) {
               )}
             </form.Field>
           </div>
-          <div>
+          <div className="col-span-2 mt-3 flex h-full w-full gap-2">
             <form.Field name="emotional_status_id">
               {(field) => (
                 <EmotionalStatusDropdown
@@ -195,19 +174,37 @@ export default function StudentModal({ id }: { id?: string }) {
                 />
               )}
             </form.Field>
-          </div>
-          <div className="h-full w-full">
             <form.Field name="university_id">
-              {(field) => (
-                <FormInputField
-                  label="University ID"
-                  placeholder="Enter a valid university ID (student)"
-                  field={field}
-                />
-              )}
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>University ID</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="number"
+                      value={String(field.state.value ?? "")}
+                      onBlur={field.handleBlur}
+                      onChange={(e) =>
+                        field.handleChange(Number(e.target.value))
+                      }
+                      aria-invalid={isInvalid}
+                      placeholder="Enter university ID"
+                    />
+                    {isInvalid ? (
+                      <div className="text-destructive mt-1 text-xs">
+                        {field.state.meta.errors?.join(", ")}
+                      </div>
+                    ) : null}
+                  </Field>
+                );
+              }}
             </form.Field>
           </div>
-          <div className="h-full w-full">
+          <div className="col-span-2 mt-3 flex h-full w-full gap-2">
             <form.Field name="email">
               {(field) => (
                 <FormInputField
@@ -217,8 +214,6 @@ export default function StudentModal({ id }: { id?: string }) {
                 />
               )}
             </form.Field>
-          </div>
-          <div className="h-full w-full">
             <form.Field name="year_level">
               {(field) => <FormYearLevelField field={field} />}
             </form.Field>

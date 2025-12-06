@@ -2,8 +2,23 @@
 
 import { createClient } from "@/utils/supabase/server";
 import z from "zod";
-import { Tables } from "@/types/supabase";
-import { counselorFormSchema, studentUpdateFormSchema } from "./schema";
+import { Tables, TablesUpdate } from "@/types/supabase";
+import { counselorFormSchema } from "./schema";
+
+export async function fetchStudent(
+  id: string,
+): Promise<Tables<"student_with_details"> | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("student_with_details")
+    .select("*")
+    .eq("id", id)
+    .single(); 
+
+  if (error) throw new Error(error.message);
+  return data || null;
+}
 
 export async function fetchCounselor(
   id: string,
@@ -49,16 +64,14 @@ export async function updateStudentEmotionalStatus(
 }
 
 export async function updateStudentProfile(
-  values: z.infer<typeof studentUpdateFormSchema>,
+  values: TablesUpdate<"student">,
 ) {
   const supabase = await createClient();
 
-  const { college_id, ...rest } = values;
-
   const { error } = await supabase
     .from("student")
-    .update(rest)
-    .eq("id", values.id)
+    .update(values)
+    .eq("id", values.id ?? "")
     .select("*").single();
 
   if (error) throw new Error("Error updating student profile: ", error);

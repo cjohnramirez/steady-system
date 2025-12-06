@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { updateStudentProfile } from "@/app/admin/accounts/@modal/actions";
+import { fetchStudent, updateStudentProfile } from "@/app/admin/accounts/@modal/actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Edit2 } from "lucide-react";
@@ -22,7 +22,6 @@ import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown
 import FormYearLevelField from "@/components/form-year-level-field";
 import { studentUpdateFormSchema } from "@/app/admin/accounts/@modal/schema";
 import z from "zod";
-import { fetchStudent } from "@/app/admin/appointments/@modal/actions";
 
 interface StudentModalProps {
   open: boolean;
@@ -86,7 +85,6 @@ export default function StudentProfileModal({
         university_id: Number(value.university_id),
         year_level: Number(value.year_level),
         phone: value.phone,
-        college_id: value.college_id,
         emotional_status_id: value.emotional_status_id,
       });
     },

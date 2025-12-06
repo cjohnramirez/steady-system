@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function HomeSection() {
   return (
     <section
-      className="grid h-[calc(100dvh_-_210px)] min-h-[600px] grid-cols-[850px_1fr] gap-4"
+      className="grid h-[calc(100dvh-210px)] min-h-[600px] grid-cols-[850px_1fr] gap-4"
       id="home"
     >
       <div className="flex flex-col gap-4">

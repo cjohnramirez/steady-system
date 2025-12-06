@@ -2,9 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { HeartCrack, RefreshCcw } from "lucide-react";
-import { Geist } from "next/font/google";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 export default function GlobalError({
   error,
   reset,
@@ -12,8 +10,6 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const router = useRouter();
-
   return (
     <div className="flex h-dvh flex-col items-center justify-between bg-gray-50 p-10 font-sans">
       <div className="my-auto space-y-6 text-center">

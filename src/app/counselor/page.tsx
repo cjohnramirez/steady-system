@@ -45,7 +45,7 @@ export default function CounselorPage() {
       ),
   });
 
-  const { data: counselorProfile, isLoading: isLoadingCounselorProfile } =
+  const { data: counselorProfile } =
     useQuery({
       queryKey: ["counselor-profile"],
       queryFn: () => fetchCounselorProfile(supabase, userID),

@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { fetchDepartment } from "../actions";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEmotionalStatus } from "@/app/admin/accounts/@modal/actions";
 
@@ -52,7 +51,6 @@ export default function EmotionalStatusDropdown({
       queryFn: () => fetchEmotionalStatus(),
     });
   
-
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor={field.name}>Emotional Status</FieldLabel>
