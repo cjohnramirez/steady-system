@@ -167,9 +167,13 @@ src/
 
 ## 👥 Contributors
 
-| Name | Role |
-|------|------|
-| John Carl Ramirez | Lead Developer |
+| Name | Role | Email |
+|------|------|-------|
+| Gerlie Campion | Technical Writer and Documentation Specialist | campiongerlie18@gmail.com |
+| Francis Adrian Esteban | Quality Assurance (QA) and Tester | francisadrian.esteban@1.ustp.edu.ph |
+| Jhey Gulde | Backend Developer and System Architect | gulde.jhey8@gmail.com |
+| Kathleen Grace Gultiano | UI/UX Designer | gultiano.kathleengrace@gmail.com | 
+| John Carl Ramirez | Project Manager and Full-Stack Developer | johncarl.ramirez.dev@gmail.com |
 
 ---
 

@@ -58,7 +58,7 @@ export const teamMembers: TeamMember[] = [
 export default function MeetTheDevelopers() {
   return (
     <main className="w-full bg-white rounded-4xl border">
-      <section className="flex items-center justify-between border-b-1">
+      <section className="flex items-center justify-between border-b">
         <div className="space-y-2 p-10">
           <p className="text-6xl">Meet the developers</p>
           <p>Welcome! Here is a little about the team behind this project.</p>
