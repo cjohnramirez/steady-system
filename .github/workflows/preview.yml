@@ -1,4 +1,4 @@
-name: GCS Management System and Landing Page Production Deployment
+name: GCS Management System and Landing Page Preview Deployment
 
 on:
   push:
