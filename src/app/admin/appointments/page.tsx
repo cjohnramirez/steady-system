@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchAppointments } from "./actions";
 import { PaginationState } from "@tanstack/react-table";
+import { Info } from "lucide-react";
 
 type TabName = "all" | "pending" | "approved" | "completed" | "cancelled";
 
@@ -52,6 +53,13 @@ export default function AppointmentPage() {
 
   return (
     <div>
+      <div className="mb-10 flex w-full items-center gap-5 rounded-2xl border bg-white p-5">
+        <Info strokeWidth={1.25} />
+        <div className="flex-1">
+          <p className="font-medium">Data Privacy Act and Confidentiality Clause</p>
+          <p className="text-sm ">Counselling appointment data is obfuscated to protect client privacy and comply with confidentiality regulations.</p>
+        </div>
+      </div>
       <DataTable
         columns={appointmentColumns}
         data={appointmentData}

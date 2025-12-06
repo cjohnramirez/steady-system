@@ -7,8 +7,8 @@ export default function LoadingAppointments() {
         <Skeleton className="bg-muted h-10 w-[300px] rounded-md" />
         <div className="flex gap-4">
           <Skeleton className="bg-muted h-10 w-[300px] rounded-md" />
-          <Skeleton className="bg-muted h-10 w-[80px] rounded-md" />
-          <Skeleton className="bg-muted h-10 w-[80px] rounded-md" />
+          <Skeleton className="bg-muted h-10 w-20  rounded-md" />
+          <Skeleton className="bg-muted h-10 w-20 rounded-md" />
         </div>
       </div>
       <div className="h-full">
