@@ -10,7 +10,7 @@ export default function HomeSection() {
   const router = useRouter();
 
   return (
-    <section className="h-[calc(100dvh_-_150px)] max-h-[800px]" id="home">
+    <section className="h-[calc(100dvh-150px)] max-h-[800px]" id="home">
       <div className="flex h-3/5 items-center justify-between">
         <div className="w-2/3 max-w-[700px] space-y-4">
           <p className="text-6xl">Nurturing Student Growth and Well-being</p>
@@ -34,7 +34,7 @@ export default function HomeSection() {
           </div>
         </div>
         <div className="w-1/4 rounded-xl border border-gray-200 bg-white">
-          <div className="flex items-center gap-4 border-b-1 px-6 py-4">
+          <div className="flex items-center gap-4 border-b px-6 py-4">
             <MapPin
               className="rounded-full border border-gray-200 p-2"
               size={40}
