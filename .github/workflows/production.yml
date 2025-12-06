@@ -37,7 +37,7 @@ jobs:
       - name: Run Prettier
         run: pnpm format --check
 
-   type-check:
+  type-check:
     name: TypeScript Type Checking
     runs-on: ubuntu-latest
     needs: lint
