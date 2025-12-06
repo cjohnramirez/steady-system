@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin } from "lucide-react";
 import Image from "next/image";
-import img from "../../../assets/hero.jpg";
+import img from "../../../assets/hero.jpg"
 import { useRouter } from "next/navigation";
 
 export default function HomeSection() {
