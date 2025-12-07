@@ -15,21 +15,10 @@ import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertAnnouncement, insertArticle, insertPlaylist } from "../actions";
+import { insertPlaylist } from "../actions";
 import {
-  announcementInsertFormSchema,
-  articleInsertFormSchema,
   playlistInsertFormSchema,
 } from "../schema";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Calendar } from "@/components/ui/calendar";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import {
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useState } from "react";

@@ -17,14 +17,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GCS System | University Guidance & Counseling",
+  title: "GCS System | USTP-CDO Guidance & Counseling",
   description: "Official Guidance and Counseling Services platform for students, providing announcements, workshops, and counseling sessions.",
   keywords: ["Guidance", "Counseling", "University", "Student Support", "Workshops", "Announcements"],
   authors: [{ name: "Guidance and Counselling Services" }],
-  creator: "Guidance and Counselling Services",
-  publisher: "Guidance and Counselling Services",
+  creator: "Guidance and Counselling Services, USTP-CDO",
+  publisher: "Guidance and Counselling Services, USTP-CDO",
   openGraph: {
-    title: "GCS System | University Guidance & Counseling",
+    title: "GCS System | USTP-CDO Guidance & Counseling",
     description: "Stay updated with announcements, events, and counseling programs from the Guidance and Counseling Services Unit.",
     url: "https://gcs-system.vercel.app/",
     siteName: "GCS System",
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GCS System | University Guidance & Counseling",
+    title: "GCS System | USTP-CDO Guidance & Counseling",
     description: "Official platform for announcements, events, and counseling sessions.",
-    images: ["/home-page.png"],
+    images: ["https://gcs-system.vercel.app/home-page.png"],
   }
 };
 

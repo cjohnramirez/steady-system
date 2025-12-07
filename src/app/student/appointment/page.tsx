@@ -32,10 +32,12 @@ export default function AppointmentPage() {
     queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
   });
 
+  const appointmentCounselorName =
+    (appointmentCounselor?.last_name ?? "") +
+    " " +
+    (appointmentCounselor?.first_name ?? "");
 
-
-  const appointmentCounselorName = appointmentCounselor?.first_name ?? "";
-  // fetch department of STUDENT
+    console.log(appointmentCounselor)
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -76,7 +78,7 @@ export default function AppointmentPage() {
         <div className="w-full space-y-6">
           <CounselorSection
             appointmentCounselorName={appointmentCounselorName}
-            appointmentDepartmentName={""}
+            appointmentDepartmentName={appointmentCounselor?.department ?? ""}
             isLoading={isAppointmentCounselorLoading}
           />
           <DateTimeSection

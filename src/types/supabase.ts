@@ -605,6 +605,13 @@ export type Database = {
             foreignKeyName: "student_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
+            referencedRelation: "counselor_with_details"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "student_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
             referencedRelation: "department"
             referencedColumns: ["id"]
           },
@@ -673,6 +680,8 @@ export type Database = {
         Row: {
           availability_id: string | null
           day_of_week: boolean[] | null
+          department: string | null
+          department_id: string | null
           email: string | null
           end_time: string | null
           first_name: string | null
