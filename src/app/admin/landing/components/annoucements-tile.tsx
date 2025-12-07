@@ -1,7 +1,11 @@
+"use client";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/types/supabase";
 import { Calendar, MapPin } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
+import AnnouncementUpdateModal from "./announcement-update-modal";
 
 export default function AnnoucementTile({
   annoucementTile,
@@ -10,9 +14,11 @@ export default function AnnoucementTile({
   annoucementTile?: Tables<"announcement">;
   isLoading?: boolean;
 }) {
+  const [openUpdateAnnouncement, setOpenUpdateAnnouncement] = useState(false);
+
   if (isLoading) {
     return (
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-gray-300 p-2 bg-white">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white p-2">
         <Skeleton className="h-40 w-full rounded-t-2xl" />
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
           <div className="space-y-2">
@@ -30,39 +36,53 @@ export default function AnnoucementTile({
   if (!annoucementTile) return null;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white">
-      <div className="relative h-40 w-full">
-        <Image
-          src={
-            annoucementTile.announcement_image &&
-            annoucementTile.announcement_image !== ""
-              ? annoucementTile.announcement_image
-              : "/placeholder.png"
-          }
-          alt={annoucementTile.title + "-image"}
-          fill
-          className="rounded-t-2xl object-cover"
-          sizes="100vw"
+    <>
+      {openUpdateAnnouncement && (
+        <AnnouncementUpdateModal
+          open={openUpdateAnnouncement}
+          setOpen={setOpenUpdateAnnouncement}
+          id={annoucementTile.id}
         />
-      </div>
-      <div className="flex flex-1 flex-col justify-between gap-4 p-4">
-        <div>
-          <p className="font-medium line-clamp-1">{annoucementTile.title}</p>
-            <p className="text-sm line-clamp-2">{annoucementTile.description}</p>
+      )}
+      <div
+        className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white cursor-pointer"
+        onClick={() => setOpenUpdateAnnouncement(true)}
+      >
+        <div className="relative h-40 w-full">
+          <Image
+            src={
+              annoucementTile.announcement_image &&
+              annoucementTile.announcement_image !== ""
+                ? annoucementTile.announcement_image
+                : "/placeholder.png"
+            }
+            alt={annoucementTile.title + "-image"}
+            fill
+            className="rounded-t-2xl object-cover"
+            sizes="100vw"
+          />
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
-            <Calendar size={16} />
-            <p>
-              Archived {new Date(annoucementTile.start_date).toDateString()}
+        <div className="flex flex-1 flex-col justify-between gap-4 p-4">
+          <div>
+            <p className="line-clamp-1 font-medium">{annoucementTile.title}</p>
+            <p className="line-clamp-2 text-sm">
+              {annoucementTile.description}
             </p>
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
-            <MapPin size={16} />
-            <p>{new Date(annoucementTile.end_date).toDateString()}</p>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
+              <Calendar size={16} />
+              <p>
+                Archived {new Date(annoucementTile.start_date).toDateString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
+              <MapPin size={16} />
+              <p>{new Date(annoucementTile.end_date).toDateString()}</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

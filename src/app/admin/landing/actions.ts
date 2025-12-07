@@ -1,6 +1,52 @@
-import { TablesInsert, TablesUpdate } from "@/types/supabase";
+import { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient } from "@supabase/supabase-js";
+
+
+export async function fetchPlaylist(
+  id: string
+): Promise<Tables<"playlist">> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("playlist")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) throw new Error(String(error));
+  return data;
+}
+
+export async function fetchArticle(
+  id: string
+): Promise<Tables<"article">> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("article")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) throw new Error(String(error));
+  return data;
+}
+
+export async function fetchAnnouncement(
+  id: string
+): Promise<Tables<"announcement">> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("announcement")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error) throw new Error(String(error));
+  return data;
+}
 
 export async function fetchArticles(
   supabase: SupabaseClient,
@@ -29,7 +75,7 @@ export async function fetchArticles(
   };
 }
 
-export async function fetchPlaylist(
+export async function fetchPlaylists(
   supabase: SupabaseClient,
   page: number,
   pageSize: number,
@@ -125,15 +171,15 @@ export async function insertArticle(
 }
 
 // update announcement
-export async function updateAppointment(
-  supabase: SupabaseClient,
-  id: string,
-  values: TablesUpdate<"appointment">,
+export async function updateAnnouncement(
+  values: TablesUpdate<"announcement">,
 ) {
+  const supabase = createClient()
+
   const { error } = await supabase
-    .from("appointment")
-    .update({ values })
-    .eq("id", id)
+    .from("announcement")
+    .update(values)
+    .eq("id", values.id)
     .single();
 
   if (error) throw new Error(String(error));
@@ -141,29 +187,28 @@ export async function updateAppointment(
 
 // update playlist
 export async function updatePlaylist(
-  supabase: SupabaseClient,
-  id: string,
   values: TablesUpdate<"playlist">,
 ) {
+  const supabase = createClient()
+
   const { error } = await supabase
     .from("playlist")
     .update({ values })
-    .eq("id", id)
+    .eq("id", values.id)
     .single();
 
   if (error) throw new Error(String(error));
 }
 
-// update articles
 export async function updateArticle(
-  supabase: SupabaseClient,
-  id: string,
   values: TablesUpdate<"article">,
 ) {
+  const supabase = createClient()
+
   const { error } = await supabase
     .from("article")
     .update({ values })
-    .eq("id", id)
+    .eq("id", values.id)
     .single();
 
   if (error) throw new Error(String(error));

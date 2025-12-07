@@ -9,42 +9,28 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Tables } from "@/types/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { fetchCounselor, updateCounselorProfile } from "../../actions";
 import { toast } from "sonner";
-import { counselorFormSchema } from "../../schema";
 import z from "zod";
 import { useForm } from "@tanstack/react-form";
-import { Edit2 } from "lucide-react";
+import { Edit2, Info } from "lucide-react";
 import { FormInputField } from "@/components/form-input-field";
 import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import { Spinner } from "@/components/ui/spinner";
+import { counselorUpdateFormSchema } from "../../schema";
 
-export default function CounselorModal({ id }: { id?: string }) {
+export default function CounselorModal() {
   const queryClient = useQueryClient();
 
-  const params = useParams();
-  const resolvedId = id ?? params?.id;
   const router = useRouter();
+  const { id } = useParams();
+  const resolvedId = id as string;
 
   const { data: counselor } = useQuery({
-    queryKey: ["counselor", params.id],
-    queryFn: () =>
-      resolvedId ? fetchCounselor(resolvedId[0]) : Promise.resolve(undefined),
-    initialData: () => {
-      const allQueries = queryClient.getQueriesData({
-        queryKey: ["counselors"],
-      });
-
-      for (const [_key, queryResult] of allQueries) {
-        const listData = (queryResult as any)?.data;
-        const found = listData?.find((a: any) => a.id === params.id);
-        if (found) return found;
-      }
-      return undefined;
-    },
+    queryKey: ["counselor", resolvedId],
+    queryFn: () => fetchCounselor(resolvedId),
   });
 
   const updateMutation = useMutation({
@@ -61,17 +47,15 @@ export default function CounselorModal({ id }: { id?: string }) {
 
   const form = useForm({
     defaultValues: {
-      id: String(counselor?.id ?? ""),
       email: counselor?.email ?? "",
       first_name: counselor?.first_name ?? "",
       last_name: counselor?.last_name ?? "",
-      university_id: String(counselor?.university_id ?? ""),
-      college_id: String(counselor?.college_id ?? ""),
+      university_id: counselor?.university_id ?? 0,
       username: counselor?.username ?? "",
       phone: counselor?.phone ?? "",
     },
     validators: {
-      onChange: counselorFormSchema.extend({
+      onChange: counselorUpdateFormSchema.extend({
         college_id: z.uuid({ message: "College is required" }),
       }),
     },
@@ -79,7 +63,7 @@ export default function CounselorModal({ id }: { id?: string }) {
       updateMutation.mutate({
         ...value,
         id: counselor?.id ?? "",
-        university_id: Number(value.university_id),
+        university_id: value.university_id,
       });
     },
   });
@@ -101,13 +85,23 @@ export default function CounselorModal({ id }: { id?: string }) {
           <DialogTitle>Edit Account</DialogTitle>
         </DialogHeader>
         <form
-          className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-2 pt-5"
+          className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-2 pt-3"
           id="update-student-profile-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
+          <div className="col-span-3 mb-5 flex w-full items-center gap-5 rounded-2xl border bg-white p-5">
+            <Info strokeWidth={1.25} />
+            <div className="flex-1">
+              <p className="font-medium">Counselor Availability</p>
+              <p className="text-sm">
+                Only the counselor can update their availability. Please contact
+                the counselor directly for any changes.
+              </p>
+            </div>
+          </div>
           <div className="row-span-2 h-full w-full">
             <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
               <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
@@ -137,6 +131,8 @@ export default function CounselorModal({ id }: { id?: string }) {
                 />
               )}
             </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="email">
               {(field) => (
                 <FormInputField
@@ -147,15 +143,6 @@ export default function CounselorModal({ id }: { id?: string }) {
                 />
               )}
             </form.Field>
-          </div>
-          <div className="h-full w-full">
-            <form.Field name="college_id">
-              {(field) => (
-                <CollegeDropdown field={field} enableDescription={false} />
-              )}
-            </form.Field>
-          </div>
-          <div className="h-full w-full">
             <form.Field name="university_id">
               {(field) => (
                 <FormInputField

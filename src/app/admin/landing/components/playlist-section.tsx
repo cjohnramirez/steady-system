@@ -11,7 +11,7 @@ import {
 import PlaylistTile from "./playlist-tile";
 import { createClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { fetchPlaylist } from "../actions";
+import { fetchPlaylists } from "../actions";
 import { useState } from "react";
 import { PaginationState } from "@tanstack/react-table";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
@@ -31,7 +31,7 @@ export default function PlaylistSection() {
   const { data: playlists, isLoading } = useQuery({
     queryKey: ["playlists", pagination.pageIndex, pagination.pageSize, search],
     queryFn: () =>
-      fetchPlaylist(
+      fetchPlaylists(
         supabase,
         pagination.pageIndex,
         pagination.pageSize,

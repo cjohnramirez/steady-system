@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import z from "zod";
 import { Tables, TablesUpdate } from "@/types/supabase";
-import { counselorFormSchema } from "./schema";
+import { counselorUpdateFormSchema } from "./schema";
 
 export async function fetchStudent(
   id: string,
@@ -13,7 +13,7 @@ export async function fetchStudent(
   const { data, error } = await supabase
     .from("student_with_details")
     .select("*")
-    .eq("user_id", id)
+    .eq("id", id)
     .single(); 
 
   if (error) throw new Error(error.message);
@@ -78,14 +78,14 @@ export async function updateStudentProfile(
 }
 
 export async function updateCounselorProfile(
-  values: z.infer<typeof counselorFormSchema>,
+  values: TablesUpdate<"counselor">,
 ): Promise<Tables<"counselor"> | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("counselor")
     .update(values)
-    .eq("id", values.id)
+    .eq("id", values?.id ?? "")
     .select("*")
     .single(); 
 

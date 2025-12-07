@@ -1,6 +1,8 @@
 import { studentInsertFormSchema } from "@/app/auth/signup/schema";
 import { z } from "zod";
 
+
+
 export const adminProfileFormSchema = z.object({
   email: z.email("Please enter a valid email address"),
   first_name: z.string().min(2, "First name must be at least two characters"),

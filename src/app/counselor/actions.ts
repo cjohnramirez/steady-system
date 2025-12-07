@@ -151,13 +151,13 @@ export async function updateCounselorProfile(
 }
 
 export async function updateCounselorAvailability(
-  values: TablesUpdate<"availability">
+  values: TablesUpdate<"counselor">
 ) {
 
   const supabase = createClient()
 
   const { error } = await supabase
-    .from("availability")
+    .from("counselor")
     .update(values)
     .eq("id", values.id)
     .select("*").single();

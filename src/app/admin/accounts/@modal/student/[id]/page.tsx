@@ -31,12 +31,12 @@ export default function StudentModal() {
   const queryClient = useQueryClient();
 
   const router = useRouter();
+  const { id } = useParams();
+  const resolvedId = id as string;
   
   const [college, setCollege] = useState("");
   const [emotionalStatus] = useState("");
 
-  const { id } = useParams();
-  const resolvedId = id as string;
 
   const { data: student, isLoading } = useQuery({
     queryKey: ["student", resolvedId],

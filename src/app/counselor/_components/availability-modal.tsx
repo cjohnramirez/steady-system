@@ -134,7 +134,6 @@ export default function AvailabilityModal({
       start_time: start24,
       end_time: end24,
       is_active: isActive === "null" ? null : isActive === "true",
-      id: counselor?.availability_id ?? "",
     });
   };
 
