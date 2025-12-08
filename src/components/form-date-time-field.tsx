@@ -5,13 +5,11 @@ import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Calendar } from "./ui/calendar";
-import { Clock, Info } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface FieldMeta {
   isTouched: boolean;

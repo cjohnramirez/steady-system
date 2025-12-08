@@ -59,9 +59,6 @@ export default function ArticleAddModal({
     validators: {
       onChange: articleInsertFormSchema,
     },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.errors);
-    },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
@@ -69,7 +66,7 @@ export default function ArticleAddModal({
 
   useEffect(() => {
     form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus]);
+  }, [emotionalStatus, form]);
 
   return (
     <Dialog

@@ -16,7 +16,7 @@ import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { fetchPlaylist, updatePlaylist } from "../actions";
-import { playlistInsertFormSchema, playlistUpdateFormSchema } from "../schema";
+import { playlistUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
@@ -33,8 +33,6 @@ export default function PlaylistUpdateModal({
   id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-
-  const [emotionalStatus, setEmotionalStatus] = useState("");
 
   const { data: playlist, isLoading } = useQuery({
     queryKey: ["playlist", id],
@@ -60,7 +58,7 @@ export default function PlaylistUpdateModal({
       title: playlist?.title ?? "",
       link: playlist?.link ?? "",
       creator: playlist?.creator ?? "",
-      emotional_status_id: emotionalStatus,
+      emotional_status_id: playlist?.emotional_status_id ?? "",
       id: id ?? "",
     },
     validators: {
@@ -73,14 +71,6 @@ export default function PlaylistUpdateModal({
       updateMutation.mutate(value);
     },
   });
-
-  useEffect(() => {
-    setEmotionalStatus(playlist?.emotional_status_id ?? "");
-  }, [playlist]);
-
-  useEffect(() => {
-    form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus]);
 
   if (isLoading) return;
 
@@ -158,11 +148,15 @@ export default function PlaylistUpdateModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>

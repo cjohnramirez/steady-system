@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AccountType,
@@ -79,16 +79,14 @@ export default function ExportModal({
     queryFn: () => fetchAccountCounts(supabase),
   });
 
-  useEffect(() => {
-    if (accountCount) {
-      const count =
-        accountType === "students"
-          ? accountCount.students
-          : accountCount.counselors;
+  if (accountCount) {
+    const count =
+      accountType === "students"
+        ? accountCount.students
+        : accountCount.counselors;
 
-      setNumberOfAccounts(String(Math.round(count / 10)));
-    }
-  }, [accountCount]);
+    setNumberOfAccounts(String(Math.round(count / 10)));
+  }
 
   if (accountCountError) {
     return (
@@ -134,14 +132,12 @@ export default function ExportModal({
   const studentCount = accountCount?.students ?? 0;
   const counselorCount = accountCount?.counselors ?? 0;
 
-  const numberOfStudentsArray = studentCount ? generateRange(
-    studentCount,
-    Math.round(studentCount / 10) ,
-  ) : [];
-  const numberOfCounselorsArray = counselorCount ? generateRange(
-    counselorCount,
-    Math.round(counselorCount / 10),
-  ) : [];
+  const numberOfStudentsArray = studentCount
+    ? generateRange(studentCount, Math.round(studentCount / 10))
+    : [];
+  const numberOfCounselorsArray = counselorCount
+    ? generateRange(counselorCount, Math.round(counselorCount / 10))
+    : [];
 
   const displayArray =
     accountType === "students"
@@ -168,7 +164,10 @@ export default function ExportModal({
         <div className="mt-3 grid grid-cols-2 grid-rows-2 gap-5">
           <div className="flex flex-col gap-2">
             <p className="font-medium">File Type</p>
-            <Select value={fileType} onValueChange={(val) => setFileType(val as FileType)}>
+            <Select
+              value={fileType}
+              onValueChange={(val) => setFileType(val as FileType)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>

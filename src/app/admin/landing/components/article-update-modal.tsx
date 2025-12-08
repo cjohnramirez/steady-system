@@ -19,7 +19,7 @@ import { fetchArticle, insertArticle, updateArticle } from "../actions";
 import { articleInsertFormSchema, articleUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 interface ArticleModalProps {
   open: boolean;
@@ -33,8 +33,6 @@ export default function ArticleUpdateModal({
   id,
 }: ArticleModalProps) {
   const queryClient = useQueryClient();
-
-  const [emotionalStatus, setEmotionalStatus] = useState("");
 
   const { data: article } = useQuery({
     queryKey: ["article", id],
@@ -72,10 +70,6 @@ export default function ArticleUpdateModal({
       updateMutation.mutate(value);
     },
   });
-
-  useEffect(() => {
-    setEmotionalStatus(article?.emotional_status_id ?? "");
-  }, [article]);
 
   return (
     <Dialog
@@ -171,11 +165,15 @@ export default function ArticleUpdateModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>

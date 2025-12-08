@@ -67,7 +67,7 @@ export default function PlaylistAddModal({
 
   useEffect(() => {
     form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus]);
+  }, [emotionalStatus, form]);
 
   return (
     <Dialog

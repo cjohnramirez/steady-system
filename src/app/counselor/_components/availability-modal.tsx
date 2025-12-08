@@ -9,11 +9,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchCounselorProfile, updateCounselorAvailability } from "../actions";
-import { createClient } from "@/utils/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateCounselorAvailability } from "../actions";
 import { startTransition, useEffect, useState } from "react";
-import { useUserStore } from "@/hooks/auth-store";
 import { Tables } from "@/types/supabase";
 import { ampmTo24, generateTimeSlots, toAMPM } from "@/lib/format";
 import {
