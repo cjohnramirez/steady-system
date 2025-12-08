@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
+import { FormDateTimeField } from "@/components/form-date-time-field";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -62,6 +63,9 @@ export default function AnnouncementAddModal({
     },
     validators: {
       onChange: announcementInsertFormSchema,
+    },
+    onSubmitInvalid: ({formApi}) => {
+      console.log(formApi.state.errors)
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
@@ -113,82 +117,14 @@ export default function AnnouncementAddModal({
           </div>
           <div className="col-span-2 flex gap-2">
             <form.Field name="start_date">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Start Date</FieldLabel>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="flex gap-2">
-                          {field.state.value || "Select date"}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="flex flex-col items-center">
-                        <DropdownMenuLabel>Select Start Date</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <Calendar
-                          mode="single"
-                          selected={
-                            field.state.value
-                              ? new Date(field.state.value)
-                              : undefined
-                          }
-                          onSelect={(date) =>
-                            field.setValue(
-                              date?.toISOString().split("T")[0] || "",
-                            )
-                          }
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+              {(field) => 
+                <FormDateTimeField field={field} description="Start Date"/>
+              }
             </form.Field>
             <form.Field name="end_date">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>End Date</FieldLabel>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline">
-                          {field.state.value || "Select date"}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="flex flex-col items-center">
-                        <DropdownMenuLabel>Select End Date</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <Calendar
-                          mode="single"
-                          selected={
-                            field.state.value
-                              ? new Date(field.state.value)
-                              : undefined
-                          }
-                          onSelect={(date) =>
-                            field.setValue(
-                              date?.toISOString().split("T")[0] || "",
-                            )
-                          }
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
+               {(field) => 
+                <FormDateTimeField field={field} description="End Date"/>
+              }
             </form.Field>
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">

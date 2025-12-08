@@ -69,7 +69,7 @@ export function FormDateTimeField({ field, description }: FormDateTimeField<stri
               if (date && value) {
                 date.setHours(value.getHours(), value.getMinutes());
               }
-              field.setValue(date?.toISOString() || "");
+              field.setValue(date ? date.toISOString() : "");
             }}
           />
           <div className="flex w-full flex-col items-center gap-3">

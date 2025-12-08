@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 
 export function generateRange(max: number, step: number) {
+  if (step <= 0) step = 1; // Ensure step is at least 1 to avoid infinite loop
   const arr = [];
   for (let i = step; i <= max; i += step) {
     arr.push(i);

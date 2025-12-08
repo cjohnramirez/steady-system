@@ -9,65 +9,73 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertPlaylist } from "../actions";
-import { playlistInsertFormSchema } from "../schema";
+import { fetchArticle, insertArticle, updateArticle } from "../actions";
+import { articleInsertFormSchema, articleUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
 
-interface AnnouncementModalProps {
+interface ArticleModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  id: string;
 }
 
-export default function PlaylistAddModal({
+export default function ArticleUpdateModal({
   open,
   setOpen,
-}: AnnouncementModalProps) {
+  id,
+}: ArticleModalProps) {
   const queryClient = useQueryClient();
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
+  const { data: article } = useQuery({
+    queryKey: ["article", id],
+    queryFn: () => fetchArticle(id),
+  });
+
   const updateMutation = useMutation({
-    mutationFn: insertPlaylist,
+    mutationFn: updateArticle,
     onSuccess: async () => {
-      toast.success("Playlist added successfully!");
+      toast.success("Article added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+      queryClient.invalidateQueries({ queryKey: ["article", id] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add playlist");
+      toast.error(err.message || "Failed to add articles");
     },
   });
 
   const form = useForm({
     defaultValues: {
-      title: "",
-      link: "",
-      creator: "",
-      emotional_status_id: emotionalStatus,
+      title: article?.title ?? "",
+      content: article?.content ?? "",
+      author_name: article?.author_name ?? "",
+      emotional_status_id: article?.emotional_status_id ?? "",
+      publisher_name: article?.publisher_name ?? "",
+      link: article?.link ?? "",
+      id: id ?? "",
     },
     validators: {
-      onChange: playlistInsertFormSchema,
-    },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.errors);
+      onChange: articleUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
-  });  
+  });
 
   useEffect(() => {
-    form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus]);
+    setEmotionalStatus(article?.emotional_status_id ?? "");
+  }, [article]);
 
   return (
     <Dialog
@@ -84,18 +92,18 @@ export default function PlaylistAddModal({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Add Playlist</DialogTitle>
+          <DialogTitle>Update Article</DialogTitle>
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-student-profile-form"
+          id="update-article-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
           <div className="row-span-3 flex flex-col gap-4">
-            <Label>Playlist Image</Label>
+            <Label>Article Image</Label>
             <div className="h-full rounded-2xl border p-2">
               <label
                 htmlFor="fileUpload"
@@ -134,11 +142,31 @@ export default function PlaylistAddModal({
             </form.Field>
           </div>
           <div className="col-span-2 flex gap-2">
-            <form.Field name="creator">
+            <form.Field name="author_name">
               {(field) => (
                 <FormInputField
-                  label="Creator"
-                  placeholder="Enter creator name"
+                  label="Author Name"
+                  placeholder="Enter author name"
+                  field={field}
+                />
+              )}
+            </form.Field>
+            <form.Field name="publisher_name">
+              {(field) => (
+                <FormInputField
+                  label="Publisher Name"
+                  placeholder="Enter publisher name"
+                  field={field}
+                />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex gap-2">
+            <form.Field name="content">
+              {(field) => (
+                <FormInputField
+                  label="Content"
+                  placeholder="Enter content"
                   field={field}
                 />
               )}
@@ -154,9 +182,9 @@ export default function PlaylistAddModal({
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            form="update-student-profile-form"
+            form="update-article-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending ? <Spinner /> : "Update"}
           </Button>
           <DialogClose asChild>
             <Button

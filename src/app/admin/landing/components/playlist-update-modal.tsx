@@ -9,14 +9,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertPlaylist } from "../actions";
-import { playlistInsertFormSchema } from "../schema";
+import { fetchPlaylist, updatePlaylist } from "../actions";
+import { playlistInsertFormSchema, playlistUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
@@ -24,22 +24,30 @@ import { useEffect, useState } from "react";
 interface AnnouncementModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  id: string;
 }
 
-export default function PlaylistAddModal({
+export default function PlaylistUpdateModal({
   open,
   setOpen,
+  id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
+  const { data: playlist, isLoading } = useQuery({
+    queryKey: ["playlist", id],
+    queryFn: () => fetchPlaylist(id),
+  });
+
   const updateMutation = useMutation({
-    mutationFn: insertPlaylist,
+    mutationFn: updatePlaylist,
     onSuccess: async () => {
       toast.success("Playlist added successfully!");
       setOpen(false);
 
+      queryClient.invalidateQueries({ queryKey: ["playlist", id] });
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
     },
     onError: (err: Error) => {
@@ -49,13 +57,14 @@ export default function PlaylistAddModal({
 
   const form = useForm({
     defaultValues: {
-      title: "",
-      link: "",
-      creator: "",
+      title: playlist?.title ?? "",
+      link: playlist?.link ?? "",
+      creator: playlist?.creator ?? "",
       emotional_status_id: emotionalStatus,
+      id: id ?? "",
     },
     validators: {
-      onChange: playlistInsertFormSchema,
+      onChange: playlistUpdateFormSchema,
     },
     onSubmitInvalid: ({ formApi }) => {
       console.log(formApi.state.errors);
@@ -63,11 +72,17 @@ export default function PlaylistAddModal({
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
-  });  
+  });
+
+  useEffect(() => {
+    setEmotionalStatus(playlist?.emotional_status_id ?? "");
+  }, [playlist]);
 
   useEffect(() => {
     form.setFieldValue("emotional_status_id", emotionalStatus);
   }, [emotionalStatus]);
+
+  if (isLoading) return;
 
   return (
     <Dialog
@@ -84,7 +99,7 @@ export default function PlaylistAddModal({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Add Playlist</DialogTitle>
+          <DialogTitle>Update Playlist</DialogTitle>
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
@@ -156,7 +171,7 @@ export default function PlaylistAddModal({
             disabled={updateMutation.isPending}
             form="update-student-profile-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending ? <Spinner /> : "Update"}
           </Button>
           <DialogClose asChild>
             <Button

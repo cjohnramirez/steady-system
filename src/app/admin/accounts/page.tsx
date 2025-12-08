@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { studentColumn } from "./_components/student-column";
 
 import { counselorColumn } from "./_components/counselor-column";
-import { fetchCounselors, fetchStudents } from "./actions";
+import { AccountType, fetchCounselors, fetchStudents } from "./actions";
 import { PaginationState } from "@tanstack/react-table";
 import { Download, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -73,7 +73,7 @@ export default function AccountsPage() {
 
   const tabs = {
     students: {
-      name: "students",
+      name: "students" as AccountType,
       data: studentsData,
       count: totalStudents,
       columns: studentColumn,
@@ -81,7 +81,7 @@ export default function AccountsPage() {
       rowUrl: (id: string) => `/admin/accounts/student/${id}`,
     },
     counselors: {
-      name: "counselors",
+      name: "counselors" as AccountType,
       data: counselorsData,
       count: totalCounselors,
       columns: counselorColumn,
@@ -91,6 +91,8 @@ export default function AccountsPage() {
   };
 
   const active = tabs[activeTab];
+
+  console.log(active.data)
 
   return (
     <>

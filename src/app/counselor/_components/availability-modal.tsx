@@ -10,10 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchCounselorProfile,
-  updateCounselorAvailability,
-} from "../actions";
+import { fetchCounselorProfile, updateCounselorAvailability } from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { startTransition, useEffect, useState } from "react";
 import { useUserStore } from "@/hooks/auth-store";
@@ -60,20 +57,13 @@ export default function AvailabilityModal({
   setOpen,
   counselorProfile,
 }: AvailabilityModalProps) {
-  const { confirm } = useConfirmStore();
+  const { confirm, startLoading, stopLoading } = useConfirmStore();
   const queryClient = useQueryClient();
-  const supabase = createClient();
-  const userID = useUserStore.getState().id;
 
   const [dayOfWeek, setDayOfWeek] = useState<boolean[]>([]);
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
   const [isActive, setIsActive] = useState<string>("");
-
-  const { data: counselor } = useQuery({
-    queryKey: ["counselor-profile"],
-    queryFn: () => fetchCounselorProfile(supabase, userID),
-  });
 
   useEffect(() => {
     if (!counselorProfile) return;
@@ -84,7 +74,7 @@ export default function AvailabilityModal({
       const startTimeFormatted = counselorProfile.start_time
         ? toAMPM(counselorProfile.start_time)
         : "";
-        
+
       const endTimeFormatted = counselorProfile.end_time
         ? toAMPM(counselorProfile.end_time)
         : "";
@@ -107,11 +97,14 @@ export default function AvailabilityModal({
     mutationFn: updateCounselorAvailability,
     onSuccess: async () => {
       toast.success("Counselor profile updated successfully!");
-      setOpen(false);
       queryClient.invalidateQueries({ queryKey: ["counselor-profile"] });
+      
+      setOpen(false);
+      stopLoading();
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to update counselor profile");
+      stopLoading();
     },
   });
 
@@ -122,6 +115,8 @@ export default function AvailabilityModal({
     );
 
     if (!ok) return;
+
+    startLoading();
 
     const start24 = startTime ? ampmTo24(startTime) : "";
     const end24 = endTime ? ampmTo24(endTime) : "";

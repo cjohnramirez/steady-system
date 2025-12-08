@@ -27,12 +27,18 @@ export async function fetchVisitorAnalytics(daysFromNow: number) {
 export async function fetchAppointmentCountAnalytics() {
   const supabaseAdmin = await createServiceClient();
 
-  const today = new Date().toISOString();
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  const toDate = today.toISOString().slice(0, 10);
+  const fromDate = yesterday.toISOString().slice(0, 10);
 
   const { count, error } = await supabaseAdmin
     .from("appointment")
     .select("*", { count: "exact", head: true })
-    .gte("created_at", today);
+    .lte("created_at", toDate)
+    .gte("created_at", fromDate);
 
   if (error) {
     throw new Error(
@@ -77,8 +83,7 @@ export async function fetchVisitorCountAnalytics() {
     .gte("date", fromDate)
     .lte("date", toDate);
 
-  const count =
-    data?.reduce((acc, curr) => acc + (curr.number_of_visitors), 0);
+  const count = data?.reduce((acc, curr) => acc + curr.number_of_visitors, 0);
 
   if (error) {
     throw new Error("Failed to retrieve visitor count analytics data :", error);

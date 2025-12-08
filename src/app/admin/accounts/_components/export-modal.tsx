@@ -16,25 +16,59 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchAccountCounts } from "../actions";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  AccountType,
+  exportAccounts,
+  fetchAccountCounts,
+  FileType,
+} from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { generateRange, strToTitleCase } from "@/lib/format";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 interface ExportModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  defaultAccountType: string;
+  defaultAccountType: AccountType;
 }
 
-export default function ExportModal({ open, setOpen }: ExportModalProps) {
+export default function ExportModal({
+  open,
+  setOpen,
+  defaultAccountType,
+}: ExportModalProps) {
   const supabase = createClient();
 
-  const [accountType, setAccountType] = useState("student");
+  const [loading, isLoading] = useState(false);
+
+  const [accountType, setAccountType] = useState(defaultAccountType);
+  const [fileType, setFileType] = useState("csv" as FileType);
   const [numberOfAccounts, setNumberOfAccounts] = useState("");
   const [sortBy, setSortBy] = useState("first_name");
+
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      isLoading(true);
+      return exportAccounts(
+        supabase,
+        accountType,
+        fileType,
+        parseInt(numberOfAccounts),
+      );
+    },
+    onSuccess: async () => {
+      toast.success("Announcement added successfully!");
+      isLoading(false);
+      setOpen(false);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to add annoucements");
+      isLoading(false);
+    },
+  });
 
   const {
     data: accountCount,
@@ -44,6 +78,17 @@ export default function ExportModal({ open, setOpen }: ExportModalProps) {
     queryKey: ["account-count"],
     queryFn: () => fetchAccountCounts(supabase),
   });
+
+  useEffect(() => {
+    if (accountCount) {
+      const count =
+        accountType === "students"
+          ? accountCount.students
+          : accountCount.counselors;
+
+      setNumberOfAccounts(String(Math.round(count / 10)));
+    }
+  }, [accountCount]);
 
   if (accountCountError) {
     return (
@@ -89,17 +134,20 @@ export default function ExportModal({ open, setOpen }: ExportModalProps) {
   const studentCount = accountCount?.students ?? 0;
   const counselorCount = accountCount?.counselors ?? 0;
 
-  const numberOfStudentsArray = generateRange(
+  const numberOfStudentsArray = studentCount ? generateRange(
     studentCount,
-    Math.round(studentCount / 10),
-  );
-  const numberOfCounselorsArray = generateRange(
+    Math.round(studentCount / 10) ,
+  ) : [];
+  const numberOfCounselorsArray = counselorCount ? generateRange(
     counselorCount,
     Math.round(counselorCount / 10),
-  );
+  ) : [];
 
   const displayArray =
-    accountType === "student" ? numberOfStudentsArray : numberOfCounselorsArray;
+    accountType === "students"
+      ? numberOfStudentsArray
+      : numberOfCounselorsArray;
+
   const sortByArray = [
     { value: "first_name", label: "First Name" },
     { value: "last_name", label: "Last Name" },
@@ -108,7 +156,7 @@ export default function ExportModal({ open, setOpen }: ExportModalProps) {
   ];
 
   const handleExport = async () => {
-    setOpen(false);
+    updateMutation.mutate();
   };
 
   return (
@@ -120,18 +168,22 @@ export default function ExportModal({ open, setOpen }: ExportModalProps) {
         <div className="mt-3 grid grid-cols-2 grid-rows-2 gap-5">
           <div className="flex flex-col gap-2">
             <p className="font-medium">File Type</p>
-            <Select defaultValue="csv">
+            <Select value={fileType} onValueChange={(val) => setFileType(val as FileType)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent side="top">
                 <SelectItem value="csv">CSV</SelectItem>
+                <SelectItem value="json">JSON</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-2">
             <p className="font-medium">Accounts</p>
-            <Select value={accountType} onValueChange={setAccountType}>
+            <Select
+              value={accountType}
+              onValueChange={(val) => setAccountType(val as AccountType)}
+            >
               <SelectTrigger className="w-full">
                 {!isAccountCountLoading ? (
                   <SelectValue placeholder="Select value" />
@@ -143,14 +195,14 @@ export default function ExportModal({ open, setOpen }: ExportModalProps) {
                 )}
               </SelectTrigger>
               <SelectContent side="top">
-                <SelectItem value="student">Student</SelectItem>
-                <SelectItem value="counselor">Counselor</SelectItem>
+                <SelectItem value="students">Students</SelectItem>
+                <SelectItem value="counselors">Counselors</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex flex-col gap-2">
             <p className="font-medium">
-              Number of {strToTitleCase(accountType)}s
+              Number of {strToTitleCase(accountType)}
             </p>
             <Select
               value={numberOfAccounts}
@@ -190,7 +242,7 @@ export default function ExportModal({ open, setOpen }: ExportModalProps) {
               Exit
             </Button>
           </DialogClose>
-          <Button onClick={handleExport}>Export</Button>
+          <Button onClick={handleExport}>{loading && <Spinner />}Export</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

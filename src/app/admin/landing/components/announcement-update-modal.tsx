@@ -16,7 +16,7 @@ import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { fetchAnnouncement, updateAnnouncement } from "../actions";
-import { announcementInsertFormSchema } from "../schema";
+import { announcementInsertFormSchema, announcementUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import { FormDateTimeField } from "@/components/form-date-time-field";
 
@@ -41,13 +41,14 @@ export default function AnnouncementUpdateModal({
   const updateMutation = useMutation({
     mutationFn: updateAnnouncement,
     onSuccess: async () => {
-      toast.success("Announcement added successfully!");
+      toast.success("Announcement updated successfully!");
       setOpen(false);
 
       queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcement", id] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to update annoucements");
     },
   });
 
@@ -61,7 +62,10 @@ export default function AnnouncementUpdateModal({
       id: annoucement?.id,
     },
     validators: {
-      onChange: announcementInsertFormSchema,
+      onChange: announcementUpdateFormSchema,
+    },
+    onSubmitInvalid: ({formApi}) => {
+      console.log(formApi.state.values)
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);

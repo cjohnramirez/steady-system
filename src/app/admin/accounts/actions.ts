@@ -1,8 +1,9 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { dataTableParams } from "../appointments/actions";
 import { TablesInsert } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
+import { json2csv } from "json-2-csv";
 
 export async function fetchStudents(
   supabase: SupabaseClient,
@@ -80,64 +81,22 @@ export async function fetchAccountCounts(supabase: SupabaseClient) {
     counselors: counselorCount || 0,
   };
 
+  console.log(counts);
+
   return counts;
 }
 
-export default async function insertCounselor(
-  values: TablesInsert<"counselor"> & { password: string },
-): Promise<{ error?: string; success?: string }> {
-  const supabase = await createClient();
-  const supabaseAdmin = await createServiceClient();
-
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: values.email,
-    password: values.password,
-  });
-
-  if (signUpError) {
-    return { error: "Counselor sign up failed" };
-  }
-
-  if (!signUpData.user?.id) {
-    return { error: "User ID not found" };
-  }
-
-  const userRole: { user_id: string; role: "student" | "admin" | "counselor" } =
-    {
-      user_id: signUpData.user?.id as string,
-      role: "counselor",
-    };
-
-  const { error: updateRoleError } = await supabaseAdmin
-    .from("user_roles")
-    .insert([userRole]);
-
-  if (updateRoleError) {
-    return { error: `Failed to update user role: ${updateRoleError.message}` };
-  }
-
-  const { error: updateStudentError } = await supabaseAdmin
-    .from("counselor")
-    .insert(values);
-
-  if (updateStudentError) {
-    return {
-      error: `Failed to insert counselor: ${updateStudentError.message}`,
-    };
-  }
-
-  return { success: "Sign Up successful" };
-}
-
-type AccountType = "student" | "counselor";
+export type AccountType = "students" | "counselors";
+export type FileType = "csv" | "json";
 
 export async function exportAccounts(
   supabase: SupabaseClient,
   accountType: AccountType,
+  fileType: FileType,
   amountOfData?: number,
 ) {
   const tableName =
-    accountType === "student"
+    accountType === "students"
       ? "student_with_details"
       : "counselor_with_details";
 
@@ -149,13 +108,20 @@ export async function exportAccounts(
 
   const { data } = await query;
 
-  const blob = new Blob([JSON.stringify(data, null, 2)], {
-    type: "application/json",
-  });
+  if (!data) {
+    return;
+  }
 
-  const url = URL.createObjectURL(blob);
+  const csv = json2csv(data);
+
+  const url = URL.createObjectURL(
+    new Blob([fileType === "csv" ? csv : JSON.stringify(data, null, 2)], {
+      type: fileType === "csv" ? "text/csv" : "application/json",
+    }),
+  );
+
   const a = document.createElement("a");
   a.href = url;
-  a.download = "export.json";
+  a.download = `export.${fileType}`;
   a.click();
 }

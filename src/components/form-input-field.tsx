@@ -43,6 +43,13 @@ export function FormInputField<TValue = string>({
 }: FormInputFieldProps<TValue>) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    field.handleChange(
+      type === "number" ? (Number(value) as TValue) : (value as TValue)
+    );
+  };
+
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
@@ -52,7 +59,7 @@ export function FormInputField<TValue = string>({
         type={type}
         value={String(field.state.value ?? "")}
         onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value as TValue)}
+        onChange={handleChange}
         aria-invalid={isInvalid}
         placeholder={placeholder}
       />

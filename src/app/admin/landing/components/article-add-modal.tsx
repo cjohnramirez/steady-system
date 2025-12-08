@@ -16,12 +16,10 @@ import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { insertArticle } from "../actions";
-import {
-  articleInsertFormSchema,
-} from "../schema";
+import { articleInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -39,13 +37,13 @@ export default function ArticleAddModal({
   const updateMutation = useMutation({
     mutationFn: insertArticle,
     onSuccess: async () => {
-      toast.success("Announcement added successfully!");
+      toast.success("Article added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to add article");
     },
   });
 
@@ -61,10 +59,17 @@ export default function ArticleAddModal({
     validators: {
       onChange: articleInsertFormSchema,
     },
+    onSubmitInvalid: ({ formApi }) => {
+      console.log(formApi.state.errors);
+    },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
   });
+
+  useEffect(() => {
+    form.setFieldValue("emotional_status_id", emotionalStatus);
+  }, [emotionalStatus]);
 
   return (
     <Dialog

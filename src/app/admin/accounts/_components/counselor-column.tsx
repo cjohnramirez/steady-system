@@ -1,15 +1,16 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Eye } from "lucide-react";
 
 function getTodayBool(days: boolean[]) {
   const jsDay = new Date().getDay();
-  const dayIndex = jsDay === 0 ? 7 : jsDay;
-  return days[dayIndex] ?? false;
+  const dayIndex = jsDay;
+  return days && days.length > dayIndex ? days[dayIndex] : false;
 }
 
 export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
@@ -76,14 +77,13 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      const availabilityArray = row.getValue("availability") ?? "";
-
+      const dayOfWeekArray = originalRow.day_of_week ?? [];
       const isActive = originalRow.is_active;
 
       const status =
-        isActive === true
+        isActive === null
           ? getTodayBool(
-              (Array.isArray(availabilityArray) && availabilityArray) || [],
+              Array.isArray(dayOfWeekArray) ? dayOfWeekArray : [],
             )
           : false;
 
@@ -101,6 +101,19 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;
       return filterValue.includes(row.getValue(columnId));
+    },
+  },
+  {
+    header: "Department/s",
+    cell: ({ row }) => {
+
+      return (
+        // bruh this is sooooo cool
+        <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}> 
+          <Eye />
+          View Department
+        </Button>
+      );
     },
   },
 ];

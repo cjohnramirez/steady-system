@@ -36,7 +36,9 @@ export default function CounselorModal() {
   const updateMutation = useMutation({
     mutationFn: updateCounselorProfile,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["students"] });
+      await queryClient.invalidateQueries({ queryKey: ["counselor", resolvedId] });
+      await queryClient.invalidateQueries({ queryKey: ["counselors"] });
+      
       toast.success("Counselor profile updated successfully!");
       router.back();
     },
@@ -53,18 +55,17 @@ export default function CounselorModal() {
       university_id: counselor?.university_id ?? 0,
       username: counselor?.username ?? "",
       phone: counselor?.phone ?? "",
+      id: counselor?.id ?? ""
     },
     validators: {
-      onChange: counselorUpdateFormSchema.extend({
-        college_id: z.uuid({ message: "College is required" }),
-      }),
+      onChange: counselorUpdateFormSchema,
+    },
+    onSubmitInvalid: ({formApi}) => {
+      console.log(formApi.state.errors)
+      console.log(formApi.state.values)
     },
     onSubmit: ({ value }) => {
-      updateMutation.mutate({
-        ...value,
-        id: counselor?.id ?? "",
-        university_id: value.university_id,
-      });
+      updateMutation.mutate(value);
     },
   });
 
@@ -127,6 +128,15 @@ export default function CounselorModal() {
                 <FormInputField
                   label="Last Name"
                   placeholder="Enter last name"
+                  field={field}
+                />
+              )}
+            </form.Field>
+            <form.Field name="username">
+              {(field) => (
+                <FormInputField
+                  label="Username"
+                  placeholder="Enter username"
                   field={field}
                 />
               )}

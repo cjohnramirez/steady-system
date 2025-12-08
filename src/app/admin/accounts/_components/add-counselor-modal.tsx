@@ -25,11 +25,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
-import insertCounselor from "../actions";
 import { counselorInsertFormSchema } from "../@modal/schema";
 import { email } from "zod";
 import FormPasswordField from "@/components/form-password-field";
 import { useState } from "react";
+import insertCounselor from "../server-actions";
+import { useConfirmStore } from "@/hooks/confirm-store";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -40,6 +41,7 @@ export default function AddCounselorModal({
   open,
   setOpen,
 }: AnnouncementModalProps) {
+  const { confirm } = useConfirmStore();
   const queryClient = useQueryClient();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -47,10 +49,10 @@ export default function AddCounselorModal({
   const updateMutation = useMutation({
     mutationFn: insertCounselor,
     onSuccess: async () => {
-      toast.success("Announcement added successfully!");
+      toast.success("Counselor added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["counselors"] });
     },
     onError: (err: Error) => {
       toast.error(err.message || "Failed to add annoucements");
@@ -68,9 +70,21 @@ export default function AddCounselorModal({
       password: "",
     },
     validators: {
-      onChange: counselorInsertFormSchema,
+      onBlur: counselorInsertFormSchema,
+      onSubmit: counselorInsertFormSchema,
+    },
+    onSubmitInvalid: async ({ formApi }) => {
+      console.log("Validation errors:", formApi.state.errors);
+      console.log("Form values:", formApi.state.values);
+      toast.error("Please fill in all required fields correctly");
     },
     onSubmit: async ({ value }) => {
+      const ok = await confirm(
+        "Add this counselor?",
+        "Please make sure all details are correct. Afterwards, verify the email for confirmation",
+      );
+
+      if (!ok) return;
       updateMutation.mutate(value);
     },
   });
@@ -94,7 +108,7 @@ export default function AddCounselorModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-4 py-5"
-          id="update-student-profile-form"
+          id="insert-counselor-profile-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();

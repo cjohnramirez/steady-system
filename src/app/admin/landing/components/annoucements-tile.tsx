@@ -45,7 +45,7 @@ export default function AnnoucementTile({
         />
       )}
       <div
-        className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white cursor-pointer"
+        className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-gray-300 bg-white hover:bg-gray-100/40"
         onClick={() => setOpenUpdateAnnouncement(true)}
       >
         <div className="relative h-40 w-full">
@@ -73,12 +73,12 @@ export default function AnnoucementTile({
             <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
               <Calendar size={16} />
               <p>
-                Archived {new Date(annoucementTile.start_date).toDateString()}
+                Starts on {new Date(annoucementTile.start_date).toDateString()}
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2">
               <MapPin size={16} />
-              <p>{new Date(annoucementTile.end_date).toDateString()}</p>
+              <p>{annoucementTile.location}</p>
             </div>
           </div>
         </div>
