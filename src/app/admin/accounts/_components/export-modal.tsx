@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AccountType,
@@ -79,14 +79,16 @@ export default function ExportModal({
     queryFn: () => fetchAccountCounts(supabase),
   });
 
-  if (accountCount) {
+  const defaultNumberOfAccounts = (() => {
+    if (!accountCount) return "";
+
     const count =
       accountType === "students"
         ? accountCount.students
         : accountCount.counselors;
 
-    setNumberOfAccounts(String(Math.round(count / 10)));
-  }
+    return String(Math.round(count / 10));
+  })();
 
   if (accountCountError) {
     return (
@@ -204,7 +206,7 @@ export default function ExportModal({
               Number of {strToTitleCase(accountType)}
             </p>
             <Select
-              value={numberOfAccounts}
+              value={numberOfAccounts || defaultNumberOfAccounts}
               onValueChange={setNumberOfAccounts}
             >
               <SelectTrigger className="w-full">

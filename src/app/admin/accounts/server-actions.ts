@@ -16,7 +16,7 @@ export default async function insertCounselor(
   });
 
   if (signUpError) {
-    throw new Error("Sign Up Error: ", signUpError)
+    throw new Error(`Sign Up Error: ${signUpError.message}`)
   }
 
   if (!signUpData.user?.id) {
@@ -34,18 +34,18 @@ export default async function insertCounselor(
     .insert([userRole]);
 
   if (updateRoleError) {
-    throw new Error("Failed to update user role: ", updateRoleError)
+    throw new Error(`Failed to update user role: ${updateRoleError.message}`)
   }
 
-  const {password, ...rest} = values
+  const { password, ...rest } = values
 
   const { error: updateCounselorError } = await supabaseAdmin
     .from("counselor")
-    .insert(rest);
+    .insert([{ ...rest, user_id: signUpData.user.id }]);
 
   if (updateCounselorError) {
     console.log(rest)
-    throw new Error("Failed to insert counselor: ", updateCounselorError)
+    throw new Error(`Failed to insert counselor: ${updateCounselorError.message}`)
   }
 
   return { success: "Sign Up successful" };

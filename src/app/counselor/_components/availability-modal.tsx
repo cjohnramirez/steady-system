@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { useConfirmStore } from "@/hooks/confirm-store";
 import { toast } from "sonner";
+import { useUserStore } from "@/hooks/auth-store";
+import { Info } from "lucide-react";
 
 interface AvailabilityModalProps {
   open: boolean;
@@ -57,6 +59,7 @@ export default function AvailabilityModal({
 }: AvailabilityModalProps) {
   const { confirm, startLoading, stopLoading } = useConfirmStore();
   const queryClient = useQueryClient();
+  const userID = useUserStore.getState().id
 
   const [dayOfWeek, setDayOfWeek] = useState<boolean[]>([]);
   const [startTime, setStartTime] = useState<string>("");
@@ -127,6 +130,7 @@ export default function AvailabilityModal({
       start_time: start24,
       end_time: end24,
       is_active: isActive === "null" ? null : isActive === "true",
+      id: userID
     });
   };
 
@@ -147,7 +151,16 @@ export default function AvailabilityModal({
         <DialogHeader>
           <DialogTitle>Change Availability</DialogTitle>
         </DialogHeader>
-        <div className="mt-3">
+        <div>
+          <div className="col-span-3 mb-7 mt-3 flex w-full items-center gap-5 rounded-2xl border bg-white p-5">
+            <Info strokeWidth={1.25} />
+            <div className="flex-1">
+                <p className="font-medium">Important Notice</p>
+                <p className="text-sm">
+                Please be aware that changing your availability may affect existing appointments. Review your schedule before saving changes.
+                </p>
+            </div>
+          </div>
           <p className="font-medium">Select Day of Week</p>
           <p className="mb-5">
             Days selected will be marked as available to students for

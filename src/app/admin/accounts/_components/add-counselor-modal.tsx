@@ -41,7 +41,7 @@ export default function AddCounselorModal({
   open,
   setOpen,
 }: AnnouncementModalProps) {
-  const { confirm } = useConfirmStore();
+  const { confirm, startLoading, stopLoading } = useConfirmStore();
   const queryClient = useQueryClient();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -51,11 +51,12 @@ export default function AddCounselorModal({
     onSuccess: async () => {
       toast.success("Counselor added successfully!");
       setOpen(false);
-
+      stopLoading()
       queryClient.invalidateQueries({ queryKey: ["counselors"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      stopLoading()
+      toast.error(err.message || "Failed to add counselor");
     },
   });
 
@@ -83,6 +84,8 @@ export default function AddCounselorModal({
         "Add this counselor?",
         "Please make sure all details are correct. Afterwards, verify the email for confirmation",
       );
+
+      startLoading()
 
       if (!ok) return;
       updateMutation.mutate(value);
