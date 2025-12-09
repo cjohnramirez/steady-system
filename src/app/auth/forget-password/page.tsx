@@ -124,10 +124,10 @@ export default function ForgetPassword() {
               </emailForm.Field>
             </FieldGroup>
             <div className="flex w-full justify-end gap-4">
-              <Button variant="outline" onClick={() => window.history.back()}>
+              <Button variant="outline" type="button" onClick={() => router.back()}>
                 Back
               </Button>
-              <Button disabled={sendResetEmailMutation.isPending}>
+              <Button disabled={sendResetEmailMutation.isPending} type="submit">
                 {sendResetEmailMutation.isPending ? <Spinner /> : <>Send</>}
               </Button>
             </div>

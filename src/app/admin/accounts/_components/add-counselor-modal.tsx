@@ -12,21 +12,10 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
-import { Edit2, Upload } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Calendar } from "@/components/ui/calendar";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import {
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import { counselorInsertFormSchema } from "../@modal/schema";
-import { email } from "zod";
 import FormPasswordField from "@/components/form-password-field";
 import { useState } from "react";
 import insertCounselor from "../server-actions";
@@ -73,11 +62,6 @@ export default function AddCounselorModal({
     validators: {
       onBlur: counselorInsertFormSchema,
       onSubmit: counselorInsertFormSchema,
-    },
-    onSubmitInvalid: async ({ formApi }) => {
-      console.log("Validation errors:", formApi.state.errors);
-      console.log("Form values:", formApi.state.values);
-      toast.error("Please fill in all required fields correctly");
     },
     onSubmit: async ({ value }) => {
       const ok = await confirm(

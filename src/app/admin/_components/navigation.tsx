@@ -1,12 +1,18 @@
 "use client";
 
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import { Bell, BookOpenIcon, ChevronsUpDown } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bell,
+  BookOpenIcon,
+  ChevronsUpDown,
+  Home,
+  Settings,
+} from "lucide-react";
 import Image from "next/image";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +22,9 @@ import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { createClient } from "@/utils/supabase/client";
 import { useUserStore } from "@/hooks/auth-store";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useConfirmStore } from "@/hooks/confirm-store";
 
 type Navigation = {
   name: string;
@@ -45,21 +54,40 @@ const navigationObj: Navigation[] = [
   },
 ];
 
-export async function handleChange() {
-  useUserStore.getState().setUserName("");
-  useUserStore.getState().setUserRole("");
-
-  const supabase = createClient();
-  const { error } = await supabase.auth.signOut();
-
-  if (error) throw new Error(error.message);
-
-  window.location.reload();
-}
-
 export default function NavigationBar() {
+  const { confirm, startLoading, stopLoading } = useConfirmStore();
   const pathName = usePathname();
   const router = useRouter();
+
+  const userName = useUserStore.getState().userName;
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const handleChange = async () => {
+    const ok = await confirm(
+      "Log out?",
+      "Are you sure you want to log out? This will end your current session.",
+    );
+
+    if (!ok) return;
+
+    startLoading();
+
+    useUserStore.getState().setUserName("");
+    useUserStore.getState().setUserRole("");
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) throw new Error(error.message);
+
+    stopLoading();
+    window.location.reload();
+  };
 
   return (
     <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b bg-white p-6 pb-0">
@@ -74,27 +102,77 @@ export default function NavigationBar() {
           </div>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="flex items-center gap-4">
-              <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
-              <p>Username</p>
-              <Badge variant="secondary">User Role</Badge>
-              <ChevronsUpDown size={20} />
+              {isClient ? (
+                <>
+                  <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
+                  <p>{userName}</p>
+                  <Badge variant="secondary">User Role</Badge>
+                  <ChevronsUpDown size={20} />
+                </>
+              ) : (
+                <>
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-6 w-16" />
+                  <Skeleton className="h-5 w-5" />
+                </>
+              )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Account Options</DropdownMenuLabel>
-              <DropdownMenuItem
+            <DropdownMenuContent className="space-y-6 p-6">
+              <div className="flex flex-col items-start">
+                <p className="font-medium">{userName}</p>
+                <p>Admin account</p>
+              </div>
+              <div className="space-y-4">
+                <Link
+                  href="/admin/settings"
+                  className="flex items-center justify-between gap-20"
+                >
+                  <p>Account Settings</p>
+                  <Settings strokeWidth={1.25} />
+                </Link>
+                <Link
+                  href="/home"
+                  className="flex items-center justify-between gap-20"
+                >
+                  <p>Home Page</p>
+                  <Home strokeWidth={1.25} />
+                </Link>
+              </div>
+              <Button
                 onClick={async () => {
                   await handleChange();
                 }}
+                className="w-full"
               >
                 Log Out
-              </DropdownMenuItem>
+              </Button>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" className="w-9">
-            <BookOpenIcon />
-          </Button>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger className="flex items-center gap-4" asChild>
+              <Button variant="outline" className="w-9">
+                <BookOpenIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="mt-3 mr-6">
+              <DropdownMenuItem>
+                <Link href="/misc/meet-the-developers">
+                  Meet the Developers
+                </Link>{" "}
+                <ArrowUpRight />
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/">User Documentation</Link> <ArrowUpRight />
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/misc/privacy-policy">Privacy Policy</Link>{" "}
+                <ArrowUpRight />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <div className="flex gap-8 pl-5">

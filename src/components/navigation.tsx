@@ -13,10 +13,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ChevronsUpDown } from "lucide-react";
-import { handleChange } from "@/app/admin/_components/navigation";
 import { NavBar } from "../app/home/_lib/nav-data";
+import { useConfirmStore } from "@/hooks/confirm-store";
+import { createClient } from "@/utils/supabase/client";
 
 export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
+  const { confirm, startLoading, stopLoading } = useConfirmStore();
+
   const router = useRouter();
   const [userName, setUserName] = useState(useUserStore.getState().userName);
   const userRole = useUserStore.getState().userRole;
@@ -33,6 +36,28 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
     });
     return () => unsubscribe();
   }, []);
+
+  const handleChange = async () => {
+    const ok = await confirm(
+      "Log out?",
+      "Are you sure you want to log out? This will end your current session.",
+    );
+
+    if (!ok) return;
+
+    startLoading();
+
+    useUserStore.getState().setUserName("");
+    useUserStore.getState().setUserRole("");
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) throw new Error(error.message);
+
+    stopLoading();
+    window.location.reload();
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white p-6">

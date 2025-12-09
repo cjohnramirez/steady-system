@@ -13,11 +13,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { fetchCounselor, updateCounselorProfile } from "../../actions";
 import { toast } from "sonner";
-import z from "zod";
 import { useForm } from "@tanstack/react-form";
 import { Edit2, Info } from "lucide-react";
 import { FormInputField } from "@/components/form-input-field";
-import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import { Spinner } from "@/components/ui/spinner";
 import { counselorUpdateFormSchema } from "../../schema";
 
@@ -161,6 +159,7 @@ export default function CounselorModal() {
                   label="University ID"
                   placeholder="Enter a valid university ID (student)"
                   field={field}
+                  type="number"
                 />
               )}
             </form.Field>

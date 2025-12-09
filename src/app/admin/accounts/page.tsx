@@ -29,7 +29,6 @@ export default function AccountsPage() {
 
   const [openExport, setOpenExport] = useState(false);
   const [openAddCounselorAccount, setOpenAddCounselorAccount] = useState(false);
-  const [openAddStudentAccount, setOpenAddStudentAccount] = useState(false);
 
   const { data: students, isLoading: isStudentsLoading } = useQuery({
     queryKey: [

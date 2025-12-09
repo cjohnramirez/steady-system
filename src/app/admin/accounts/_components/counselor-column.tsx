@@ -6,6 +6,8 @@ import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ArrowUpDown, Eye } from "lucide-react";
+import { useState } from "react";
+import AssignDepartmentModal from "./assign-department-modal";
 
 function getTodayBool(days: boolean[]) {
   const jsDay = new Date().getDay();
@@ -63,13 +65,6 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
   {
     accessorKey: "username",
     header: "Username",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("username")}
-        </div>
-      );
-    },
   },
   {
     accessorKey: "availability",
@@ -82,9 +77,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
 
       const status =
         isActive === null
-          ? getTodayBool(
-              Array.isArray(dayOfWeekArray) ? dayOfWeekArray : [],
-            )
+          ? getTodayBool(Array.isArray(dayOfWeekArray) ? dayOfWeekArray : [])
           : false;
 
       const statusColor = clsx("text-black", {
@@ -106,13 +99,29 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
   {
     header: "Department/s",
     cell: ({ row }) => {
+      const [openAssignDepartment, setOpenAssignDepartment] = useState(false);
 
       return (
-        // bruh this is sooooo cool
-        <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}> 
-          <Eye />
-          View Department
-        </Button>
+        <>
+          {openAssignDepartment && (
+            <AssignDepartmentModal
+              open={openAssignDepartment}
+              setOpen={setOpenAssignDepartment}
+              id={row.original.id ?? ""}
+            />
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenAssignDepartment(true);
+            }}
+          >
+            <Eye />
+            View Department
+          </Button>
+        </>
       );
     },
   },

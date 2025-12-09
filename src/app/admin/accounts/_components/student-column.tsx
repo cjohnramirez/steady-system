@@ -68,34 +68,13 @@ export const studentColumn: ColumnDef<Tables<"student">>[] = [
   {
     accessorKey: "college_name",
     header: "College",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("college_name")}
-        </div>
-      );
-    },
   },
   {
     accessorKey: "department",
     header: "Department",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("department"))}
-        </div>
-      );
-    },
   },
   {
     accessorKey: "year_level",
     header: "Year Level",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-left text-xs">
-          {String(row.getValue("year_level"))}
-        </div>
-      );
-    },
   },
 ];
