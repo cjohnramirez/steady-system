@@ -1,5 +1,14 @@
 import { format } from "date-fns";
 
+export function generateRange(max: number, step: number) {
+  if (step <= 0) step = 1; // Ensure step is at least 1 to avoid infinite loop
+  const arr = [];
+  for (let i = step; i <= max; i += step) {
+    arr.push(i);
+  }
+  return arr;
+}
+
 export function dateToString(dateString?: string): string {
   if (!dateString) return "No schedule";
   return new Date(dateString).toLocaleString(undefined, {
@@ -52,3 +61,4 @@ export function toAMPM(time24: string): string {
   const hour = h % 12 === 0 ? 12 : h % 12;
   return `${hour}:${m.toString().padStart(2, "0")} ${period}`;
 }
+

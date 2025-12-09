@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { CircleOff } from "lucide-react";
 import { Suspense } from "react";
 import OrganizationInfo from "./_components/organization-info";
+import ProfilePicture from "./_components/profile-picture";
 
 interface SettingSection {
   name: string;
@@ -13,8 +14,12 @@ interface SettingSection {
 const settingSectionObj: SettingSection[] = [
   {
     name: "Organization Info",
-    section: <OrganizationInfo />
-  }
+    section: <OrganizationInfo />,
+  },
+  {
+    name: "Profile Picture",
+    section: <ProfilePicture />,
+  },
 ];
 
 export default function SystemSettingsPage() {

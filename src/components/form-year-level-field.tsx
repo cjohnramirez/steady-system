@@ -22,14 +22,14 @@ interface FieldState<TValue> {
   meta: FieldMeta;
 }
 
-interface FieldLike<TValue = string> {
+interface FieldLike<TValue = number> {
   name: string;
   state: FieldState<TValue>;
   handleBlur: () => void;
   handleChange: (value: TValue) => void;
 }
 
-interface FormYearLevelProps<TValue = string> {
+interface FormYearLevelProps<TValue = number> {
   field: FieldLike<TValue>;
 }
 
@@ -42,7 +42,7 @@ export default function FormYearLevelField({ field }: FormYearLevelProps) {
       <Select
         name={field.name}
         value={field.state.value ? field.state.value.toString() : ""}
-        onValueChange={(value) => field.handleChange(value)}
+        onValueChange={(value) => field.handleChange(Number(value))}
       >
         <SelectTrigger id="select-year-level" aria-invalid={isInvalid}>
           <SelectValue placeholder="Select Year Level" />

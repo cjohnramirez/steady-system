@@ -9,64 +9,68 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertArticle } from "../actions";
-import { articleInsertFormSchema } from "../schema";
+import { fetchAnnouncement, updateAnnouncement } from "../actions";
+import { announcementInsertFormSchema, announcementUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
-import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useEffect, useState } from "react";
+import { FormDateTimeField } from "@/components/form-date-time-field";
 
 interface AnnouncementModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  id: string;
 }
 
-export default function ArticleAddModal({
+export default function AnnouncementUpdateModal({
   open,
   setOpen,
+  id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
 
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const { data: annoucement } = useQuery({
+    queryKey: ["annoucement", id],
+    queryFn: () => fetchAnnouncement(id),
+  });
 
   const updateMutation = useMutation({
-    mutationFn: insertArticle,
+    mutationFn: updateAnnouncement,
     onSuccess: async () => {
-      toast.success("Article added successfully!");
+      toast.success("Announcement updated successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["announcement", id] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add article");
+      toast.error(err.message || "Failed to update annoucements");
     },
   });
 
   const form = useForm({
     defaultValues: {
-      title: "",
-      content: "",
-      author_name: "",
-      emotional_status_id: "",
-      publisher_name: "",
-      link: "",
+      description: annoucement?.description ?? "",
+      end_date: annoucement?.end_date ?? "",
+      location: annoucement?.location ?? "",
+      start_date: annoucement?.start_date ?? "",
+      title: annoucement?.title ?? "",
+      id: annoucement?.id,
     },
     validators: {
-      onChange: articleInsertFormSchema,
+      onChange: announcementUpdateFormSchema,
+    },
+    onSubmitInvalid: ({formApi}) => {
+      console.log(formApi.state.values)
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
   });
-
-  useEffect(() => {
-    form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus, form]);
 
   return (
     <Dialog
@@ -83,7 +87,7 @@ export default function ArticleAddModal({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Add Article</DialogTitle>
+          <DialogTitle>Update Announcement</DialogTitle>
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
@@ -94,7 +98,7 @@ export default function ArticleAddModal({
           }}
         >
           <div className="row-span-3 flex flex-col gap-4">
-            <Label>Article Image</Label>
+            <Label>Annoucement Image</Label>
             <div className="h-full rounded-2xl border p-2">
               <label
                 htmlFor="fileUpload"
@@ -111,7 +115,18 @@ export default function ArticleAddModal({
               />
             </div>
           </div>
-
+          <div className="col-span-2 flex gap-2">
+            <form.Field name="start_date">
+              {(field) => (
+                <FormDateTimeField field={field} description="Start Date" />
+              )}
+            </form.Field>
+            <form.Field name="end_date">
+              {(field) => (
+                <FormDateTimeField field={field} description="End Date" />
+              )}
+            </form.Field>
+          </div>
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
@@ -122,51 +137,26 @@ export default function ArticleAddModal({
                 />
               )}
             </form.Field>
-            <form.Field name="link">
+            <form.Field name="location">
               {(field) => (
                 <FormInputField
-                  label="Link"
-                  placeholder="Enter link"
+                  label="Location"
+                  placeholder="Enter location"
                   field={field}
                 />
               )}
             </form.Field>
           </div>
-          <div className="col-span-2 flex gap-2">
-            <form.Field name="author_name">
+          <div className="col-span-2">
+            <form.Field name="description">
               {(field) => (
                 <FormInputField
-                  label="Author Name"
-                  placeholder="Enter author name"
+                  label="Description"
+                  placeholder="Enter description"
                   field={field}
                 />
               )}
             </form.Field>
-            <form.Field name="publisher_name">
-              {(field) => (
-                <FormInputField
-                  label="Publisher Name"
-                  placeholder="Enter publisher name"
-                  field={field}
-                />
-              )}
-            </form.Field>
-          </div>
-          <div className="col-span-2 flex gap-2">
-            <form.Field name="content">
-              {(field) => (
-                <FormInputField
-                  label="Content"
-                  placeholder="Enter content"
-                  field={field}
-                />
-              )}
-            </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
           </div>
         </form>
         <DialogFooter>
@@ -175,7 +165,7 @@ export default function ArticleAddModal({
             disabled={updateMutation.isPending}
             form="update-student-profile-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending ? <Spinner /> : "Update"}
           </Button>
           <DialogClose asChild>
             <Button

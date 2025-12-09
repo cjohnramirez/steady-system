@@ -62,7 +62,7 @@ export default function NavigationBar() {
   const router = useRouter();
 
   return (
-    <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b-1 bg-white p-5 pb-0">
+    <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b bg-white p-6 pb-0">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-10">
           <div
@@ -70,7 +70,7 @@ export default function NavigationBar() {
             onClick={() => router.replace("/home")}
           >
             <Image src="/icon.png" alt="GCS Icon" width={40} height={40} />
-            <p>Guidance and Counseling Services</p>
+            <p>Guidance and Counselling Services</p>
           </div>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="flex items-center gap-4">
@@ -92,9 +92,6 @@ export default function NavigationBar() {
           </DropdownMenu>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" className="w-9">
-            <Bell />
-          </Button>
           <Button variant="outline" className="w-9">
             <BookOpenIcon />
           </Button>

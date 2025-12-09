@@ -81,7 +81,7 @@ export default function DashboardPage() {
     {
       label: "Total Appointments Today",
       value: appointmentCount.data ?? 0,
-      description: "Number of appointments scheduled for today",
+      description: "Number of appointments created today",
       isLoading: appointmentCount.isLoading,
     },
     {

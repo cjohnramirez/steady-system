@@ -15,24 +15,11 @@ import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertAnnouncement, insertArticle, insertPlaylist } from "../actions";
-import {
-  announcementInsertFormSchema,
-  articleInsertFormSchema,
-  playlistInsertFormSchema,
-} from "../schema";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Calendar } from "@/components/ui/calendar";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import {
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { insertPlaylist } from "../actions";
+import { playlistInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -45,18 +32,16 @@ export default function PlaylistAddModal({
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
 
-  const [emotionalStatus, setEmotionalStatus] = useState("");
-
   const updateMutation = useMutation({
     mutationFn: insertPlaylist,
     onSuccess: async () => {
-      toast.success("Announcement added successfully!");
+      toast.success("Playlist added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to add playlist");
     },
   });
 
@@ -65,10 +50,15 @@ export default function PlaylistAddModal({
       title: "",
       link: "",
       creator: "",
-      emotional_status_id: emotionalStatus,
+      emotional_status_id: "",
     },
     validators: {
       onChange: playlistInsertFormSchema,
+    },
+    onSubmitInvalid: ({ formApi }) => {
+      console.log("Validation errors:", formApi.state.errors);
+      console.log("Form values:", formApi.state.values);
+      toast.error("Please fill in all required fields correctly");
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
@@ -149,11 +139,15 @@ export default function PlaylistAddModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>

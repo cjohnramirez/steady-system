@@ -62,9 +62,9 @@ export default function StudentProfileModal({
       username: student?.username || "",
       college_id: student?.college_id || "",
       department_id: student?.department_id || "",
-      university_id: String(student?.university_id || ""),
+      university_id: student?.university_id || 0,
       email: student?.email || "",
-      year_level: String(student?.year_level || ""),
+      year_level: student?.year_level || 0,
       id: String(student?.id),
       phone: student?.phone ? String(student.phone) : "",
       emotional_status_id: student?.emotional_status_id || "",
@@ -72,10 +72,6 @@ export default function StudentProfileModal({
     validators: {
       onChange: studentUpdateFormSchema.extend({
         college_id: z.uuid({ message: "College is required" }),
-        university_id: z
-          .string()
-          .min(1, { message: "University ID is required" }),
-        year_level: z.string().min(1, { message: "Year level is required" }),
       }),
     },
     onSubmit: async ({ value }) => {

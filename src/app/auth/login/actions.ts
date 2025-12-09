@@ -113,3 +113,51 @@ export default async function LoginFormAction(
     };
   }
 }
+
+export async function sendResetPasswordEmail(email: string): Promise<{
+  error?: string;
+  success?: string;
+}> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+  if (error)
+    return {
+      error: `Password reset email was not sent. Please check if your email exists`,
+    };
+
+  return { success: "Password reset email sent successfully." };
+}
+
+export async function updatePassword(password: string): Promise<{
+  error?: string;
+  success?: string;
+}> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) return { error: "Password reset failed" };
+
+  return { success: "Password reset successfully" };
+}
+
+export async function sendPasswordResetEmail(email: string): Promise<{
+  error?: string;
+  success?: string;
+}> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/forget-password`,
+  });
+
+  if (error) {
+    return { error: error.message || "Failed to send reset email" };
+  }
+
+  return { success: "Password reset email sent successfully" };
+}

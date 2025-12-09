@@ -9,14 +9,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertArticle } from "../actions";
-import { articleInsertFormSchema } from "../schema";
+import { fetchPlaylist, updatePlaylist } from "../actions";
+import { playlistUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
@@ -24,49 +24,55 @@ import { useEffect, useState } from "react";
 interface AnnouncementModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  id: string;
 }
 
-export default function ArticleAddModal({
+export default function PlaylistUpdateModal({
   open,
   setOpen,
+  id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
 
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const { data: playlist, isLoading } = useQuery({
+    queryKey: ["playlist", id],
+    queryFn: () => fetchPlaylist(id),
+  });
 
   const updateMutation = useMutation({
-    mutationFn: insertArticle,
+    mutationFn: updatePlaylist,
     onSuccess: async () => {
-      toast.success("Article added successfully!");
+      toast.success("Playlist added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["articles"] });
+      queryClient.invalidateQueries({ queryKey: ["playlist", id] });
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add article");
+      toast.error(err.message || "Failed to add playlist");
     },
   });
 
   const form = useForm({
     defaultValues: {
-      title: "",
-      content: "",
-      author_name: "",
-      emotional_status_id: "",
-      publisher_name: "",
-      link: "",
+      title: playlist?.title ?? "",
+      link: playlist?.link ?? "",
+      creator: playlist?.creator ?? "",
+      emotional_status_id: playlist?.emotional_status_id ?? "",
+      id: id ?? "",
     },
     validators: {
-      onChange: articleInsertFormSchema,
+      onChange: playlistUpdateFormSchema,
+    },
+    onSubmitInvalid: ({ formApi }) => {
+      console.log(formApi.state.errors);
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
   });
 
-  useEffect(() => {
-    form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus, form]);
+  if (isLoading) return;
 
   return (
     <Dialog
@@ -83,7 +89,7 @@ export default function ArticleAddModal({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Add Article</DialogTitle>
+          <DialogTitle>Update Playlist</DialogTitle>
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
@@ -94,7 +100,7 @@ export default function ArticleAddModal({
           }}
         >
           <div className="row-span-3 flex flex-col gap-4">
-            <Label>Article Image</Label>
+            <Label>Playlist Image</Label>
             <div className="h-full rounded-2xl border p-2">
               <label
                 htmlFor="fileUpload"
@@ -133,40 +139,24 @@ export default function ArticleAddModal({
             </form.Field>
           </div>
           <div className="col-span-2 flex gap-2">
-            <form.Field name="author_name">
+            <form.Field name="creator">
               {(field) => (
                 <FormInputField
-                  label="Author Name"
-                  placeholder="Enter author name"
+                  label="Creator"
+                  placeholder="Enter creator name"
                   field={field}
                 />
               )}
             </form.Field>
-            <form.Field name="publisher_name">
+            <form.Field name="emotional_status_id">
               {(field) => (
-                <FormInputField
-                  label="Publisher Name"
-                  placeholder="Enter publisher name"
-                  field={field}
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
                 />
               )}
             </form.Field>
-          </div>
-          <div className="col-span-2 flex gap-2">
-            <form.Field name="content">
-              {(field) => (
-                <FormInputField
-                  label="Content"
-                  placeholder="Enter content"
-                  field={field}
-                />
-              )}
-            </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
           </div>
         </form>
         <DialogFooter>
@@ -175,7 +165,7 @@ export default function ArticleAddModal({
             disabled={updateMutation.isPending}
             form="update-student-profile-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending ? <Spinner /> : "Update"}
           </Button>
           <DialogClose asChild>
             <Button

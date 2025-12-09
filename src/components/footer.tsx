@@ -9,7 +9,7 @@ type ContactInfo = {
   link?: string;
 };
 
-const contactObj: ContactInfo[] = [
+export const contactObj: ContactInfo[] = [
   {
     icon: <Home size={20} strokeWidth={1} />,
     text: "Room 41-109, Claro M. Recto Avenue, Lapasan, Cagayan de Oro City 9000",
@@ -32,7 +32,7 @@ const contactObj: ContactInfo[] = [
 
 export default function Footer({ navBarObj }: { navBarObj: NavBar[] }) {
   return (
-    <section className="border-t-1 border-gray-200 bg-white p-15">
+    <section className="border-t border-gray-200 bg-white p-15">
       <div className="m-auto flex max-w-[1600px] justify-between gap-4">
         <div className="w-1/3 space-y-10">
           <section className="flex items-center gap-4">

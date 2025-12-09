@@ -1,6 +1,8 @@
 import { studentInsertFormSchema } from "@/app/auth/signup/schema";
 import { z } from "zod";
 
+
+
 export const adminProfileFormSchema = z.object({
   email: z.email("Please enter a valid email address"),
   first_name: z.string().min(2, "First name must be at least two characters"),
@@ -19,7 +21,7 @@ export const adminProfileFormSchema = z.object({
     .regex(/^\d{10,15}$/, "Phone number must be between 10 and 15 digits"),
 });
 
-export const adminPasswordFormSchema = z
+export const resetPasswordFormSchema = z
   .object({
     password: studentInsertFormSchema.shape.password,
     confirmPassword: studentInsertFormSchema.shape.password,

@@ -33,9 +33,9 @@ export default function SignUpForm() {
       email: "",
       department_id: "",
       college: "",
-      year_level: "",
+      year_level: 0,
       password: "",
-      university_id: "",
+      university_id: 0,
       username: "",
       phone: "",
       emotional_status_id: "",
@@ -159,6 +159,7 @@ export default function SignUpForm() {
                   label="University ID"
                   placeholder="Enter your university ID"
                   description="Enter a valid university ID (student)"
+                  type="number"
                 />
               )}
             </form.Field>

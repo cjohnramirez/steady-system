@@ -23,6 +23,9 @@ export default function ProfileSection() {
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
+  console.log("Student Data: ", studentData)
+  console.log("Student User ID: ", userID)
+
   return (
     <>
       {open && (

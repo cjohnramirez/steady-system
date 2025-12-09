@@ -27,9 +27,6 @@ export default function MetricSection({
           <p className="text-3xl">{pendingAppointments}</p>
         </div>
       </div>
-      <div className="rounded-2xl border p-5 text-center">
-        <p>Graph will be shown here</p>
-      </div>
     </section>
   );
 }

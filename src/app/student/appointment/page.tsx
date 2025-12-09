@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Tables } from "@/types/supabase";
+import { CircleOff, Phone, UserRoundXIcon } from "lucide-react";
+import { contactObj } from "@/components/footer";
 
 export default function AppointmentPage() {
   const [selectReason, setSelectReason] = useState("Academic");
@@ -32,10 +34,12 @@ export default function AppointmentPage() {
     queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
   });
 
+  const appointmentCounselorName =
+    (appointmentCounselor?.last_name ?? "") +
+    " " +
+    (appointmentCounselor?.first_name ?? "");
 
-
-  const appointmentCounselorName = appointmentCounselor?.first_name ?? "";
-  // fetch department of STUDENT
+  console.log(appointmentCounselor);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -59,6 +63,34 @@ export default function AppointmentPage() {
     },
   });
 
+  if (!appointmentCounselor)
+    return (
+      <div className="my-20 flex h-[calc(100dvh-250px)] flex-col items-center justify-center rounded-2xl">
+        <div className="flex justify-start gap-10">
+          <UserRoundXIcon size={40} strokeWidth={0.75} />
+          <div>
+            <p className="font-medium">There is no available counselor</p>
+            <p>Please contact the administration office for support.</p>
+          </div>
+        </div>
+
+        <div className="mt-10 grid grid-cols-1 items-center justify-between gap-5 rounded-2xl border border-gray-200 bg-white p-6">
+          {contactObj.map((contact, index) => (
+            <div key={index} className="flex items-start gap-2">
+              {contact.icon}
+              {contact.link ? (
+                <a href={contact.link} className="text-sm">
+                  {contact.text}
+                </a>
+              ) : (
+                <p className="text-sm">{contact.text}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
   return (
     <div className="space-y-6 p-10">
       <div className="space-y-2">
@@ -76,7 +108,7 @@ export default function AppointmentPage() {
         <div className="w-full space-y-6">
           <CounselorSection
             appointmentCounselorName={appointmentCounselorName}
-            appointmentDepartmentName={""}
+            appointmentDepartmentName={appointmentCounselor?.department ?? ""}
             isLoading={isAppointmentCounselorLoading}
           />
           <DateTimeSection

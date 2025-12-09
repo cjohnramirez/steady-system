@@ -9,64 +9,67 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertArticle } from "../actions";
-import { articleInsertFormSchema } from "../schema";
+import { fetchArticle, insertArticle, updateArticle } from "../actions";
+import { articleInsertFormSchema, articleUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
-interface AnnouncementModalProps {
+interface ArticleModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  id: string;
 }
 
-export default function ArticleAddModal({
+export default function ArticleUpdateModal({
   open,
   setOpen,
-}: AnnouncementModalProps) {
+  id,
+}: ArticleModalProps) {
   const queryClient = useQueryClient();
 
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const { data: article } = useQuery({
+    queryKey: ["article", id],
+    queryFn: () => fetchArticle(id),
+  });
 
   const updateMutation = useMutation({
-    mutationFn: insertArticle,
+    mutationFn: updateArticle,
     onSuccess: async () => {
       toast.success("Article added successfully!");
       setOpen(false);
 
+      queryClient.invalidateQueries({ queryKey: ["article", id] });
       queryClient.invalidateQueries({ queryKey: ["articles"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add article");
+      toast.error(err.message || "Failed to add articles");
     },
   });
 
   const form = useForm({
     defaultValues: {
-      title: "",
-      content: "",
-      author_name: "",
-      emotional_status_id: "",
-      publisher_name: "",
-      link: "",
+      title: article?.title ?? "",
+      content: article?.content ?? "",
+      author_name: article?.author_name ?? "",
+      emotional_status_id: article?.emotional_status_id ?? "",
+      publisher_name: article?.publisher_name ?? "",
+      link: article?.link ?? "",
+      id: id ?? "",
     },
     validators: {
-      onChange: articleInsertFormSchema,
+      onChange: articleUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);
     },
   });
-
-  useEffect(() => {
-    form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus, form]);
 
   return (
     <Dialog
@@ -83,11 +86,11 @@ export default function ArticleAddModal({
         }}
       >
         <DialogHeader>
-          <DialogTitle>Add Article</DialogTitle>
+          <DialogTitle>Update Article</DialogTitle>
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-student-profile-form"
+          id="update-article-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -162,20 +165,24 @@ export default function ArticleAddModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            form="update-student-profile-form"
+            form="update-article-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending ? <Spinner /> : "Update"}
           </Button>
           <DialogClose asChild>
             <Button

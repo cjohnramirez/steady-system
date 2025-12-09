@@ -272,30 +272,6 @@ export type Database = {
           },
         ]
       }
-      availability: {
-        Row: {
-          day_of_week: boolean[]
-          end_time: string
-          id: string
-          is_active: boolean | null
-          start_time: string
-        }
-        Insert: {
-          day_of_week?: boolean[]
-          end_time?: string
-          id?: string
-          is_active?: boolean | null
-          start_time?: string
-        }
-        Update: {
-          day_of_week?: boolean[]
-          end_time?: string
-          id?: string
-          is_active?: boolean | null
-          start_time?: string
-        }
-        Relationships: []
-      }
       college: {
         Row: {
           abbreviation: string
@@ -319,50 +295,51 @@ export type Database = {
       }
       counselor: {
         Row: {
-          availability_id: string
           avatar: string
+          day_of_week: boolean[]
           email: string
+          end_time: string
           first_name: string
           id: string
+          is_active: boolean | null
           last_name: string
           phone: string
+          start_time: string
           university_id: number
           user_id: string | null
           username: string
         }
         Insert: {
-          availability_id: string
           avatar?: string
+          day_of_week?: boolean[]
           email: string
+          end_time?: string
           first_name: string
           id?: string
+          is_active?: boolean | null
           last_name?: string
           phone: string
+          start_time?: string
           university_id: number
           user_id?: string | null
           username: string
         }
         Update: {
-          availability_id?: string
           avatar?: string
+          day_of_week?: boolean[]
           email?: string
+          end_time?: string
           first_name?: string
           id?: string
+          is_active?: boolean | null
           last_name?: string
           phone?: string
+          start_time?: string
           university_id?: number
           user_id?: string | null
           username?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "counselor_availability_id_fkey"
-            columns: ["availability_id"]
-            isOneToOne: false
-            referencedRelation: "availability"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       department: {
         Row: {
@@ -605,6 +582,13 @@ export type Database = {
             foreignKeyName: "student_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
+            referencedRelation: "counselor_with_details"
+            referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "student_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
             referencedRelation: "department"
             referencedColumns: ["id"]
           },
@@ -671,8 +655,9 @@ export type Database = {
       }
       counselor_with_details: {
         Row: {
-          availability_id: string | null
           day_of_week: boolean[] | null
+          department: string | null
+          department_id: string | null
           email: string | null
           end_time: string | null
           first_name: string | null
@@ -685,15 +670,7 @@ export type Database = {
           user_id: string | null
           username: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "counselor_availability_id_fkey"
-            columns: ["availability_id"]
-            isOneToOne: false
-            referencedRelation: "availability"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       playlist_with_details: {
         Row: {

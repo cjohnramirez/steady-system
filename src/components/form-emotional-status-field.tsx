@@ -7,12 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   fetchEmotionalStatus,
   updateStudentEmotionalStatus,
 } from "@/app/admin/accounts/@modal/actions";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { strToTitleCase } from "@/lib/format";
 
@@ -52,6 +51,8 @@ export default function FormEmotionalStatusField({
     if (user_id) mutation.mutate(newStatus);
   };
 
+  console.log("Emotional status selected: ", emotionalStatus)
+
   return (
     <Field>
       <FieldLabel>Emotional Status</FieldLabel>
@@ -69,10 +70,10 @@ export default function FormEmotionalStatusField({
             <SelectValue placeholder="Select Emotional Status" />
           )}
         </SelectTrigger>
-        <SelectContent position="item-aligned">
+        <SelectContent align="center">
           {emotionalStatusData &&
-            emotionalStatusData.map((emotion, idx) => (
-              <SelectItem value={emotion.id} key={idx}>
+            emotionalStatusData.map((emotion) => (
+              <SelectItem value={emotion.id} key={emotion.id}>
                 {strToTitleCase(emotion.name)}
               </SelectItem>
             ))}

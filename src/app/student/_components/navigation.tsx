@@ -27,7 +27,7 @@ export default function NavigationBar() {
   }, []);
 
   return (
-    <nav className="border-b-1 border-gray-200 bg-white p-6 top-0 z-10 sticky">
+    <nav className="border-b border-gray-200 bg-white p-6 top-0 z-10 sticky">
       <div className="m-auto flex max-w-[1600px] items-center justify-between gap-4">
         <section
           className="flex cursor-pointer items-center gap-4"

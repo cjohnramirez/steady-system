@@ -17,6 +17,7 @@ import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import AnnoucementTile from "./annoucements-tile";
 import AnnouncementAddModal from "./announcement-add-modal";
+import AnnouncementUpdateModal from "./announcement-update-modal";
 
 export default function AnnouncementSection() {
   const supabase = createClient();

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/input-group";
 import { Eye, EyeClosed } from "lucide-react";
 import { roles } from "@/types/main";
-import LoginFormAction from "../actions";
+import LoginFormAction, { sendResetPasswordEmail } from "../actions";
 import { FormInputField } from "@/components/form-input-field";
 import { useUserStore } from "@/hooks/auth-store";
 
@@ -39,7 +39,8 @@ const formSchema = z.object({
 export default function LoginForm({ role }: { role: roles }) {
   const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm({
@@ -51,7 +52,7 @@ export default function LoginForm({ role }: { role: roles }) {
       onSubmit: formSchema,
     },
     onSubmit: async (form) => {
-      setIsLoading(true);
+      setIsLoginLoading(true);
 
       try {
         const formData = new FormData();
@@ -77,7 +78,7 @@ export default function LoginForm({ role }: { role: roles }) {
 
         router.push("/");
       } finally {
-        setIsLoading(false);
+        setIsLoginLoading(false);
       }
     },
   });
@@ -116,7 +117,15 @@ export default function LoginForm({ role }: { role: roles }) {
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <p
+                      onClick={() => router.push("/auth/forget-password")}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      {isResetLoading && <Spinner />}Forget Password?
+                    </p>
+                  </div>
                   <InputGroup>
                     <InputGroupInput
                       id={field.name}
@@ -151,9 +160,9 @@ export default function LoginForm({ role }: { role: roles }) {
           type="submit"
           form="login-form"
           className="w-full"
-          disabled={isLoading}
+          disabled={isLoginLoading}
         >
-          {isLoading ? (
+          {isLoginLoading ? (
             <>
               <Spinner />
               <p>Submitting</p>

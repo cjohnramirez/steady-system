@@ -3,13 +3,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { updateAdminPassword } from "../actions";
 import { toast } from "sonner";
-import { useForm } from "@tanstack/react-form";
-import { adminPasswordFormSchema } from "../schema";
 import { FieldGroup } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
 import FormPasswordField from "@/components/form-password-field";
+import { resetPasswordFormSchema } from "../schema";
+import { useForm } from "@tanstack/react-form";
 
 export default function ChangePassword() {
   const [showPasswords, setShowPasswords] = useState(false);
@@ -31,7 +31,7 @@ export default function ChangePassword() {
       confirmPassword: "",
     },
     validators: {
-      onChange: adminPasswordFormSchema,
+      onChange: resetPasswordFormSchema,
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(value);

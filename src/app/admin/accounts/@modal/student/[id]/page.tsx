@@ -31,12 +31,11 @@ export default function StudentModal() {
   const queryClient = useQueryClient();
 
   const router = useRouter();
-  
-  const [college, setCollege] = useState("");
-  const [emotionalStatus] = useState("");
-
   const { id } = useParams();
   const resolvedId = id as string;
+
+  const [college, setCollege] = useState("");
+  const [emotionalStatus] = useState("");
 
   const { data: student, isLoading } = useQuery({
     queryKey: ["student", resolvedId],
@@ -46,6 +45,7 @@ export default function StudentModal() {
   const updateMutation = useMutation({
     mutationFn: updateStudentProfile,
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["student", resolvedId] });
       await queryClient.invalidateQueries({ queryKey: ["students"] });
       toast.success("Student profile updated successfully!");
       router.back();
@@ -61,9 +61,9 @@ export default function StudentModal() {
       last_name: student?.last_name ?? "",
       username: student?.username ?? "",
       department_id: student?.department_id ?? "",
-      university_id: Number(student?.university_id) ?? 0,
+      university_id: student?.university_id ?? 0,
       email: student?.email ?? "",
-      year_level: String(student?.year_level) ?? "",
+      year_level: student?.year_level ?? 0,
       id: student?.id ?? "",
       phone: student?.phone ?? "",
       emotional_status_id: student?.emotional_status_id ?? "",
@@ -73,14 +73,12 @@ export default function StudentModal() {
       onChange: studentUpdateFormSchema,
     },
     onSubmit: ({ value }) => {
-      updateMutation.mutate({
-        ...value,
-        year_level: Number(value.year_level),
-      });
+      const { college_id, ...rest } = value;
+      updateMutation.mutate(rest);
     },
   });
 
-  if (isLoading) return
+  if (isLoading) return;
 
   return (
     <Dialog

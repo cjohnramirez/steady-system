@@ -3,34 +3,35 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useConfirmStore } from "@/hooks/confirm-store";
+import { Spinner } from "./ui/spinner";
 
 export default function ConfirmModal() {
-  const { isOpen, title, message, resolve, close } = useConfirmStore();
-
-  const handleCancel = () => {
-    resolve?.(false);
-    close();
-  };
-
-  const handleConfirm = () => {
-    resolve?.(true);
-    close();
-  };
+  const { isOpen, isLoading, title, message, accept, cancel } = useConfirmStore();
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <DialogContent showCloseButton={false}>
+    <Dialog open={isOpen}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        <p className="">{message}</p>
+        <p>{message}</p>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-          <Button onClick={handleConfirm}>Confirm</Button>
+          <Button
+            variant="outline"
+            onClick={cancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+
+          <Button onClick={accept} disabled={isLoading}>
+            {isLoading && <Spinner />}Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+
