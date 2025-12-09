@@ -99,30 +99,34 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
   {
     header: "Department/s",
     cell: ({ row }) => {
-      const [openAssignDepartment, setOpenAssignDepartment] = useState(false);
+      // Move state to a component to avoid hook errors
+      function DepartmentCell() {
+        const [openAssignDepartment, setOpenAssignDepartment] = useState(false);
 
-      return (
-        <>
-          {openAssignDepartment && (
-            <AssignDepartmentModal
-              open={openAssignDepartment}
-              setOpen={setOpenAssignDepartment}
-              id={row.original.id ?? ""}
-            />
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenAssignDepartment(true);
-            }}
-          >
-            <Eye />
-            View Department
-          </Button>
-        </>
-      );
-    },
-  },
+        return (
+          <>
+            {openAssignDepartment && (
+              <AssignDepartmentModal
+                open={openAssignDepartment}
+                setOpen={setOpenAssignDepartment}
+                id={row.original.id ?? ""}
+              />
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenAssignDepartment(true);
+              }}
+            >
+              <Eye />
+              View Department
+            </Button>
+          </>
+        );
+      }
+      return <DepartmentCell />;
+    }
+  }
 ];

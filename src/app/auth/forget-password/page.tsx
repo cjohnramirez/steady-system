@@ -44,7 +44,7 @@ export default function ForgetPassword() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase.auth]);
 
   const sendResetEmailMutation = useMutation({
     mutationFn: sendPasswordResetEmail,
