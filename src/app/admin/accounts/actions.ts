@@ -1,8 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { dataTableParams } from "../appointments/actions";
-import { TablesInsert } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/server";
-import { createServiceClient } from "@/utils/supabase/service";
+import { createClient } from "@/utils/supabase/client";
 import { json2csv } from "json-2-csv";
 
 export async function fetchStudents(
@@ -61,6 +59,18 @@ export async function fetchCounselors(
     data: data || [],
     count: count || 0,
   };
+}
+
+export async function fetchCounselorDepartment(counselorID: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("department")
+    .select(`*`)
+    .eq("counselor_id", counselorID);
+
+  if (error) throw new Error("Error fetching counselor departments: ", error);
+  return data || [];
 }
 
 export async function fetchAccountCounts(supabase: SupabaseClient) {

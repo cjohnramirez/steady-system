@@ -11,9 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCounselorAvailability } from "../actions";
-import { startTransition, useEffect, useState } from "react";
 import { Tables } from "@/types/supabase";
-import { ampmTo24, generateTimeSlots, toAMPM } from "@/lib/format";
+import { generateTimeSlots, toAMPM } from "@/lib/format";
 import {
   Select,
   SelectContent,
@@ -25,6 +24,7 @@ import { useConfirmStore } from "@/hooks/confirm-store";
 import { toast } from "sonner";
 import { useUserStore } from "@/hooks/auth-store";
 import { Info } from "lucide-react";
+import { useForm } from "@tanstack/react-form";
 
 interface AvailabilityModalProps {
   open: boolean;
@@ -59,47 +59,14 @@ export default function AvailabilityModal({
 }: AvailabilityModalProps) {
   const { confirm, startLoading, stopLoading } = useConfirmStore();
   const queryClient = useQueryClient();
-  const userID = useUserStore.getState().id
-
-  const [dayOfWeek, setDayOfWeek] = useState<boolean[]>([]);
-  const [startTime, setStartTime] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
-  const [isActive, setIsActive] = useState<string>("");
-
-  useEffect(() => {
-    if (!counselorProfile) return;
-
-    startTransition(() => {
-      setDayOfWeek(counselorProfile.day_of_week ?? Array(7).fill(false));
-
-      const startTimeFormatted = counselorProfile.start_time
-        ? toAMPM(counselorProfile.start_time)
-        : "";
-
-      const endTimeFormatted = counselorProfile.end_time
-        ? toAMPM(counselorProfile.end_time)
-        : "";
-
-      setStartTime(startTimeFormatted);
-      setEndTime(endTimeFormatted);
-
-      console.log("Start time: ", startTimeFormatted);
-      console.log("End time: ", endTimeFormatted);
-
-      console.log(counselorProfile);
-
-      setIsActive(String(counselorProfile.is_active));
-    });
-  }, [counselorProfile]);
-
-  const timeSlots = generateTimeSlots("06:00", "20:30");
+  const counselorID = useUserStore.getState().id;
 
   const updateMutation = useMutation({
     mutationFn: updateCounselorAvailability,
     onSuccess: async () => {
       toast.success("Counselor profile updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["counselor-profile"] });
-      
+
       setOpen(false);
       stopLoading();
     },
@@ -109,30 +76,33 @@ export default function AvailabilityModal({
     },
   });
 
-  const handleSubmit = async () => {
-    const ok = await confirm(
-      "Change this appointment?",
-      "This action cannot be undone.",
-    );
+  console.log(counselorID);
 
-    if (!ok) return;
+  const timeSlots = generateTimeSlots("06:00", "20:30");
 
-    startLoading();
+  const form = useForm({
+    defaultValues: {
+      day_of_week: counselorProfile?.day_of_week ?? Array(7).fill(false),
+      start_time: counselorProfile?.start_time
+        ? toAMPM(counselorProfile.start_time)
+        : "",
+      end_time: counselorProfile?.end_time
+        ? toAMPM(counselorProfile.end_time)
+        : "",
+      is_active: (counselorProfile?.is_active ?? null) as boolean | null,
+      id: counselorID,
+    },
+    onSubmit: async ({ value }) => {
+      const ok = await confirm(
+        "Change this appointment?",
+        "This action cannot be undone.",
+      );
 
-    const start24 = startTime ? ampmTo24(startTime) : "";
-    const end24 = endTime ? ampmTo24(endTime) : "";
-
-    console.log("Start time: ", start24);
-    console.log("End time: ", end24);
-
-    updateMutation.mutate({
-      day_of_week: dayOfWeek,
-      start_time: start24,
-      end_time: end24,
-      is_active: isActive === "null" ? null : isActive === "true",
-      id: userID
-    });
-  };
+      if (!ok) return;
+      startLoading();
+      updateMutation.mutate(value);
+    },
+  });
 
   return (
     <Dialog
@@ -151,116 +121,145 @@ export default function AvailabilityModal({
         <DialogHeader>
           <DialogTitle>Change Availability</DialogTitle>
         </DialogHeader>
-        <div>
-          <div className="col-span-3 mb-7 mt-3 flex w-full items-center gap-5 rounded-2xl border bg-white p-5">
-            <Info strokeWidth={1.25} />
-            <div className="flex-1">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          id="update-availability-form"
+        >
+          <div>
+            <div className="col-span-3 mt-3 mb-7 flex w-full items-center gap-5 rounded-2xl border bg-white p-5">
+              <Info strokeWidth={1.25} />
+              <div className="flex-1">
                 <p className="font-medium">Important Notice</p>
                 <p className="text-sm">
-                Please be aware that changing your availability may affect existing appointments. Review your schedule before saving changes.
+                  Please be aware that changing your availability may affect
+                  existing appointments. Review your schedule before saving
+                  changes.
                 </p>
-            </div>
-          </div>
-          <p className="font-medium">Select Day of Week</p>
-          <p className="mb-5">
-            Days selected will be marked as available to students for
-            appointments
-          </p>
-          <div className="flex gap-2">
-            {counselorProfile &&
-              DAY_NAMES.map((day, idx) => (
-                <Button
-                  key={idx}
-                  variant={dayOfWeek[idx] ? "default" : "outline"}
-                  onClick={() => {
-                    setDayOfWeek((prev) => {
-                      const updated = [...prev];
-                      updated[idx] = !updated[idx];
-                      return updated;
-                    });
-                  }}
-                >
-                  {day}
-                </Button>
-              ))}
-          </div>
-        </div>
-        <div className="my-5 flex gap-10">
-          <div>
-            <p className="font-medium">Select Start and End Time</p>
-            <div className="mt-5 flex gap-4">
-              <div>
-                <p className="font-medium">Start Time</p>
-                <Select
-                  value={startTime}
-                  onValueChange={(val) => {
-                    setStartTime(val);
-                    console.log("Selected Time: ", val);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a start time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeSlots.map((slot, idx) => (
-                      <SelectItem key={idx} value={slot}>
-                        {slot}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <p className="font-medium">End Time</p>
-                <Select
-                  value={endTime}
-                  onValueChange={(val) => {
-                    setEndTime(val);
-                    console.log("Selected Time: ", val);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select an end time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeSlots.map((slot, idx) => (
-                      <SelectItem key={idx} value={slot}>
-                        {slot}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
+            <p className="font-medium">Select Day of Week</p>
+            <p className="mb-5">
+              Days selected will be marked as available to students for
+              appointments
+            </p>
+            <form.Field name="day_of_week">
+              {(field) => (
+                <div className="flex gap-2">
+                  {counselorProfile &&
+                    DAY_NAMES.map((day, idx) => (
+                      <Button
+                        key={day}
+                        type="button"
+                        variant={field.state.value[idx] ? "default" : "outline"}
+                        onClick={() => {
+                          const dayOfWeek = [...field.state.value];
+                          dayOfWeek[idx] = !dayOfWeek[idx];
+                          field.handleChange(dayOfWeek);
+                        }}
+                      >
+                        {day}
+                      </Button>
+                    ))}
+                </div>
+              )}
+            </form.Field>
           </div>
-          <div>
-            <p className="font-medium">Active Status</p>
-            <p>This overrides availability, defaults to None</p>
-            <div className="mt-5">
-              <Select
-                value={isActive}
-                onValueChange={(val) => setIsActive(val)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select active status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTIVE_STATUS.map((status) => (
-                    <SelectItem key={status.name} value={status.value}>
-                      <div
-                        className={`h-2 w-2 rounded-full ` + status.color}
-                      ></div>
-                      <p>{status.name}</p>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="my-5 flex gap-10">
+            <div>
+              <p className="font-medium">Select Start and End Time</p>
+              <div className="mt-5 flex gap-4">
+                <div>
+                  <p className="font-medium">Start Time</p>
+                  <form.Field name="start_time">
+                    {(field) => (
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(val) => field.handleChange(val)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a start time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeSlots.map((slot, idx) => (
+                            <SelectItem key={idx} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </form.Field>
+                </div>
+                <div>
+                  <p className="font-medium">End Time</p>
+                  <form.Field name="end_time">
+                    {(field) => (
+                      <Select
+                        value={field.state.value}
+                        onValueChange={(val) => field.handleChange(val)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select an end time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {timeSlots.map((slot, idx) => (
+                            <SelectItem key={idx} value={slot}>
+                              {slot}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </form.Field>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="font-medium">Active Status</p>
+              <p>This overrides availability, defaults to None</p>
+              <div className="mt-5">
+                <form.Field name="is_active">
+                  {(field) => (
+                    <Select
+                      value={String(field.state.value)}
+                      onValueChange={(val) =>
+                        field.handleChange(
+                          val === "null" ? null : val === "true",
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select active status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ACTIVE_STATUS.map((status) => (
+                          <SelectItem key={status.name} value={status.value}>
+                            <div
+                              className={`h-2 w-2 rounded-full ${status.color}`}
+                            />
+                            {status.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </form.Field>
+              </div>
             </div>
           </div>
-        </div>
+        </form>
         <DialogFooter>
           <div className="flex gap-2">
-            <Button onClick={handleSubmit}>Save Changes</Button>
+            <Button
+              type="submit"
+              disabled={updateMutation.isPending}
+              form="update-availability-form"
+            >
+              Save Changes
+            </Button>
             <DialogClose asChild>
               <Button
                 variant="outline"

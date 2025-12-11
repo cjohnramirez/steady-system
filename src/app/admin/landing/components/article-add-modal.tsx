@@ -20,6 +20,8 @@ import { articleInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
+import { uploadToCloudinary } from "@/app/actions";
+import ImageUpload from "@/components/image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -31,6 +33,8 @@ export default function ArticleAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
@@ -55,12 +59,31 @@ export default function ArticleAddModal({
       emotional_status_id: "",
       publisher_name: "",
       link: "",
+      article_image: "",
     },
     validators: {
       onChange: articleInsertFormSchema,
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      let finalValues = { ...value };
+
+      if (file) {
+        setIsUploading(true);
+        try {
+          const result = await uploadToCloudinary(file, "articles");
+
+          if (result && result.optimizedUrl) {
+            finalValues.article_image = result.optimizedUrl;
+          }
+        } catch (error) {
+          toast.error("Failed to upload article image");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      setIsUploading(false);
+      updateMutation.mutate(finalValues);
     },
   });
 
@@ -78,8 +101,8 @@ export default function ArticleAddModal({
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
-        onInteractOutside={() => {
-          setOpen(false);
+        onInteractOutside={(e) => {
+          if (isUploading) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -87,31 +110,18 @@ export default function ArticleAddModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-student-profile-form"
+          id="add-article-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
-          <div className="row-span-3 flex flex-col gap-4">
-            <Label>Article Image</Label>
-            <div className="h-full rounded-2xl border p-2">
-              <label
-                htmlFor="fileUpload"
-                className="row-span-3 flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center"
-              >
-                <Upload strokeWidth={1.25} />
-                <p>Click to upload the image.</p>
-              </label>
-              <input
-                type="file"
-                id="fileUpload"
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
+          <div className="row-span-3">
+            <ImageUpload
+              initialURL={form.state.values.article_image}
+              setFile={setFile}
+            />
           </div>
-
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
@@ -173,9 +183,10 @@ export default function ArticleAddModal({
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            form="update-student-profile-form"
+            form="add-article-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending || (isUploading && <Spinner />)}
+            <p>Update</p>
           </Button>
           <DialogClose asChild>
             <Button
@@ -183,6 +194,7 @@ export default function ArticleAddModal({
               onClick={() => {
                 setOpen(false);
               }}
+              disabled={isUploading}
             >
               Cancel
             </Button>

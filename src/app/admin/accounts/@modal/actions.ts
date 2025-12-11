@@ -55,7 +55,7 @@ export async function updateStudentEmotionalStatus(
   const { data, error } = await supabase
     .from("student")
     .update({ emotional_status_id: emotionalStatusId })
-    .eq("user_id", studentId)
+    .eq("id", studentId)
     .select("*")
     .single();
 

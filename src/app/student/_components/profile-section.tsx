@@ -13,23 +13,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 
 export default function ProfileSection() {
-  const userID = useUserStore.getState().id;
+  const studentID = useUserStore.getState().id;
   const [open, setOpen] = useState(false);
 
   const { data: studentData, isLoading } = useQuery({
     queryKey: ["student-user"],
-    queryFn: () => fetchStudent(userID),
+    queryFn: () => fetchStudent(studentID),
   });
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
   console.log("Student Data: ", studentData)
-  console.log("Student User ID: ", userID)
+  console.log("Student User ID: ", studentID)
 
   return (
     <>
       {open && (
-        <StudentProfileModal open={open} setOpen={setOpen} id={userID} />
+        <StudentProfileModal open={open} setOpen={setOpen} id={studentID} />
       )}
 
       <div className="grid grid-cols-2 grid-rows-3 gap-4 rounded-2xl border border-gray-200 bg-white p-5">
@@ -42,7 +42,7 @@ export default function ProfileSection() {
                   ? emotionalStatus
                   : (studentData?.emotional_status_id ?? "")
               }
-              user_id={userID}
+              studentID={studentID}
             />
           </div>
         </div>

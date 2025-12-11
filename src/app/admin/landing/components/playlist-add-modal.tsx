@@ -20,6 +20,8 @@ import { playlistInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
+import { uploadToCloudinary } from "@/app/actions";
+import ImageUpload from "@/components/image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -31,6 +33,8 @@ export default function PlaylistAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const updateMutation = useMutation({
     mutationFn: insertPlaylist,
@@ -51,17 +55,31 @@ export default function PlaylistAddModal({
       link: "",
       creator: "",
       emotional_status_id: "",
+      image: "",
     },
     validators: {
       onChange: playlistInsertFormSchema,
     },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log("Validation errors:", formApi.state.errors);
-      console.log("Form values:", formApi.state.values);
-      toast.error("Please fill in all required fields correctly");
-    },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      let finalValues = { ...value };
+
+      if (file) {
+        setIsUploading(true);
+        try {
+          const result = await uploadToCloudinary(file, "playlists");
+
+          if (result && result.optimizedUrl) {
+            finalValues.image = result.optimizedUrl;
+          }
+        } catch (error) {
+          toast.error("Failed to upload playlist image");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      setIsUploading(false);
+      updateMutation.mutate(finalValues);
     },
   });
 
@@ -75,8 +93,8 @@ export default function PlaylistAddModal({
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
-        onInteractOutside={() => {
-          setOpen(false);
+        onInteractOutside={(e) => {
+          if (isUploading) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -90,40 +108,18 @@ export default function PlaylistAddModal({
             form.handleSubmit();
           }}
         >
-          <div className="row-span-3 flex flex-col gap-4">
-            <Label>Playlist Image</Label>
-            <div className="h-full rounded-2xl border p-2">
-              <label
-                htmlFor="fileUpload"
-                className="row-span-3 flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center"
-              >
-                <Upload strokeWidth={1.25} />
-                <p>Click to upload the image.</p>
-              </label>
-              <input
-                type="file"
-                id="fileUpload"
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
+          <div className="row-span-3">
+            <ImageUpload
+              initialURL={form.state.values.image}
+              setFile={setFile}
+            />
           </div>
-
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
                 <FormInputField
                   label="Title"
                   placeholder="Enter title of annoucement"
-                  field={field}
-                />
-              )}
-            </form.Field>
-            <form.Field name="link">
-              {(field) => (
-                <FormInputField
-                  label="Link"
-                  placeholder="Enter link"
                   field={field}
                 />
               )}
@@ -145,6 +141,17 @@ export default function PlaylistAddModal({
                   emotionalStatus={field.state.value}
                   setEmotionalStatus={(value) => field.setValue(value)}
                   enableDescription={false}
+                />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <form.Field name="link">
+              {(field) => (
+                <FormInputField
+                  label="Link"
+                  placeholder="Enter link"
+                  field={field}
                 />
               )}
             </form.Field>

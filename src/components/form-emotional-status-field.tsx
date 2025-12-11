@@ -18,12 +18,12 @@ import { strToTitleCase } from "@/lib/format";
 export default function FormEmotionalStatusField({
   emotionalStatus,
   setEmotionalStatus,
-  user_id,
+  studentID,
   enableDescription = true,
 }: {
   emotionalStatus: string;
   setEmotionalStatus: (emotionalStatus: string) => void;
-  user_id?: string;
+  studentID?: string;
   enableDescription?: boolean;
 }) {
   const {
@@ -36,7 +36,7 @@ export default function FormEmotionalStatusField({
 
   const mutation = useMutation({
     mutationFn: (newStatus: string) => {
-      return updateStudentEmotionalStatus(user_id ?? "", newStatus);
+      return updateStudentEmotionalStatus(studentID ?? "", newStatus);
     },
     onSuccess: () => {
       toast.success("Emotional status updated!");
@@ -48,7 +48,7 @@ export default function FormEmotionalStatusField({
 
   const handleEmotionalStatusChange = (newStatus: string) => {
     setEmotionalStatus(newStatus);
-    if (user_id) mutation.mutate(newStatus);
+    if (studentID) mutation.mutate(newStatus);
   };
 
   console.log("Emotional status selected: ", emotionalStatus)

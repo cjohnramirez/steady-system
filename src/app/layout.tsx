@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gcs-system.vercel.app/"),
   title: "GCS System | University Guidance & Counseling",
   description: "Official Guidance and Counseling Services platform for students, providing announcements, workshops, and counseling sessions.",
   keywords: ["Guidance", "Counseling", "University", "Student Support", "Workshops", "Announcements"],
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GCS System | University Guidance & Counseling",
     description: "Official platform for announcements, events, and counseling sessions.",
-    images: ["/home-page.png"],
+    images: "/home-page.png",
   },
 };
 

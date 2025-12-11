@@ -62,19 +62,19 @@ export async function fetchCounselorAppointments(
 
 export async function countCounselorAppointments(
   supabase: SupabaseClient,
-  id: string,
+  counselorID: string,
 ) {
   const { count: totalCount, error: totalError } = await supabase
     .from("appointment_with_details")
     .select("id", { count: "exact", head: true })
-    .eq("counselor_id", id);
+    .eq("counselor_id", counselorID);
 
   if (totalError) throw totalError;
 
   const { count: approvedCount, error: approvedError } = await supabase
     .from("appointment_with_details")
     .select("id", { count: "exact", head: true })
-    .eq("counselor_id", id)
+    .eq("counselor_id", counselorID)
     .eq("status", "approved");
 
   if (approvedError) throw approvedError;
@@ -82,7 +82,7 @@ export async function countCounselorAppointments(
   const { count: pendingCount, error: pendingError } = await supabase
     .from("appointment_with_details")
     .select("id", { count: "exact", head: true })
-    .eq("counselor_id", id)
+    .eq("counselor_id", counselorID)
     .eq("status", "pending");
 
   if (pendingError) throw pendingError;
@@ -117,13 +117,13 @@ export async function fetchCounselorProfile(
 
 export async function fetchCounselorDeparments(
   supabase: SupabaseClient,
-  userID: string,
+  counselorID: string,
 ): Promise<Tables<"department">[]> {
   const { data: counselorDeparmentData, error: counselorDepartmentError } =
     await supabase
       .from("department")
       .select("*")
-      .eq("counselor_id", userID);
+      .eq("counselor_id", counselorID);
 
   if (counselorDepartmentError) throw counselorDepartmentError;
 

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin } from "lucide-react";
 import Image from "next/image";
-import img from "../../../assets/hero.jpg"
+import img from "../../../assets/hero.jpg";
 import { useRouter } from "next/navigation";
 
 export default function HomeSection() {
@@ -28,7 +28,11 @@ export default function HomeSection() {
               Book an Appointment
               <ArrowRight />
             </Button>
-            <Button variant="outline" size="cta" onClick={() => router.push("/portal")}>
+            <Button
+              variant="outline"
+              size="cta"
+              onClick={() => router.push("/portal")}
+            >
               Go to GCS Portal
             </Button>
           </div>

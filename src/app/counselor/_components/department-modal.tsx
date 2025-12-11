@@ -22,11 +22,11 @@ interface StudentModalProps {
 
 export default function DepartmentModal({ open, setOpen }: StudentModalProps) {
   const supabase = createClient();
-  const userID = useUserStore.getState().id;
+  const counselorID = useUserStore.getState().id;
 
   const { data: departments } = useQuery({
-    queryKey: ["counselor-departments", userID],
-    queryFn: () => fetchCounselorDeparments(supabase, userID),
+    queryKey: ["counselor-departments", counselorID],
+    queryFn: () => fetchCounselorDeparments(supabase, counselorID),
   });
 
   return (

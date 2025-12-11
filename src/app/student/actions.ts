@@ -1,35 +1,21 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export type studentAppointmentParams = {
-  page: number;
-  pageSize: number;
-  id: string;
-  search: string;
-  supabase: SupabaseClient;
-};
+export type studentAppointmentParams = {};
 
-export async function fetchStudentAppointment({
-  page,
-  pageSize,
-  id,
-  search,
-  supabase,
-}: studentAppointmentParams) {
+export async function fetchStudentAppointment(
+  page: number,
+  pageSize: number,
+  studentID: string,
+  search: string,
+  supabase: SupabaseClient,
+) {
   const from = page * pageSize;
   const to = from + pageSize - 1;
-
-  const { data: studentData, error: studentError } = await supabase
-    .from("student")
-    .select("*")
-    .eq("user_id", id)
-    .single();
-
-  if (studentError) throw studentError;
 
   let query = supabase
     .from("appointment_with_details")
     .select("*", { count: "exact" })
-    .eq("student_id", studentData.id);
+    .eq("student_id", studentID);
 
   if (search) {
     query = query.ilike("last_counselor_name", `%${search}%`);

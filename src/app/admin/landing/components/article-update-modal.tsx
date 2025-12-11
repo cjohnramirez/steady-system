@@ -12,14 +12,15 @@ import { Button } from "@/components/ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
-import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { fetchArticle, insertArticle, updateArticle } from "../actions";
-import { articleInsertFormSchema, articleUpdateFormSchema } from "../schema";
-import { Label } from "@/components/ui/label";
+import { fetchArticle, updateArticle } from "../actions";
+import { articleUpdateFormSchema } from "../schema";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { startTransition, useEffect, useState } from "react";
+import ImageUpload from "@/components/image-upload";
+import { useState } from "react";
+import { deleteFromCloudinary, uploadToCloudinary } from "@/app/actions";
+import { extractPublicId } from "@/lib/format";
 
 interface ArticleModalProps {
   open: boolean;
@@ -33,8 +34,10 @@ export default function ArticleUpdateModal({
   id,
 }: ArticleModalProps) {
   const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const { data: article } = useQuery({
+  const { data: article, isLoading } = useQuery({
     queryKey: ["article", id],
     queryFn: () => fetchArticle(id),
   });
@@ -42,14 +45,13 @@ export default function ArticleUpdateModal({
   const updateMutation = useMutation({
     mutationFn: updateArticle,
     onSuccess: async () => {
-      toast.success("Article added successfully!");
+      toast.success("Article updated successfully!");
       setOpen(false);
-
       queryClient.invalidateQueries({ queryKey: ["article", id] });
       queryClient.invalidateQueries({ queryKey: ["articles"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add articles");
+      toast.error(err.message || "Failed to update article");
     },
   });
 
@@ -62,27 +64,59 @@ export default function ArticleUpdateModal({
       publisher_name: article?.publisher_name ?? "",
       link: article?.link ?? "",
       id: id ?? "",
+      article_image: article?.article_image ?? "",
     },
     validators: {
       onChange: articleUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      let finalValues = { ...value };
+      const articleImage = form.state.values.article_image;
+
+      if (file) {
+        setIsUploading(true);
+        try {
+          const result = await uploadToCloudinary(file, "articles");
+
+          if (result && result.optimizedUrl) {
+            finalValues.article_image = result.optimizedUrl;
+          }
+        } catch (error) {
+          toast.error("Failed to upload article image");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      if (!file && articleImage.length !== 0) {
+        setIsUploading(true);
+        try {
+          const publicId = extractPublicId(articleImage);
+          if (publicId) {
+            await deleteFromCloudinary(publicId);
+          }
+        } catch (error) {
+          toast.error("Failed to delete article image");
+          setIsUploading(false);
+          return;
+        } finally {
+          finalValues.article_image = "";
+        }
+      }
+      setIsUploading(false);
+      updateMutation.mutate(finalValues);
     },
   });
 
+  if (isLoading) return null;
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        setOpen(isOpen);
-      }}
-    >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
-        onInteractOutside={() => {
-          setOpen(false);
+        onInteractOutside={(e) => {
+          if (isUploading) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -93,34 +127,22 @@ export default function ArticleUpdateModal({
           id="update-article-form"
           onSubmit={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             form.handleSubmit();
           }}
         >
-          <div className="row-span-3 flex flex-col gap-4">
-            <Label>Article Image</Label>
-            <div className="h-full rounded-2xl border p-2">
-              <label
-                htmlFor="fileUpload"
-                className="row-span-3 flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center"
-              >
-                <Upload strokeWidth={1.25} />
-                <p>Click to upload the image.</p>
-              </label>
-              <input
-                type="file"
-                id="fileUpload"
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
+          <div className="row-span-3">
+            <ImageUpload
+              initialURL={form.state.values.article_image}
+              setFile={setFile}
+            />
           </div>
-
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
+                  placeholder="Enter title"
                   field={field}
                 />
               )}
@@ -179,20 +201,14 @@ export default function ArticleUpdateModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || isUploading}
             form="update-article-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Update"}
+            {updateMutation.isPending || isUploading && <Spinner />}
+            <p>Update</p>
           </Button>
           <DialogClose asChild>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
+            <Button variant="outline" disabled={isUploading}>Cancel</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

@@ -24,62 +24,51 @@ import {
 } from "@/components/ui/input-group";
 import { Eye, EyeClosed } from "lucide-react";
 import { roles } from "@/types/main";
-import LoginFormAction, { sendResetPasswordEmail } from "../actions";
+import LoginFormAction from "../actions";
 import { FormInputField } from "@/components/form-input-field";
+import { useMutation } from "@tanstack/react-query";
+import { LoginFormSchema } from "../schema";
 import { useUserStore } from "@/hooks/auth-store";
-
-const formSchema = z.object({
-  email: z.email({ error: "Invalid email" }),
-  password: z
-    .string()
-    .min(8, "8 or more characters required")
-    .max(255, "255 or less characters required"),
-});
 
 export default function LoginForm({ role }: { role: roles }) {
   const router = useRouter();
 
   const [isLoginLoading, setIsLoginLoading] = useState(false);
-  const [isResetLoading, setIsResetLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const updateMutation = useMutation({
+    mutationFn: LoginFormAction,
+    onSuccess: async (res) => {
+      setIsLoginLoading(false);
+      toast.success("Login successful");
+
+      useUserStore.getState().setUserName(res.data?.userName ?? "");
+      useUserStore.getState().setUserRole(role ?? "");
+      useUserStore
+        .getState()
+        .setEmotionalStatus(res.data?.emotionalStatus ?? "");
+      useUserStore.getState().setId(res.data?.id ?? "");
+
+      router.push("/");
+    },
+    onError: (err) => {
+      setIsLoginLoading(false);
+      toast.error(err.message);
+    },
+  });
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
+      role: role,
     },
     validators: {
-      onSubmit: formSchema,
+      onSubmit: LoginFormSchema,
     },
-    onSubmit: async (form) => {
+    onSubmit: async ({ value }) => {
       setIsLoginLoading(true);
-
-      try {
-        const formData = new FormData();
-        formData.append("email", form.value.email);
-        formData.append("password", form.value.password);
-
-        const res = await LoginFormAction(formData, role);
-
-        if (res?.error) {
-          toast.error(res.error);
-          return;
-        }
-
-        if (res?.success) {
-          toast.success(res.success);
-          useUserStore.getState().setUserName(res.data?.userName ?? "");
-          useUserStore.getState().setUserRole(role ?? "");
-          useUserStore
-            .getState()
-            .setEmotionalStatus(res.data?.emotionalStatus ?? "");
-          useUserStore.getState().setId(res.data?.id ?? "");
-        }
-
-        router.push("/");
-      } finally {
-        setIsLoginLoading(false);
-      }
+      updateMutation.mutate(value);
     },
   });
 
@@ -123,7 +112,7 @@ export default function LoginForm({ role }: { role: roles }) {
                       onClick={() => router.push("/auth/forget-password")}
                       className="flex cursor-pointer items-center gap-2"
                     >
-                      {isResetLoading && <Spinner />}Forget Password?
+                      Forget Password?
                     </p>
                   </div>
                   <InputGroup>

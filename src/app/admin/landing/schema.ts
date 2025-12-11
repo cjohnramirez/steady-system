@@ -15,6 +15,7 @@ export const announcementInsertFormSchema = z.object({
     .string()
     .min(1, "Title is required")
     .max(100, "Title must not exceed 100 characters"),
+  announcement_image: z.string()
 });
 
 export const articleInsertFormSchema = z.object({
@@ -35,6 +36,7 @@ export const articleInsertFormSchema = z.object({
     .string()
     .min(1, "Publisher name is required")
     .max(100, "Publisher name must not exceed 100 characters"),
+  article_image: z.string(),
   link: z.url("Article link must be a valid URL"),
 });
 
@@ -48,6 +50,7 @@ export const playlistInsertFormSchema = z.object({
     .string()
     .min(1, "Creator name is required")
     .max(100, "Creator name must not exceed 100 characters"),
+  image: z.string(),
   emotional_status_id: z.uuid(),
 });
 

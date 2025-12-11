@@ -11,7 +11,7 @@ import { studentAppointmentColumns } from "./appointment-column";
 
 export default function StudentAppointmentSection() {
   const supabase = createClient();
-  const getUserID = useUserStore.getState().id;
+  const studentID = useUserStore.getState().id;
 
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({
@@ -28,13 +28,13 @@ export default function StudentAppointmentSection() {
         search,
       ],
       queryFn: () =>
-        fetchStudentAppointment({
-          page: pagination.pageIndex,
-          pageSize: pagination.pageSize,
-          search: search,
+        fetchStudentAppointment(
+          pagination.pageIndex,
+          pagination.pageSize,
+          studentID,
+          search,
           supabase,
-          id: getUserID,
-        }),
+        ),
     });
 
   const studentAppointmentData = studentAppointment?.data || [];

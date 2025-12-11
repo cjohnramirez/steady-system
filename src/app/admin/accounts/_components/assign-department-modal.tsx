@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useUserStore } from "@/hooks/auth-store";
+import { fetchCounselorDepartment } from "../actions";
+import { useQuery } from "@tanstack/react-query";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -20,8 +23,15 @@ interface AnnouncementModalProps {
 export default function AssignDepartmentModal({
   open,
   setOpen,
-  id
+  id,
 }: AnnouncementModalProps) {
+  const { data: counselorDepartments, isLoading } = useQuery({
+    queryKey: ["counselor-department", id],
+    queryFn: () => fetchCounselorDepartment(id),
+  });
+
+  console.log(counselorDepartments);
+
   return (
     <Dialog
       open={open}
@@ -30,7 +40,7 @@ export default function AssignDepartmentModal({
       }}
     >
       <DialogContent
-        className="sm:max-w-[800px]"
+        className="sm:max-w-[600px]"
         showCloseButton={false}
         onInteractOutside={() => {
           setOpen(false);
@@ -39,16 +49,27 @@ export default function AssignDepartmentModal({
         <DialogHeader>
           <DialogTitle>Assign Departments</DialogTitle>
         </DialogHeader>
-        <p>{id}</p>
+        <div>
+          {counselorDepartments?.map((department) => (
+            <p key={department.id}>{department.title}</p>
+          ))}
+        </div>
         <DialogFooter>
-          <Button type="submit" form="insert-counselor-profile-form">
+          <Button
+            type="submit"
+            form="insert-counselor-profile-form"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
             Submit
           </Button>
           <DialogClose asChild>
             <Button
               variant="outline"
-              onClick={() => {
+              onClick={(e) => {
                 setOpen(false);
+                e.stopPropagation();
               }}
             >
               Cancel

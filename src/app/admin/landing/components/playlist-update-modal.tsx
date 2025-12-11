@@ -19,7 +19,10 @@ import { fetchPlaylist, updatePlaylist } from "../actions";
 import { playlistUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { deleteFromCloudinary, uploadToCloudinary } from "@/app/actions";
+import { extractPublicId } from "@/lib/format";
+import ImageUpload from "@/components/image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -33,6 +36,8 @@ export default function PlaylistUpdateModal({
   id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const { data: playlist, isLoading } = useQuery({
     queryKey: ["playlist", id],
@@ -60,6 +65,7 @@ export default function PlaylistUpdateModal({
       creator: playlist?.creator ?? "",
       emotional_status_id: playlist?.emotional_status_id ?? "",
       id: id ?? "",
+      image: playlist?.image ?? "",
     },
     validators: {
       onChange: playlistUpdateFormSchema,
@@ -68,11 +74,45 @@ export default function PlaylistUpdateModal({
       console.log(formApi.state.errors);
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      let finalValues = { ...value };
+      const playlistImage = form.state.values.image;
+
+      if (file) {
+        setIsUploading(true);
+        try {
+          const result = await uploadToCloudinary(file, "playlists");
+
+          if (result && result.optimizedUrl) {
+            finalValues.image = result.optimizedUrl;
+          }
+        } catch (error) {
+          toast.error("Failed to upload playlist image");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      if (!file && playlistImage.length !== 0) {
+        setIsUploading(true);
+        try {
+          const publicId = extractPublicId(playlistImage);
+          if (publicId) {
+            await deleteFromCloudinary(publicId);
+          }
+        } catch (error) {
+          toast.error("Failed to delete playlist image");
+          setIsUploading(false);
+          return;
+        } finally {
+          finalValues.image = "";
+        }
+      }
+      setIsUploading(false);
+      updateMutation.mutate(finalValues);
     },
   });
 
-  if (isLoading) return;
+  if (isLoading) return null;
 
   return (
     <Dialog
@@ -84,8 +124,8 @@ export default function PlaylistUpdateModal({
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
-        onInteractOutside={() => {
-          setOpen(false);
+        onInteractOutside={(e) => {
+          if (isUploading) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -93,46 +133,24 @@ export default function PlaylistUpdateModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-student-profile-form"
+          id="update-playlist-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
-          <div className="row-span-3 flex flex-col gap-4">
-            <Label>Playlist Image</Label>
-            <div className="h-full rounded-2xl border p-2">
-              <label
-                htmlFor="fileUpload"
-                className="row-span-3 flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center"
-              >
-                <Upload strokeWidth={1.25} />
-                <p>Click to upload the image.</p>
-              </label>
-              <input
-                type="file"
-                id="fileUpload"
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
+          <div className="row-span-3">
+            <ImageUpload
+              initialURL={form.state.values.image}
+              setFile={setFile}
+            />
           </div>
-
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
                 <FormInputField
                   label="Title"
                   placeholder="Enter title of annoucement"
-                  field={field}
-                />
-              )}
-            </form.Field>
-            <form.Field name="link">
-              {(field) => (
-                <FormInputField
-                  label="Link"
-                  placeholder="Enter link"
                   field={field}
                 />
               )}
@@ -158,14 +176,26 @@ export default function PlaylistUpdateModal({
               )}
             </form.Field>
           </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <form.Field name="link">
+              {(field) => (
+                <FormInputField
+                  label="Link"
+                  placeholder="Enter link"
+                  field={field}
+                />
+              )}
+            </form.Field>
+          </div>
         </form>
         <DialogFooter>
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            form="update-student-profile-form"
+            form="update-playlist-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Update"}
+            {updateMutation.isPending || (isUploading && <Spinner />)}
+            <p>Update</p>
           </Button>
           <DialogClose asChild>
             <Button

@@ -62,3 +62,9 @@ export function toAMPM(time24: string): string {
   return `${hour}:${m.toString().padStart(2, "0")} ${period}`;
 }
 
+export function extractPublicId(url: string) {
+  const regex = /\/v\d+\/([^?]+)/;
+  const match = url.match(regex);
+
+  return match ? match[1] : null;
+}

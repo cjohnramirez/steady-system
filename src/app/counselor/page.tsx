@@ -15,7 +15,7 @@ import {
 
 export default function CounselorPage() {
   const supabase = createClient();
-  const userID = useUserStore.getState().id;
+  const counselorID = useUserStore.getState().id;
 
   const [username, setUsername] = useState<string | undefined>("");
 
@@ -29,7 +29,7 @@ export default function CounselorPage() {
 
   const { data: counts } = useQuery({
     queryKey: ["count-counselor-appointments"],
-    queryFn: () => countCounselorAppointments(supabase, userID),
+    queryFn: () => countCounselorAppointments(supabase, counselorID),
   });
 
   const { data: appointments, isLoading: isLoadingAppointments } = useQuery({
@@ -38,19 +38,14 @@ export default function CounselorPage() {
       fetchCounselorAppointments(
         pagination.pageIndex,
         pagination.pageSize,
-        userID,
+        counselorID,
         search,
         supabase,
         status,
       ),
   });
 
-  const { data: counselorProfile } =
-    useQuery({
-      queryKey: ["counselor-profile"],
-      queryFn: () => fetchCounselorProfile(supabase, userID),
-    });
-
+ 
   return (
     <div className="space-y-6 p-10">
       <div className="space-y-2">
@@ -67,7 +62,7 @@ export default function CounselorPage() {
             pendingAppointments={String(counts?.pendingCount ?? "")}
             approvedAppointments={String(counts?.approvedCount ?? "")}
           />
-          <CounselorProfileSection counselorProfile={counselorProfile} />
+          <CounselorProfileSection />
         </div>
         <CounselorAppointmentSection
           status={status}

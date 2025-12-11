@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/hooks/auth-store";
 import { useEffect, useState } from "react";
+import { Session } from "@supabase/supabase-js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,21 +22,21 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
   const { confirm, startLoading, stopLoading } = useConfirmStore();
 
   const router = useRouter();
-  const [userName, setUserName] = useState(useUserStore.getState().userName);
-  const userRole = useUserStore.getState().userRole;
+  const [session, setSession] = useState<Session | null>(null);
+  const supabase = createClient();
 
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const userName = useUserStore((state) => state.userName);
+  const userRole = useUserStore((state) => state.userRole);
 
   useEffect(() => {
-    const unsubscribe = useUserStore.subscribe((state) => {
-      setUserName(state.userName);
+    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      data?.subscription?.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleChange = async () => {
     const ok = await confirm(
@@ -44,19 +45,16 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
     );
 
     if (!ok) return;
-
     startLoading();
 
     useUserStore.getState().setUserName("");
     useUserStore.getState().setUserRole("");
 
-    const supabase = createClient();
     const { error } = await supabase.auth.signOut();
-
     if (error) throw new Error(error.message);
 
     stopLoading();
-    window.location.reload();
+    router.push("/home");
   };
 
   return (
@@ -80,13 +78,13 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
         )}
 
         <section className="flex space-x-4">
-          {isClient && userName != "" ? (
+          {session ? (
             <>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger className="flex items-center gap-4">
                   <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
-                  <p>{userName}</p>
-                  <Badge variant="secondary">{userRole}</Badge>
+                  <p>{userName || "User"}</p>
+                  {userRole && <Badge variant="secondary">{userRole}</Badge>}
                   <ChevronsUpDown size={20} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>

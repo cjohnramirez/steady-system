@@ -50,16 +50,10 @@ export default function AnnoucementTile({
       >
         <div className="relative h-40 w-full">
           <Image
-            src={
-              annoucementTile.announcement_image &&
-              annoucementTile.announcement_image !== ""
-                ? annoucementTile.announcement_image
-                : "/placeholder.png"
-            }
+            src="/placeholder.png"
             alt={annoucementTile.title + "-image"}
             fill
             className="rounded-t-2xl object-cover"
-            sizes="100vw"
           />
         </div>
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
