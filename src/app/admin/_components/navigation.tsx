@@ -98,7 +98,7 @@ export default function NavigationBar() {
             onClick={() => router.replace("/home")}
           >
             <Image src="/icon.png" alt="GCS Icon" width={40} height={40} />
-            <p>Guidance and Counselling Services</p>
+            <p>Guidance and Counseling Services</p>
           </div>
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger className="flex items-center gap-4">

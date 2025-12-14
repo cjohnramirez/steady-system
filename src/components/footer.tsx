@@ -37,12 +37,12 @@ export default function Footer({ navBarObj }: { navBarObj: NavBar[] }) {
         <div className="w-1/3 space-y-10">
           <section className="flex items-center gap-4">
             <Image src="/icon.png" alt="logo" width={40} height={40} />
-            <p className="font-medium">Guidance and Counselling Services</p>
+            <p className="font-medium">Guidance and Counseling Services</p>
           </section>
           <p>
             We are dedicated to the holistic development of every student
             fostering emotional, psychological, and academic balance through
-            support, counseling, and care.
+            support, Counseling, and care.
           </p>
           <div className="space-y-2">
             <Link

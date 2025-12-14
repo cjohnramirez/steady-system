@@ -38,7 +38,7 @@ export default function GlobalError({
       </div>
       <div className="flex place-content-end items-center gap-4">
         <Image src="/icon.png" alt="logo" width={40} height={40} />
-        <p>Guidance and Counselling Services</p>
+        <p>Guidance and Counseling Services</p>
       </div>
     </div>
   );

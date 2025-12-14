@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { strToTitleCase } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
@@ -70,7 +71,7 @@ export default function GenderField({
                 if (setCollege) setCollege(gender);
               }}
             >
-              {gender}
+              {strToTitleCase(gender)}
             </SelectItem>
           ))}
         </SelectContent>

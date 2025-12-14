@@ -59,7 +59,7 @@ export default function NavigationBar() {
           onClick={() => router.push("/home")}
         >
           <Image src="/icon.png" alt="logo" width={40} height={40} />
-          <p>Guidance and Counselling Services</p>
+          <p>Guidance and Counseling Services</p>
         </section>
         <section className="flex space-x-4">
           {isClient && userName != "" ? (

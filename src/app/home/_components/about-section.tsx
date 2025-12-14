@@ -17,7 +17,7 @@ export default function AboutSection() {
           academically and emotionally.
         </p>
         <p>
-          Through one-on-one counseling, group mentoring, and developmental
+          Through one-on-one Counseling, group mentoring, and developmental
           programs, GCS ensures that every student receives the guidance they
           need to thrive.
         </p>

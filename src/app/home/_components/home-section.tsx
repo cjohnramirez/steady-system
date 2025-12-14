@@ -17,7 +17,7 @@ export default function HomeSection() {
           <p className="w-2/3">
             The Guidance and Counseling Services (GCS) of USTP-CDO is dedicated
             to the holistic development of every student — fostering emotional,
-            psychological, and academic balance through support, counseling, and
+            psychological, and academic balance through support, Counseling, and
             care.
           </p>
           <div className="flex items-center gap-4">

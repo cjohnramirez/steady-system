@@ -36,8 +36,6 @@ export default function ArticleAddModal({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const [emotionalStatus, setEmotionalStatus] = useState("");
-
   const updateMutation = useMutation({
     mutationFn: insertArticle,
     onSuccess: async () => {
@@ -60,6 +58,10 @@ export default function ArticleAddModal({
       publisher_name: "",
       link: "",
       article_image: "",
+    },
+    onSubmitInvalid: ({ formApi }) => {
+      console.log(formApi.state.errors);
+      console.log(formApi.state.values);
     },
     validators: {
       onChange: articleInsertFormSchema,
@@ -86,10 +88,6 @@ export default function ArticleAddModal({
       updateMutation.mutate(finalValues);
     },
   });
-
-  useEffect(() => {
-    form.setFieldValue("emotional_status_id", emotionalStatus);
-  }, [emotionalStatus, form]);
 
   return (
     <Dialog
@@ -172,11 +170,15 @@ export default function ArticleAddModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>

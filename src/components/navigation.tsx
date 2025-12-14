@@ -65,7 +65,7 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
           onClick={() => router.push("/home")}
         >
           <Image src="/icon.png" alt="logo" width={40} height={40} />
-          <p>Guidance and Counselling Services</p>
+          <p>Guidance and Counseling Services</p>
         </section>
         {navBarObj.length !== 0 && (
           <section className="flex items-center gap-10">

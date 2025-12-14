@@ -55,12 +55,12 @@ export default function ConsentFormModal({
               </p>
               <p>
                 The clients have the right to decide whether to enter into a
-                counseling relationship with the specific counselor and must be
+                Counseling relationship with the specific counselor and must be
                 told what to expect (Villar, 2009).
               </p>
             </div>
             <div>
-              <p className="font-medium">Counselling</p>
+              <p className="font-medium">Counseling</p>
               <p>
                 It is a collaborative effort between the counselor and client.
                 Professional counselors help clients identify goals and
@@ -74,16 +74,16 @@ export default function ConsentFormModal({
               <p className="pb-3 font-medium">Terms and Conditions</p>
               <ul className="flex flex-col gap-3">
                 {[
-                  "Each counseling session will last about 45-60 minutes, but may run longer depending on the case",
-                  "The frequency of counseling sessions will be at the discretion of the counselor",
+                  "Each Counseling session will last about 45-60 minutes, but may run longer depending on the case",
+                  "The frequency of Counseling sessions will be at the discretion of the counselor",
                   "The client will share information about his or her problems or issues with the counselor that may have affected certain areas of his or her life.",
-                  "The client may ask questions before, during, and after the counseling session (s) if there are things unclear to her or him.",
+                  "The client may ask questions before, during, and after the Counseling session (s) if there are things unclear to her or him.",
                   "The counselor will guide the session and may ask probing questions to better understand the specific or various concerns of the client regarding personal matters. academic, emotional, psychological, occupational, spiritual, etc.",
-                  "Both the client and the counselor have the right not to continue the counseling sessions without any impediment unless required by a specific authority.",
+                  "Both the client and the counselor have the right not to continue the Counseling sessions without any impediment unless required by a specific authority.",
                   "In case of termination, both client and counselor have the responsibility to notify each party of the reason for dismissing the sessions for record purposes.",
-                  "There is no fee for counseling services.",
-                  "Virtual/electronic counseling sessions may experience privacy and other technical glitches.",
-                  "All information provided in this form and during counseling will be kept strictly confidential except for reasons cited in the dimensions of confidentiality",
+                  "There is no fee for Counseling services.",
+                  "Virtual/electronic Counseling sessions may experience privacy and other technical glitches.",
+                  "All information provided in this form and during Counseling will be kept strictly confidential except for reasons cited in the dimensions of confidentiality",
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle2
