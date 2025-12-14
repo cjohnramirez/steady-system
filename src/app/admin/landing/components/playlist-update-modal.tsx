@@ -38,6 +38,7 @@ export default function PlaylistUpdateModal({
   const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const { data: playlist, isLoading } = useQuery({
     queryKey: ["playlist", id],
@@ -89,7 +90,7 @@ export default function PlaylistUpdateModal({
         }
       }
 
-      if (!file && playlistImage.length !== 0) {
+      if (isDeleted) {
         setIsUploading(true);
         try {
           const publicId = extractPublicId(playlistImage);
@@ -115,6 +116,9 @@ export default function PlaylistUpdateModal({
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setFile(null);
+        }
         setOpen(isOpen);
       }}
     >
@@ -140,6 +144,7 @@ export default function PlaylistUpdateModal({
             <ImageUpload
               initialURL={playlist?.image ?? ""}
               setFile={setFile}
+              setIsDeleted={() => setIsDeleted(true)}
             />
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">

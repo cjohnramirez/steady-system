@@ -2,6 +2,7 @@ import { Tables } from "@/types/supabase";
 import { Clock2Icon, MapPin } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CldImage } from "next-cloudinary";
 
 export function formatAnnouncementDate(date: string | Date): string {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -18,7 +19,7 @@ export default function AnnouncementTile({
   announcementData,
   isLoading,
 }: {
-  announcementData?: Tables<"announcement">; 
+  announcementData?: Tables<"announcement">;
   isLoading: boolean;
 }) {
   if (isLoading) {
@@ -52,12 +53,23 @@ export default function AnnouncementTile({
   return (
     <div className="flex h-full flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
       <div className="relative h-1/2 justify-between">
-        <Image
-          src="/placeholder.png"
-          alt="placeholder"
-          fill
-          className="rounded-2xl object-cover"
-        />
+        {announcementData.announcement_image?.length ? (
+          <CldImage
+            src={announcementData.announcement_image}
+            alt={`${announcementData.title}-image`}
+            fill
+            className="rounded-2xl border object-cover"
+            sizes="100vw"
+          />
+        ) : (
+          <Image
+            src="/placeholder.png"
+            alt="placeholder"
+            fill
+            className="rounded-2xl border object-cover"
+            sizes="100vw"
+          />
+        )}
       </div>
       <div className="h-1/2 space-y-2 rounded-xl border border-gray-200">
         <div className="space-y-2 p-4">

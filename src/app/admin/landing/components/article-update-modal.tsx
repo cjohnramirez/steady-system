@@ -36,6 +36,7 @@ export default function ArticleUpdateModal({
   const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false)
 
   const { data: article, isLoading } = useQuery({
     queryKey: ["article", id],
@@ -69,6 +70,9 @@ export default function ArticleUpdateModal({
     validators: {
       onChange: articleUpdateFormSchema,
     },
+    onSubmitInvalid: ({formApi}) => {
+      console.log(formApi.state.values)
+    },
     onSubmit: async ({ value }) => {
       let finalValues = { ...value };
       const articleImage = form.state.values.article_image;
@@ -88,7 +92,7 @@ export default function ArticleUpdateModal({
         }
       }
 
-      if (!file && articleImage.length !== 0) {
+      if (isDeleted) {
         setIsUploading(true);
         try {
           const publicId = extractPublicId(articleImage);
@@ -111,9 +115,18 @@ export default function ArticleUpdateModal({
   if (isLoading) return null;
 
   console.log("Image is fetched: ", article?.article_image)
+  console.log(article)
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog 
+      open={open} 
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setFile(null);
+        }
+        setOpen(isOpen);
+      }}
+    >
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
@@ -137,6 +150,7 @@ export default function ArticleUpdateModal({
             <ImageUpload
               initialURL={article?.article_image ?? ""}
               setFile={setFile}
+              setIsDeleted={() => setIsDeleted(true)}
             />
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">

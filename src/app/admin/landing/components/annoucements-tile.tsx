@@ -6,6 +6,7 @@ import { Calendar, MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import AnnouncementUpdateModal from "./announcement-update-modal";
+import { CldImage } from "next-cloudinary";
 
 export default function AnnouncementTile({
   announcementTile,
@@ -49,12 +50,23 @@ export default function AnnouncementTile({
         onClick={() => setOpenUpdateAnnouncement(true)}
       >
         <div className="relative h-40 w-full">
-          <Image
-            src="/placeholder.png"
-            alt={announcementTile.title + "-image"}
-            fill
-            className="rounded-t-2xl object-cover"
-          />
+          {announcementTile.announcement_image?.length ? (
+            <CldImage
+              src={announcementTile.announcement_image}
+              alt={`${announcementTile.title}-image`}
+              fill
+              className="rounded-2xl object-cover border"
+              sizes="100vw"
+            />
+          ) : (
+            <Image
+              src="/placeholder.png"
+              alt="placeholder"
+              fill
+              className="rounded-2xl object-cover border"
+              sizes="100vw"
+            />
+          )}
         </div>
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
           <div>

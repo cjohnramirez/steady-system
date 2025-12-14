@@ -1,5 +1,17 @@
-// fetch one article
+import { createClient } from "@/utils/supabase/client";
 
-// fetch 4 latest events
+export async function fetchOrganization() {
+  const supabase = createClient();
 
-// fetch org info and contacts
+  const { data, error } = await supabase
+    .from("organization")
+    .select("*")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch organization: ${error.message}`);
+  }
+
+  return data;
+}

@@ -4,6 +4,7 @@ import { Tables } from "@/types/supabase";
 import Image from "next/image";
 import { useState } from "react";
 import PlaylistUpdateModal from "./playlist-update-modal";
+import { CldImage } from "next-cloudinary";
 
 export default function PlaylistTile({
   playlistTile,
@@ -44,19 +45,28 @@ export default function PlaylistTile({
           id={playlistTile.id ?? ""}
         />
       )}
-      <div className="flex w-full cursor-pointer flex-row gap-4 overflow-hidden rounded-2xl border border-gray-300 bg-white p-4 hover:bg-gray-100/40" onClick={() => setOpenUpdatePlaylist(true)}>
+      <div
+        className="flex w-full cursor-pointer flex-row gap-4 overflow-hidden rounded-2xl border border-gray-300 bg-white p-4 hover:bg-gray-100/40"
+        onClick={() => setOpenUpdatePlaylist(true)}
+      >
         <div className="relative w-1/3">
-          <Image
-            src={
-              playlistTile.image && playlistTile.image !== ""
-                ? playlistTile.image
-                : "/placeholder.png"
-            }
-            alt={playlistTile.title + "-image"}
-            fill
-            className="rounded-2xl object-cover"
-            sizes="100vw"
-          />
+          {playlistTile.image?.length ? (
+            <CldImage
+              src={playlistTile.image}
+              alt={`${playlistTile.title}-image`}
+              fill
+              className="rounded-2xl object-cover border"
+              sizes="100vw"
+            />
+          ) : (
+            <Image
+              src="/placeholder.png"
+              alt="placeholder"
+              fill
+              className="rounded-2xl object-cover border"
+              sizes="100vw"
+            />
+          )}
         </div>
         <div className="flex flex-col justify-between gap-4">
           <div>

@@ -164,7 +164,7 @@ export default function PlaylistAddModal({
             form="update-student-profile-form"
           >
             {updateMutation.isPending ? <Spinner /> : "Add"}
-          </Button>
+          </Button>   
           <DialogClose asChild>
             <Button
               variant="outline"

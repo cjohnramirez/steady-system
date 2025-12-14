@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import ArticleUpdateModal from "./article-update-modal";
+import { CldImage } from "next-cloudinary";
 
 export default function ArticleTile({
   articleTile,
@@ -47,13 +48,23 @@ export default function ArticleTile({
         onClick={() => setOpenUpdateArticle(true)}
       >
         <div className="relative h-40 w-full">
-          <Image
-            src="/placeholder.png"
-            alt={articleTile.title + "-image"}
-            fill
-            className="rounded-t-2xl object-cover"
-            sizes="100vw"
-          />
+          {articleTile.article_image?.length ? (
+            <CldImage
+              src={articleTile.article_image}
+              alt={`${articleTile.title}-image`}
+              fill
+              className="rounded-2xl object-cover border"
+              sizes="100vw"
+            />
+          ) : (
+            <Image
+              src="/placeholder.png"
+              alt="placeholder"
+              fill
+              className="rounded-2xl object-cover border"
+              sizes="100vw"
+            />
+          )}
         </div>
         <div className="flex flex-1 flex-col justify-between gap-4 p-4">
           <div>

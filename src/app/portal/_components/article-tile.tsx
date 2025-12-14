@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import ExternalLinkModal from "./external-link-modal";
+import { CldImage } from "next-cloudinary";
 
 export function formatAnnouncementDate(date: string | Date): string {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -73,12 +74,23 @@ export default function ArticleTile({
         onClick={() => setOpen(true)}
       >
         <div className="relative h-1/2 justify-between">
-          <Image
-            src="/placeholder.png"
-            alt="placeholder"
-            fill
-            className="rounded-2xl object-cover"
-          />
+          {articleData.article_image?.length ? (
+            <CldImage
+              src={articleData.article_image}
+              alt={`${articleData.title}-image`}
+              fill
+              className="rounded-2xl border object-cover"
+              sizes="100vw"
+            />
+          ) : (
+            <Image
+              src="/placeholder.png"
+              alt="placeholder"
+              fill
+              className="rounded-2xl border object-cover"
+              sizes="100vw"
+            />
+          )}
         </div>
         <div className="h-1/2 space-y-2 rounded-xl border border-gray-200">
           <div className="space-y-2 p-4">

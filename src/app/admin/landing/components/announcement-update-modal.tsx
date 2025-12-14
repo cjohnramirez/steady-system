@@ -38,6 +38,7 @@ export default function AnnouncementUpdateModal({
   const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const { data: announcement, isLoading } = useQuery({
     queryKey: ["announcement", id],
@@ -90,7 +91,7 @@ export default function AnnouncementUpdateModal({
         }
       }
 
-      if (!file && articleImage.length !== 0) {
+      if (isDeleted) {
         setIsUploading(true);
         try {
           const publicId = extractPublicId(articleImage);
@@ -116,6 +117,9 @@ export default function AnnouncementUpdateModal({
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setFile(null);
+        }
         setOpen(isOpen);
       }}
     >
@@ -141,6 +145,7 @@ export default function AnnouncementUpdateModal({
             <ImageUpload
               initialURL={announcement?.announcement_image ?? ""}
               setFile={setFile}
+              setIsDeleted={() => setIsDeleted(true)}
             />
           </div>
           <div className="col-span-2 flex gap-2">
@@ -193,7 +198,7 @@ export default function AnnouncementUpdateModal({
             disabled={updateMutation.isPending}
             form="update-announcement-form"
           >
-            {updateMutation.isPending || isUploading && <Spinner />}
+            {updateMutation.isPending || (isUploading && <Spinner />)}
             <p>Update</p>
           </Button>
           <DialogClose asChild>
