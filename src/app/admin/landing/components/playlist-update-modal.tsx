@@ -70,9 +70,6 @@ export default function PlaylistUpdateModal({
     validators: {
       onChange: playlistUpdateFormSchema,
     },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.errors);
-    },
     onSubmit: async ({ value }) => {
       let finalValues = { ...value };
       const playlistImage = form.state.values.image;
@@ -141,7 +138,7 @@ export default function PlaylistUpdateModal({
         >
           <div className="row-span-3">
             <ImageUpload
-              initialURL={form.state.values.image}
+              initialURL={playlist?.image ?? ""}
               setFile={setFile}
             />
           </div>
@@ -150,7 +147,7 @@ export default function PlaylistUpdateModal({
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
+                  placeholder="Enter title of announcement"
                   field={field}
                 />
               )}

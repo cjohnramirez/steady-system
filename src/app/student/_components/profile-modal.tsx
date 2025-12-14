@@ -10,7 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchStudent, updateStudentProfile } from "@/app/admin/accounts/@modal/actions";
+import {
+  fetchStudent,
+  updateStudentProfile,
+} from "@/app/admin/accounts/@modal/actions";
 import { toast } from "sonner";
 import { useForm } from "@tanstack/react-form";
 import { Edit2 } from "lucide-react";
@@ -20,8 +23,9 @@ import { FormInputField } from "@/components/form-input-field";
 import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown";
 import FormYearLevelField from "@/components/form-year-level-field";
-import { studentUpdateFormSchema } from "@/app/admin/accounts/@modal/schema";
-import z from "zod";
+import GenderField from "@/components/form-gender-field";
+import EmotionalStatusDropdown from "@/app/auth/signup/components/emotional-status-dropdown";
+import { studentUpdateFormSchema } from "@/app/auth/signup/schema";
 
 interface StudentModalProps {
   open: boolean;
@@ -36,6 +40,7 @@ export default function StudentProfileModal({
 }: StudentModalProps) {
   const queryClient = useQueryClient();
   const [college, setCollege] = useState("");
+  const [emotionalStatus] = useState("");
 
   const { data: student } = useQuery({
     queryKey: ["student-user"],
@@ -59,30 +64,29 @@ export default function StudentProfileModal({
     defaultValues: {
       first_name: student?.first_name || "",
       last_name: student?.last_name || "",
+      middle_name: student?.middle_name || "",
       username: student?.username || "",
-      college_id: student?.college_id || "",
+      college: student?.college_id || "",
       department_id: student?.department_id || "",
       university_id: student?.university_id || 0,
       email: student?.email || "",
       year_level: student?.year_level || 0,
-      id: String(student?.id),
+      id: String(student?.id) || "",
       phone: student?.phone ? String(student.phone) : "",
       emotional_status_id: student?.emotional_status_id || "",
+      age: student?.age || 0,
+      gender: student?.gender || "",
+    },
+    onSubmitInvalid: ({formApi}) => {
+      console.log(formApi.state.values);
+      console.log(formApi.state.errors);
     },
     validators: {
-      onChange: studentUpdateFormSchema.extend({
-        college_id: z.uuid({ message: "College is required" }),
-      }),
+      onChange: studentUpdateFormSchema
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate({
-        ...value,
-        id: student?.id || "",
-        university_id: Number(value.university_id),
-        year_level: Number(value.year_level),
-        phone: value.phone,
-        emotional_status_id: value.emotional_status_id,
-      });
+      const {college, ...rest } = value
+      updateMutation.mutate(rest);
     },
   });
 
@@ -94,7 +98,7 @@ export default function StudentProfileModal({
       }}
     >
       <DialogContent
-        className="sm:max-w-[800px]"
+        className="sm:max-w-[900px]"
         showCloseButton={false}
         onInteractOutside={() => {
           setOpen(false);
@@ -104,14 +108,14 @@ export default function StudentProfileModal({
           <DialogTitle>Edit Account</DialogTitle>
         </DialogHeader>
         <form
-          className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-2 pt-5"
+          className="grid grid-cols-[170px_auto_auto] grid-rows-[auto_auto_auto] gap-5 pt-5"
           id="update-student-profile-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
-          <div className="row-span-2 h-full w-full">
+          <div className="row-span-7 h-full w-full">
             <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
               <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
                 <Edit2
@@ -140,6 +144,17 @@ export default function StudentProfileModal({
                 />
               )}
             </form.Field>
+            <form.Field name="middle_name">
+              {(field) => (
+                <FormInputField
+                  label="Middle Name (Optional)"
+                  placeholder="Enter middle name"
+                  field={field}
+                />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="username">
               {(field) => (
                 <FormInputField
@@ -149,55 +164,6 @@ export default function StudentProfileModal({
                 />
               )}
             </form.Field>
-          </div>
-          <div className="col-span-2 flex h-full w-full gap-2">
-            <div className="h-full w-full">
-              <form.Field name="college_id">
-                {(field) => (
-                  <CollegeDropdown
-                    field={field}
-                    setCollege={setCollege}
-                    enableDescription={false}
-                  />
-                )}
-              </form.Field>
-            </div>
-            <div className="h-full w-full pb-4">
-              <form.Field name="department_id">
-                {(field) => (
-                  <DepartmentDropdown
-                    field={field}
-                    college={college}
-                    enableDescription={false}
-                  />
-                )}
-              </form.Field>
-            </div>
-            <div className="h-full w-full pb-4">
-              <form.Field name="phone">
-                {(field) => (
-                  <FormInputField
-                    label="Phone Number"
-                    placeholder="Enter a valid phone number"
-                    field={field}
-                  />
-                )}
-              </form.Field>
-            </div>
-          </div>
-
-          <div className="h-full w-full">
-            <form.Field name="university_id">
-              {(field) => (
-                <FormInputField
-                  label="University ID"
-                  placeholder="Enter a valid university ID (student)"
-                  field={field}
-                />
-              )}
-            </form.Field>
-          </div>
-          <div className="h-full w-full">
             <form.Field name="email">
               {(field) => (
                 <FormInputField
@@ -208,9 +174,79 @@ export default function StudentProfileModal({
               )}
             </form.Field>
           </div>
-          <div className="h-full w-full">
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <form.Field name="age">
+              {(field) => (
+                <FormInputField
+                  label="Age"
+                  placeholder="Enter your age"
+                  field={field}
+                  type="number"
+                />
+              )}
+            </form.Field>
+            <form.Field name="gender">
+              {(field) => (
+                <GenderField field={field} enableDescription={false} />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <form.Field name="college">
+              {(field) => (
+                <CollegeDropdown
+                  field={field}
+                  setCollege={setCollege}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="department_id">
+              {(field) => (
+                <DepartmentDropdown
+                  field={field}
+                  college={college}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="year_level">
-              {(field) => <FormYearLevelField field={field} />}
+              {(field) => (
+                <FormYearLevelField field={field} enableDescription={false} />
+              )}    
+            </form.Field>
+            <form.Field name="university_id">
+              {(field) => (
+                <FormInputField
+                  label="University ID"
+                  placeholder="Enter a valid university ID (student)"
+                  field={field}
+                  type="number"
+                />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <form.Field name="phone">
+              {(field) => (
+                <FormInputField
+                  label="Phone Number"
+                  placeholder="Enter a valid phone number"
+                  field={field}
+                />
+              )}
+            </form.Field>
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <EmotionalStatusDropdown
+                  field={field}
+                  emotionalStatus={emotionalStatus}
+                  enableDescription={false}
+                />
+              )}
             </form.Field>
           </div>
         </form>

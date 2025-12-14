@@ -65,7 +65,7 @@ export default function ExportModal({
       setOpen(false);
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to add announcements");
       isLoading(false);
     },
   });

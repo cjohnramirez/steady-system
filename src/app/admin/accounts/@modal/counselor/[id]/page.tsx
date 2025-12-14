@@ -58,10 +58,6 @@ export default function CounselorModal() {
     validators: {
       onChange: counselorUpdateFormSchema,
     },
-    onSubmitInvalid: ({formApi}) => {
-      console.log(formApi.state.errors)
-      console.log(formApi.state.values)
-    },
     onSubmit: ({ value }) => {
       updateMutation.mutate(value);
     },

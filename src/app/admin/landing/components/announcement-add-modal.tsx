@@ -45,7 +45,7 @@ export default function AnnouncementAddModal({
       queryClient.invalidateQueries({ queryKey: ["announcements"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to add announcements");
     },
   });
 
@@ -60,9 +60,6 @@ export default function AnnouncementAddModal({
     },
     validators: {
       onChange: announcementInsertFormSchema,
-    },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.errors);
     },
     onSubmit: async ({ value }) => {
       let finalValues = { ...value };
@@ -135,7 +132,7 @@ export default function AnnouncementAddModal({
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
+                  placeholder="Enter title of announcement"
                   field={field}
                 />
               )}

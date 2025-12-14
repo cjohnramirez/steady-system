@@ -29,17 +29,10 @@ export default function AppointmentPage() {
   const {
     data: appointmentCounselor,
     isLoading: isAppointmentCounselorLoading,
-  } = useQuery<Tables<"counselor_with_details">>({
+  } = useQuery<Tables<"counselor_with_details">[]>({
     queryKey: ["appointment-counselor"],
     queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
   });
-
-  const appointmentCounselorName =
-    (appointmentCounselor?.last_name ?? "") +
-    " " +
-    (appointmentCounselor?.first_name ?? "");
-
-  console.log(appointmentCounselor);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -47,7 +40,7 @@ export default function AppointmentPage() {
       if (!appointmentCounselor || !date) throw new Error("Missing fields");
 
       return insertAppointment(supabase, getUserID, {
-        counselor_id: appointmentCounselor.id ?? "",
+        counselor_id: appointmentCounselor[0].id ?? "",
         scheduled_at: date.toISOString(),
         reason: selectReason,
         notes: notes,
@@ -91,6 +84,11 @@ export default function AppointmentPage() {
       </div>
     );
 
+  const appointmentCounselorName =
+    (appointmentCounselor[0].first_name ?? "") +
+    " " +
+    (appointmentCounselor[0].last_name ?? "");
+
   return (
     <div className="space-y-6 p-10">
       <div className="space-y-2">
@@ -108,11 +106,11 @@ export default function AppointmentPage() {
         <div className="w-full space-y-6">
           <CounselorSection
             appointmentCounselorName={appointmentCounselorName}
-            appointmentDepartmentName={appointmentCounselor?.department ?? ""}
+            appointmentDepartmentName={appointmentCounselor[0].department ?? ""}
             isLoading={isAppointmentCounselorLoading}
           />
           <DateTimeSection
-            counselorData={appointmentCounselor ?? null}
+            counselorData={appointmentCounselor[0] ?? null}
             date={date}
             setDate={setDate}
             isLoading={isAppointmentCounselorLoading}

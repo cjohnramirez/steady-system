@@ -276,22 +276,68 @@ export type Database = {
         Row: {
           abbreviation: string
           full_name: string
-          icon: string
           id: string
         }
         Insert: {
           abbreviation?: string
           full_name?: string
-          icon?: string
           id?: string
         }
         Update: {
           abbreviation?: string
           full_name?: string
-          icon?: string
           id?: string
         }
         Relationships: []
+      }
+      contact_person: {
+        Row: {
+          first_name: string
+          id: number
+          last_name: string
+          middle_name: string | null
+          phone: number
+          student_id: string
+        }
+        Insert: {
+          first_name: string
+          id?: number
+          last_name: string
+          middle_name?: string | null
+          phone: number
+          student_id: string
+        }
+        Update: {
+          first_name?: string
+          id?: number
+          last_name?: string
+          middle_name?: string | null
+          phone?: number
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_person_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_with_details"
+            referencedColumns: ["student_id"]
+          },
+          {
+            foreignKeyName: "contact_person_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_person_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "student_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       counselor: {
         Row: {
@@ -536,13 +582,18 @@ export type Database = {
       }
       student: {
         Row: {
+          age: number | null
           avatar: string
           department_id: string
           email: string
           emotional_status_id: string | null
           first_name: string
+          gender: string | null
           id: string
+          is_disabled: boolean
+          last_active_at: string
           last_name: string
+          middle_name: string | null
           phone: string | null
           university_id: number
           user_id: string | null
@@ -550,13 +601,18 @@ export type Database = {
           year_level: number
         }
         Insert: {
+          age?: number | null
           avatar?: string
           department_id: string
           email: string
           emotional_status_id?: string | null
           first_name: string
+          gender?: string | null
           id?: string
+          is_disabled?: boolean
+          last_active_at?: string
           last_name?: string
+          middle_name?: string | null
           phone?: string | null
           university_id: number
           user_id?: string | null
@@ -564,13 +620,18 @@ export type Database = {
           year_level: number
         }
         Update: {
+          age?: number | null
           avatar?: string
           department_id?: string
           email?: string
           emotional_status_id?: string | null
           first_name?: string
+          gender?: string | null
           id?: string
+          is_disabled?: boolean
+          last_active_at?: string
           last_name?: string
+          middle_name?: string | null
           phone?: string | null
           university_id?: number
           user_id?: string | null
@@ -701,6 +762,7 @@ export type Database = {
       }
       student_with_details: {
         Row: {
+          age: number | null
           college_id: string | null
           college_name: string | null
           counselor_first_name: string | null
@@ -712,8 +774,10 @@ export type Database = {
           emotional_status: string | null
           emotional_status_id: string | null
           first_name: string | null
+          gender: string | null
           id: string | null
           last_name: string | null
+          middle_name: string | null
           phone: string | null
           university_id: number | null
           user_id: string | null

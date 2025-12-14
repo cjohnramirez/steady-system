@@ -39,8 +39,8 @@ export default function AnnouncementUpdateModal({
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  const { data: annoucement, isLoading } = useQuery({
-    queryKey: ["annoucement", id],
+  const { data: announcement, isLoading } = useQuery({
+    queryKey: ["announcement", id],
     queryFn: () => fetchAnnouncement(id),
   });
 
@@ -54,25 +54,22 @@ export default function AnnouncementUpdateModal({
       queryClient.invalidateQueries({ queryKey: ["announcement", id] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to update annoucements");
+      toast.error(err.message || "Failed to update announcements");
     },
   });
 
   const form = useForm({
     defaultValues: {
-      description: annoucement?.description ?? "",
-      end_date: annoucement?.end_date ?? "",
-      location: annoucement?.location ?? "",
-      start_date: annoucement?.start_date ?? "",
-      title: annoucement?.title ?? "",
-      id: annoucement?.id,
-      announcement_image: annoucement?.announcement_image ?? "",
+      description: announcement?.description ?? "",
+      end_date: announcement?.end_date ?? "",
+      location: announcement?.location ?? "",
+      start_date: announcement?.start_date ?? "",
+      title: announcement?.title ?? "",
+      id: announcement?.id,
+      announcement_image: announcement?.announcement_image ?? "",
     },
     validators: {
       onChange: announcementUpdateFormSchema,
-    },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.values);
     },
     onSubmit: async ({ value }) => {
       let finalValues = { ...value };
@@ -142,7 +139,7 @@ export default function AnnouncementUpdateModal({
         >
           <div className="row-span-3">
             <ImageUpload
-              initialURL={form.state.values.announcement_image}
+              initialURL={announcement?.announcement_image ?? ""}
               setFile={setFile}
             />
           </div>
@@ -163,7 +160,7 @@ export default function AnnouncementUpdateModal({
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
+                  placeholder="Enter title of announcement"
                   field={field}
                 />
               )}

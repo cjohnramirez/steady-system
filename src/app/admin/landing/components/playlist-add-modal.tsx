@@ -119,7 +119,7 @@ export default function PlaylistAddModal({
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
+                  placeholder="Enter title of announcement"
                   field={field}
                 />
               )}

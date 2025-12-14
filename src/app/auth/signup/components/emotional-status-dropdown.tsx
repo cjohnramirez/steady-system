@@ -14,6 +14,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEmotionalStatus } from "@/app/admin/accounts/@modal/actions";
+import { strToTitleCase } from "@/lib/format";
 
 interface FieldMeta {
   isTouched: boolean;
@@ -72,7 +73,7 @@ export default function EmotionalStatusDropdown({
         <SelectContent position="item-aligned">
           {emotionalStatusData && emotionalStatusData.map((emotion, idx) => (
             <SelectItem value={emotion.id} key={idx}>
-              {emotion.name}
+              {strToTitleCase(emotion.name)}
             </SelectItem>
           ))}
         </SelectContent>

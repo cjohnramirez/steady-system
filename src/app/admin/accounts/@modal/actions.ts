@@ -1,9 +1,11 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import z from "zod";
 import { Tables, TablesUpdate } from "@/types/supabase";
-import { counselorUpdateFormSchema } from "./schema";
+
+export async function fetchContactPerson(id: string) {
+  const supabase = await createClient()
+}
 
 export async function fetchStudent(
   id: string,
@@ -14,7 +16,7 @@ export async function fetchStudent(
     .from("student_with_details")
     .select("*")
     .eq("id", id)
-    .single(); 
+    .single();
 
   if (error) throw new Error(error.message);
   return data || null;
@@ -31,7 +33,7 @@ export async function fetchCounselor(
     .eq("id", id)
     .single();
 
-  if (error) throw new Error("Error fetching counselor: ", error);
+  if (error) throw new Error(`Error fetching counselor: ${error.message}`);
   return data || null;
 }
 
@@ -42,7 +44,7 @@ export async function fetchEmotionalStatus(): Promise<
 
   const { data, error } = await supabase.from("emotional_status").select("*");
 
-  if (error) throw new Error("Error fetching emotional status: ", error);
+  if (error) throw new Error(`Error fetching emotional status: ${error.message}`);
   return data || null;
 }
 
@@ -59,22 +61,22 @@ export async function updateStudentEmotionalStatus(
     .select("*")
     .single();
 
-  if (error) throw new Error("Error updating student emotional status: ", error);
+  if (error)
+    throw new Error(`Error updating student emotional status: ${error.message}`);
   return data || null;
 }
 
-export async function updateStudentProfile(
-  values: TablesUpdate<"student">,
-) {
+export async function updateStudentProfile(values: TablesUpdate<"student">) {
   const supabase = await createClient();
 
   const { error } = await supabase
     .from("student")
     .update(values)
     .eq("id", values.id ?? "")
-    .select("*").single();
+    .select("*")
+    .single();
 
-  if (error) throw new Error("Error updating student profile: ", error);
+  if (error) throw new Error(`Error updating student profile: ${error.message}`);
 }
 
 export async function updateCounselorProfile(
@@ -87,8 +89,8 @@ export async function updateCounselorProfile(
     .update(values)
     .eq("id", values?.id ?? "")
     .select("*")
-    .single(); 
+    .single();
 
-  if (error) throw new Error("Error updating counselor profile: ", error);
+  if (error) throw new Error(`Error updating counselor profile: ${error.message}`);
   return data || null;
 }

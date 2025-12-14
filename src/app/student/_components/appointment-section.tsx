@@ -22,7 +22,7 @@ export default function StudentAppointmentSection() {
   const { data: studentAppointment, isLoading: isStudentAppointmentLoading } =
     useQuery({
       queryKey: [
-        "student-appointment",
+        "student-appointments",
         pagination.pageIndex,
         pagination.pageSize,
         search,

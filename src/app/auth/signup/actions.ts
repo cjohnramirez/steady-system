@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
 import z from "zod";
-import { studentSignUpFormSchema } from "./schema";
+import { studentInsertFormSchema } from "./schema";
 
 export async function fetchDepartment(college: string) {
   const supabase = await createClient();
@@ -30,7 +30,7 @@ export async function fetchCollege() {
 }
 
 export default async function SignUpFormAction(
-  values: z.infer<typeof studentSignUpFormSchema>,
+  values: z.infer<typeof studentInsertFormSchema>,
 ): Promise<{ error?: string; success?: string }> {
   const supabase = await createClient(); 
   const supabaseAdmin = await createServiceClient(); 
@@ -62,9 +62,9 @@ export default async function SignUpFormAction(
     return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
 
-  const { college, password, ...otherValues} = values;
+  const { college, password, contact_person, ...otherValues} = values;
 
-  const { error: updateStudentError } = await supabaseAdmin
+  const { data: studentData, error: updateStudentError } = await supabaseAdmin
     .from("student")
     .insert({
       ...otherValues,
@@ -72,10 +72,29 @@ export default async function SignUpFormAction(
       university_id: Number(values.university_id),
       user_id: signUpData.user.id,
       phone: String(values.phone)
-    });
+    })
+    .select();
 
   if (updateStudentError) {
     return { error: `Failed to insert student: ${updateStudentError.message}` };
+  }
+
+  if (!studentData?.[0]?.id) {
+    return { error: "Student ID not found" };
+  }
+
+  const contactPersonData = contact_person.map(contact => ({
+    ...contact,
+    student_id: studentData[0].id,
+    phone: Number(contact.phone)
+  }));
+
+  const { error: insertContactPerson } = await supabaseAdmin
+    .from("contact_person")
+    .insert(contactPersonData);
+
+  if (insertContactPerson) {
+    return { error: `Failed to insert contact person: ${insertContactPerson.message}` };
   }
 
   return { success: "Sign Up successful" };

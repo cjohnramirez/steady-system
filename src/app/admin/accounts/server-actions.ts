@@ -44,7 +44,6 @@ export default async function insertCounselor(
     .insert([{ ...rest, user_id: signUpData.user.id }]);
 
   if (updateCounselorError) {
-    console.log(rest)
     throw new Error(`Failed to insert counselor: ${updateCounselorError.message}`)
   }
 

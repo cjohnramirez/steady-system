@@ -4,17 +4,19 @@ import { fetchStudent } from "@/app/admin/accounts/@modal/actions";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/hooks/auth-store";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Edit2 } from "lucide-react";
+import { ArrowUpRight, Contact, Edit2, Phone, User } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useState } from "react";
 import StudentProfileModal from "./profile-modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
+import { strToTitleCase } from "@/lib/format";
 
 export default function ProfileSection() {
   const studentID = useUserStore.getState().id;
-  const [open, setOpen] = useState(false);
+  const [openProfile, setOpenProfile] = useState(false);
+  const [openContactPerson, setOpenContactPerson] = useState(false);
 
   const { data: studentData, isLoading } = useQuery({
     queryKey: ["student-user"],
@@ -23,13 +25,16 @@ export default function ProfileSection() {
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
-  console.log("Student Data: ", studentData)
-  console.log("Student User ID: ", studentID)
+  console.log(studentData)
 
   return (
     <>
-      {open && (
-        <StudentProfileModal open={open} setOpen={setOpen} id={studentID} />
+      {openProfile && (
+        <StudentProfileModal
+          open={openProfile}
+          setOpen={setOpenProfile}
+          id={studentID}
+        />
       )}
 
       <div className="grid grid-cols-2 grid-rows-3 gap-4 rounded-2xl border border-gray-200 bg-white p-5">
@@ -91,10 +96,16 @@ export default function ProfileSection() {
               Ensure these details are complete for a better service experience.
             </p>
           </div>
-          <Button variant="outline" onClick={() => setOpen(true)}>
-            <Edit2 strokeWidth={1.25} />
-            <p>Edit Profile</p>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setOpenProfile(true)}>
+              <User strokeWidth={1.25} />
+              <p>Edit Profile</p>
+            </Button>
+            <Button variant="outline" onClick={() => setOpenProfile(true)}>
+              <Phone strokeWidth={1.25} />
+              <p>Edit Contact Person/s</p>
+            </Button>
+          </div>
         </div>
         <div className="mt-10 grid w-full grid-cols-[150px_1fr] gap-x-8 gap-y-4">
           <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
@@ -128,10 +139,17 @@ export default function ProfileSection() {
                 { label: "Department", value: studentData?.department },
                 { label: "Year Level", value: studentData?.year_level },
                 { label: "University ID", value: studentData?.university_id },
+                { label: "Gender", value: studentData?.gender ?? "" },
+                { label: "Age", value: studentData?.age },
               ].map((item) => (
-                <div key={item.label} className="rounded-xl border px-4 py-2">
-                  <p className="font-medium">{item.label}</p>
-                  <p>{item.value}</p>
+                <div
+                  key={item.label}
+                  className="flex overflow-hidden rounded-xl border"
+                >
+                  <p className="w-2/5 border-r bg-gray-50 p-4 font-medium">
+                    {item.label}
+                  </p>
+                  <p className="wrap-break-words flex-1 p-4">{item?.value}</p>
                 </div>
               ))
             )}

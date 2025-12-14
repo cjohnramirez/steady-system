@@ -75,9 +75,7 @@ export default function AvailabilityModal({
       stopLoading();
     },
   });
-
-  console.log(counselorID);
-
+  
   const timeSlots = generateTimeSlots("06:00", "20:30");
 
   const form = useForm({

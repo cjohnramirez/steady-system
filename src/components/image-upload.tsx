@@ -16,14 +16,17 @@ export default function ImageUpload({
 }) {
   const [preview, setPreview] = useState<string | null>(initialURL || null);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const selectedFile = acceptedFiles[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const objectUrl = URL.createObjectURL(selectedFile);
-      setPreview(objectUrl);
-    }
-  }, [setFile]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const selectedFile = acceptedFiles[0];
+      if (selectedFile) {
+        setFile(selectedFile);
+        const objectUrl = URL.createObjectURL(selectedFile);
+        setPreview(objectUrl);
+      }
+    },
+    [setFile],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -33,7 +36,7 @@ export default function ImageUpload({
     multiple: false,
   });
 
-  console.log(initialURL)
+  console.log("Image is loaded to component: ", initialURL);
 
   return (
     <div className="row-span-3 flex aspect-square flex-col gap-4">

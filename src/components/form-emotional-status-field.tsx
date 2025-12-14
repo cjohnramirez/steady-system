@@ -51,8 +51,6 @@ export default function FormEmotionalStatusField({
     if (studentID) mutation.mutate(newStatus);
   };
 
-  console.log("Emotional status selected: ", emotionalStatus)
-
   return (
     <Field>
       <FieldLabel>Emotional Status</FieldLabel>

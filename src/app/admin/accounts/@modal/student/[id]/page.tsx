@@ -21,11 +21,11 @@ import { FormInputField } from "@/components/form-input-field";
 import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown";
 import FormYearLevelField from "@/components/form-year-level-field";
-import { studentUpdateFormSchema } from "../../schema";
 import EmotionalStatusDropdown from "@/app/auth/signup/components/emotional-status-dropdown";
 import { fetchStudent } from "../../actions";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { studentUpdateFormSchema } from "@/app/auth/signup/schema";
 
 export default function StudentModal() {
   const queryClient = useQueryClient();
@@ -67,13 +67,13 @@ export default function StudentModal() {
       id: student?.id ?? "",
       phone: student?.phone ?? "",
       emotional_status_id: student?.emotional_status_id ?? "",
-      college_id: student?.college_id ?? "",
+      college: student?.college_id ?? "",
     },
     validators: {
       onChange: studentUpdateFormSchema,
     },
     onSubmit: ({ value }) => {
-      const { college_id, ...rest } = value;
+      const { college, ...rest } = value;
       updateMutation.mutate(rest);
     },
   });
@@ -143,7 +143,7 @@ export default function StudentModal() {
             </form.Field>
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">
-            <form.Field name="college_id">
+            <form.Field name="college">
               {(field) => (
                 <CollegeDropdown
                   field={field}

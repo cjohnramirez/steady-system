@@ -110,6 +110,8 @@ export default function ArticleUpdateModal({
 
   if (isLoading) return null;
 
+  console.log("Image is fetched: ", article?.article_image)
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
@@ -133,7 +135,7 @@ export default function ArticleUpdateModal({
         >
           <div className="row-span-3">
             <ImageUpload
-              initialURL={form.state.values.article_image}
+              initialURL={article?.article_image ?? ""}
               setFile={setFile}
             />
           </div>

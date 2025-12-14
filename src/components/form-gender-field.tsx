@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 interface FieldMeta {
@@ -24,55 +25,62 @@ interface FieldState<TValue> {
   meta: FieldMeta;
 }
 
-interface FieldLike<TValue = number> {
+interface FieldLike<TValue = string> {
   name: string;
   state: FieldState<TValue>;
   handleBlur: () => void;
   handleChange: (value: TValue) => void;
 }
 
-interface FormYearLevelProps<TValue = number> {
+interface FormDropdownInputProps<TValue = string> {
   field: FieldLike<TValue>;
+  setCollege?: (value: React.SetStateAction<string>) => void;
   enableDescription?: boolean;
 }
 
-export default function FormYearLevelField({
+const genderObj = ["male", "female", "non-binary", "prefer not to say"]
+
+export default function GenderField({
   field,
+  setCollege,
   enableDescription = true,
-}: FormYearLevelProps) {
+}: FormDropdownInputProps) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
     <Field data-invalid={isInvalid}>
-      <FieldLabel htmlFor={field.name}>Year Level</FieldLabel>
+      <FieldLabel htmlFor={field.name}>Gender</FieldLabel>
       <Select
         name={field.name}
-        value={field.state.value ? field.state.value.toString() : ""}
-        onValueChange={(value) => field.handleChange(Number(value))}
+        value={field.state.value ?? ""}
+        onValueChange={(value) => {
+          field.handleChange(value);
+          if (setCollege) setCollege(value);
+        }}
       >
-        <SelectTrigger id="select-year-level" aria-invalid={isInvalid}>
-          <SelectValue placeholder="Select Year Level" />
+        <SelectTrigger id="select-college" aria-invalid={isInvalid}>
+          <SelectValue placeholder="Select Gender" />
         </SelectTrigger>
         <SelectContent position="item-aligned">
-          {[
-            { year: "1", name: "1st Year" },
-            { year: "2", name: "2nd Year" },
-            { year: "3", name: "3rd Year" },
-            { year: "4", name: "4th Year" },
-            { year: "5", name: "5th Year" },
-          ].map((data, idx) => (
-            <SelectItem value={data.year} key={idx}>
-              {data.name}
+          {genderObj.map((gender, idx) => (
+            <SelectItem
+              value={gender}
+              key={idx}
+              onClick={() => {
+                if (setCollege) setCollege(gender);
+              }}
+            >
+              {gender}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
       {isInvalid ? (
         <FieldError errors={field.state.meta.errors} />
+      ) : enableDescription ? (
+        <FieldDescription>A gender must be chosen</FieldDescription>
       ) : (
-        <FieldDescription>
-          {enableDescription && "Ensure the year level is valid"}
-        </FieldDescription>
+        <></>
       )}
     </Field>
   );

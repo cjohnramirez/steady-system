@@ -15,9 +15,8 @@ import {
 } from "lucide-react";
 import { Tables } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
-import AnnoucementTile from "./annoucements-tile";
 import AnnouncementAddModal from "./announcement-add-modal";
-import AnnouncementUpdateModal from "./announcement-update-modal";
+import AnnouncementTile from "./annoucements-tile";
 
 export default function AnnouncementSection() {
   const supabase = createClient();
@@ -84,15 +83,15 @@ export default function AnnouncementSection() {
         {isLoading ? (
           <div className="grid h-[300px] grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, idx) => (
-              <AnnoucementTile key={`skeleton-${idx}`} isLoading={true} />
+              <AnnouncementTile key={`skeleton-${idx}`} isLoading={true} />
             ))}
           </div>
         ) : list.length > 0 ? (
           <div className="grid h-[300px] grid-cols-4 gap-4">
             {list.map((announcement, idx) => (
-              <AnnoucementTile
+              <AnnouncementTile
                 key={announcement.id || idx}
-                annoucementTile={announcement}
+                announcementTile={announcement}
               />
             ))}
           </div>

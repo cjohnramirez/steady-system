@@ -60,7 +60,6 @@ export default function AddCounselorModal({
       password: "",
     },
     validators: {
-      onBlur: counselorInsertFormSchema,
       onSubmit: counselorInsertFormSchema,
     },
     onSubmit: async ({ value }) => {

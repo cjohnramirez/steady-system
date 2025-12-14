@@ -7,7 +7,7 @@ export default function AnnouncementSection() {
     <section id="announcement">
       <div className="m-auto flex h-1/2 max-w-[600px] flex-col items-center justify-center space-y-4 py-20 text-center">
         <div className="rounded-xl border border-gray-200 bg-white px-10 py-2">
-          Annoucements
+          announcements
         </div>
         <p className="mt-5 text-4xl">Announcements & Events</p>
         <p>
@@ -26,7 +26,7 @@ export default function AnnouncementSection() {
               sizes=""
             />
             <div className="z-10 w-36 rounded-xl border border-gray-200 bg-white p-2">
-              <p className="text-center">Annoucements</p>
+              <p className="text-center">announcements</p>
             </div>
             <Link
               className="z-10 flex gap-4 rounded-2xl bg-white px-6 py-8"

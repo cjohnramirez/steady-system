@@ -1,6 +1,25 @@
+import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export type studentAppointmentParams = {};
+export async function deleteStudentAppointment(
+  appointmentID: string,
+): Promise<{ error?: string; success?: string }> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("appointment")
+    .delete()
+    .eq("id", appointmentID);
+
+  if (error)
+    return {
+      error: "Appointment cancel failed",
+    };
+
+  return {
+    success: "Appointment cancelled successfully",
+  };
+}
 
 export async function fetchStudentAppointment(
   page: number,

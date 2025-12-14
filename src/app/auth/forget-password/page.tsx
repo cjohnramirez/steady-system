@@ -29,8 +29,6 @@ export default function ForgetPassword() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth Event:", event);
-
       if (event === "PASSWORD_RECOVERY") {
         setStep("reset");
       }

@@ -91,8 +91,6 @@ export async function fetchAccountCounts(supabase: SupabaseClient) {
     counselors: counselorCount || 0,
   };
 
-  console.log(counts);
-
   return counts;
 }
 

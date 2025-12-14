@@ -28,8 +28,6 @@ export default function CounselorProfileSection() {
     queryFn: () => fetchCounselorProfile(supabase, counselorID),
   });
 
-  console.log(counselorProfile);
-
   return (
     <>
       {openAvailability && (

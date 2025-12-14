@@ -30,8 +30,6 @@ export default function AssignDepartmentModal({
     queryFn: () => fetchCounselorDepartment(id),
   });
 
-  console.log(counselorDepartments);
-
   return (
     <Dialog
       open={open}

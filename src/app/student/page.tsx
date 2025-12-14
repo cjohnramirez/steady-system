@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useUserStore } from "@/hooks/auth-store";
 import ProfileSection from "./_components/profile-section";
 import StudentAppointmentSection from "./_components/appointment-section";
 
 export default function StudentPage() {
-  const username = useUserStore.getState().userName ?? "";
+  const { userName } = useUserStore();
+  const [username, setUsername] = useState(userName ?? "");
 
   return (
     <div className="space-y-6 p-10">

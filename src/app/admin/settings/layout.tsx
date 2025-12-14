@@ -5,7 +5,7 @@ export default function SettingsLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div></div>}>
       <div className="min-h-screen">
         <div className="flex gap-8">
           <SettingsSidebar />

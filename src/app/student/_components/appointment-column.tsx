@@ -1,11 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { useConfirmStore } from "@/hooks/confirm-store";
 import { dateToString } from "@/lib/format";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ArrowUpDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { deleteStudentAppointment } from "../actions";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const studentAppointmentColumns: ColumnDef<
   Tables<"appointment_with_details">
@@ -68,9 +73,7 @@ export const studentAppointmentColumns: ColumnDef<
           {notes && String(notes).trim() !== "" ? (
             String(notes)
           ) : (
-            <span className="text-muted-foreground">
-              No notes provided
-            </span>
+            <span className="text-muted-foreground">No notes provided</span>
           )}
         </p>
       );
@@ -82,58 +85,73 @@ export const studentAppointmentColumns: ColumnDef<
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      return (
-        <p>
-          {dateToString(originalRow.scheduled_at ?? "")}
-        </p>
-      );
+      return <p>{dateToString(originalRow.scheduled_at ?? "")}</p>;
     },
   },
   {
     header: "Actions",
-    cell: ({ row }) => {
-      const originalRow = row.original;
-
-      return (
-        <div className="flex items-center gap-2">
-          {originalRow.status === "pending" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Add your cancel logic here
-                // e.g. call a mutation or show a confirmation dialog
-              }}
-            >
-              Cancel Request
-            </Button>
-          )}
-          {originalRow.status === "approved" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Add your cancel logic here
-                // e.g. call a mutation or show a confirmation dialog
-              }}
-            >
-              Create Another
-            </Button>
-          )}
-          {originalRow.status === "cancelled" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Add your cancel logic here
-                // e.g. call a mutation or show a confirmation dialog
-              }}
-            >
-              Re-request
-            </Button>
-          )}
-        </div>
-      );
-    },
+    cell: ({ row }) => <AppointmentActionsCell row={row} />,
   },
 ];
+
+const AppointmentActionsCell = ({ row }: { row: any }) => {
+  const originalRow = row.original;
+  const router = useRouter();
+  const { confirm, startLoading, stopLoading } = useConfirmStore();
+  const queryClient = useQueryClient();
+
+  const handleSubmit = async () => {
+    const ok = await confirm(
+      "Cancel this appointment?",
+      "This action cannot be undone.",
+    );
+
+    if (!ok) return;
+
+    startLoading();
+    const res = await deleteStudentAppointment(row.original.id ?? "");
+
+    if (res.error) {
+      toast.error(res.error);
+    }
+
+    if (res.success) {
+      queryClient.invalidateQueries({ queryKey: ["student-appointments"] });
+      toast.success(res.success);
+    }
+
+    stopLoading();
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {originalRow.status === "pending" && (
+        <Button variant="outline" size="sm" onClick={handleSubmit}>
+          Cancel Request
+        </Button>
+      )}
+      {originalRow.status === "approved" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            router.push("/student/appointment");
+          }}
+        >
+          Create Another
+        </Button>
+      )}
+      {originalRow.status === "cancelled" && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          Re-request
+        </Button>
+      )}
+    </div>
+  );
+};
