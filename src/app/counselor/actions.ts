@@ -103,7 +103,7 @@ export async function fetchCounselorProfile(
     await supabase
       .from("counselor_with_details")
       .select("*")
-      .eq("id", id)
+      .eq("id", id).limit(1)
       .maybeSingle();
 
   if (counselorProfileError) throw counselorProfileError;
