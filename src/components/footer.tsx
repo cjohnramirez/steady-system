@@ -5,8 +5,9 @@ import { ArrowUpRight, CalendarCheck2, Home, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { fetchOrganization } from "@/app/home/actions";
+import { NavBar } from "@/app/home/_lib/nav-data";
 
-export default function Footer() {
+export default function Footer({ navBarObj }: { navBarObj?: NavBar[] }) {
   const { data: organization } = useQuery({
     queryKey: ["organization"],
     queryFn: fetchOrganization,
@@ -57,9 +58,19 @@ export default function Footer() {
           <div className="space-y-10">
             <p className="font-medium">Fast Links</p>
             <div className="flex flex-col gap-4">
-              <a href="/">Home</a>
-              <a href="/about">About</a>
-              <a href="/services">Services</a>
+              {navBarObj && navBarObj.length > 0 ? (
+                navBarObj.map((nav) => (
+                  <Link key={nav.link} href={nav.link}>
+                    {nav.title}
+                  </Link>
+                ))
+              ) : (
+                <>
+                  <Link href="/">Home</Link>
+                  <Link href="/about">About</Link>
+                  <Link href="/services">Services</Link>
+                </>
+              )}
             </div>
           </div>
           <div className="space-y-10">
