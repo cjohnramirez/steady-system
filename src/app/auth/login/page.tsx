@@ -1,5 +1,14 @@
-import LoginPage from "./[role]/page";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function LoginRedirect() {
-  return <LoginPage params={Promise.resolve({ role: "student" })} />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/auth/login/student");
+  }, [router]);
+
+  return null;
 }
