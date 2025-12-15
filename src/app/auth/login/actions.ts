@@ -47,7 +47,26 @@ export default async function LoginFormAction(data: LoginData): Promise<{
 
   if (session) {
     const jwt = jwtDecode<JwtCustomPayload>(session.access_token);
-    if (jwt.user_role !== data.role) {
+    
+    // Check if user_role exists in JWT, if not fetch from user_roles table
+    let userRole = jwt.user_role;
+    
+    if (!userRole) {
+      const { data: roleData, error: roleError } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userData.user!.id)
+        .single();
+      
+      if (roleError || !roleData) {
+        supabase.auth.signOut();
+        throw new Error("User role not found");
+      }
+      
+      userRole = roleData.role;
+    }
+    
+    if (userRole !== data.role) {
       supabase.auth.signOut();
       throw new Error("Unauthorized access for this role");
     }
@@ -73,8 +92,9 @@ export default async function LoginFormAction(data: LoginData): Promise<{
       "increment_daily_login",
     );
 
+    // Don't throw on analytics error - it shouldn't block login
     if (analyticsError) {
-      throw new Error(`Failed to update analytics: ${analyticsError.message}`);
+      console.warn("Analytics update failed:", analyticsError);
     }
 
     return {
@@ -99,8 +119,9 @@ export default async function LoginFormAction(data: LoginData): Promise<{
       "increment_daily_login",
     );
 
+    // Don't throw on analytics error - it shouldn't block login
     if (analyticsError) {
-      throw new Error(`Failed to update analytics: ${analyticsError.message}`);
+      console.warn("Analytics update failed:", analyticsError);
     }
 
     return {
