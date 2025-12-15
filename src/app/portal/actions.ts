@@ -98,6 +98,26 @@ export async function fetchArticlesByEmotion(
 
   if (error) throw error;
 
+  // If emotionalStatus filter returned empty, return all results
+  if (emotionalStatus !== "" && (!data || data.length === 0)) {
+    let fallbackQuery = supabase.from("article").select("*", { count: "exact" });
+
+    if (search) {
+      fallbackQuery = fallbackQuery.ilike("title", `%${search}%`);
+    }
+
+    const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery
+      .order("title", { ascending: false })
+      .range(from, to);
+
+    if (fallbackError) throw fallbackError;
+
+    return {
+      data: fallbackData || [],
+      count: fallbackCount || 0,
+    };
+  }
+
   return {
     data: data || [],
     count: count || 0,
@@ -142,6 +162,28 @@ export async function fetchPlaylistByEmotion(
     .range(from, to);
 
   if (error) throw error;
+
+  // If emotionalStatus filter returned empty, return all results
+  if (emotionalStatus !== "" && (!data || data.length === 0)) {
+    let fallbackQuery = supabase
+      .from("playlist_with_details")
+      .select("*", { count: "exact" });
+
+    if (search) {
+      fallbackQuery = fallbackQuery.ilike("title", `%${search}%`);
+    }
+
+    const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery
+      .order("title", { ascending: false })
+      .range(from, to);
+
+    if (fallbackError) throw fallbackError;
+
+    return {
+      data: fallbackData || [],
+      count: fallbackCount || 0,
+    };
+  }
 
   return {
     data: data || [],

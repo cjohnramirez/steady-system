@@ -41,26 +41,28 @@ export default function StudentAppointmentSection() {
   const rowCount = studentAppointment?.count || 0;
 
   return (
-    <DataTable
-      isLoading={isStudentAppointmentLoading}
-      columns={studentAppointmentColumns}
-      data={studentAppointmentData}
-      rowCount={rowCount}
-      pagination={pagination}
-      onPaginationChange={setPagination}
-      onSearchChange={(val) => {
-        setSearch(val);
-        setPagination((p) => ({ ...p, pageIndex: 0 }));
-      }}
-      toolbarExtra={
-        <div className="h-full items-center">
-          <p className="font-medium">Appointment</p>
-          <p>
-            You can edit some details about your appointments if you wished to
-            do so
-          </p>
-        </div>
-      }
-    />
+    <div className="col-span-3 rounded-2xl border border-gray-200 bg-white p-8">
+      <DataTable
+        isLoading={isStudentAppointmentLoading}
+        columns={studentAppointmentColumns}
+        data={studentAppointmentData}
+        rowCount={rowCount}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
+        }}
+        toolbarExtra={
+          <div className="h-full items-center">
+            <p className="font-medium">Appointment</p>
+            <p>
+              You can edit some details about your appointments if you wished to
+              do so
+            </p>
+          </div>
+        }
+      />
+    </div>
   );
 }

@@ -31,8 +31,21 @@ export function generateTimeSlots(
   startTime: string,
   endTime: string,
 ): string[] {
-  const [startHour, startMinute] = startTime.split(":").map(Number);
-  const [endHour, endMinute] = endTime.split(":").map(Number);
+  // Parse time format "HH:MM:SS+TZ" or "HH:MM:SS" to "HH:MM"
+  const parseTimeString = (timeStr: string): [number, number] => {
+    const timePart = timeStr.includes("+") 
+      ? timeStr.split("+")[0] 
+      : timeStr.includes("-") 
+      ? timeStr.split("-")[0]
+      : timeStr;
+    const parts = timePart.split(":");
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    return [h, m];
+  };
+
+  const [startHour, startMinute] = parseTimeString(startTime);
+  const [endHour, endMinute] = parseTimeString(endTime);
 
   const start = new Date();
   start.setHours(startHour, startMinute, 0, 0);

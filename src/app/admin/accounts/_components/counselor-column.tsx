@@ -109,7 +109,7 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
               <AssignDepartmentModal
                 open={openAssignDepartment}
                 setOpen={setOpenAssignDepartment}
-                id={row.original.id ?? ""}
+                counselorId={row.original.id ?? ""}
               />
             )}
             <Button

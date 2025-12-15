@@ -24,12 +24,12 @@ export default function AnnouncementTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
-        <div className="relative h-1/2 w-full">
+      <div className="flex h-fit flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
+        <div className="relative h-64 w-full">
           <Skeleton className="h-full w-full rounded-2xl" />
         </div>
-        <div className="flex h-1/2 flex-col justify-between rounded-xl border border-gray-200">
-          <div className="space-y-4 p-4">
+        <div className="h-fit space-y-2 rounded-xl border border-gray-200">
+          <div className="space-y-2 p-4">
             <div className="flex items-center gap-4">
               <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
               <Skeleton className="h-4 w-1/2" />
@@ -51,8 +51,8 @@ export default function AnnouncementTile({
   if (!announcementData) return null;
 
   return (
-    <div className="flex h-full flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
-      <div className="relative h-1/2 justify-between">
+    <div className="flex h-fit flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
+      <div className="relative h-64 justify-between">
         {announcementData.announcement_image?.length ? (
           <CldImage
             src={announcementData.announcement_image}
@@ -71,7 +71,7 @@ export default function AnnouncementTile({
           />
         )}
       </div>
-      <div className="h-1/2 space-y-2 rounded-xl border border-gray-200">
+      <div className="h-fit space-y-2 rounded-xl border border-gray-200">
         <div className="space-y-2 p-4">
           <div className="flex items-center gap-4">
             <MapPin

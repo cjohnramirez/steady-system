@@ -36,7 +36,6 @@ export default function ProfileSection() {
           id={studentID}
         />
       )}
-
       <div className="grid grid-cols-2 grid-rows-3 gap-4 rounded-2xl border border-gray-200 bg-white p-5">
         <div className="col-span-2 m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5">
           <div className="flex space-y-2">
@@ -97,36 +96,36 @@ export default function ProfileSection() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setOpenProfile(true)}>
+            <Button variant="outline" onClick={() => setOpenProfile(true)} disabled={isLoading}>
               <User strokeWidth={1.25} />
               <p>Edit Profile</p>
-            </Button>
-            <Button variant="outline" onClick={() => setOpenProfile(true)}>
-              <Phone strokeWidth={1.25} />
-              <p>Edit Contact Person/s</p>
             </Button>
           </div>
         </div>
         <div className="mt-10 grid w-full grid-cols-[150px_1fr] gap-x-8 gap-y-4">
           <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
-            <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
-              <Edit2
-                onClick={() => toast.info("This is an upcoming feature")}
-                size={20}
-              />
-            </div>
+            {isLoading ? (
+              <Skeleton className="h-36 w-36 rounded-full" />
+            ) : (
+              <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
+                <Edit2
+                  onClick={() => toast.info("This is an upcoming feature")}
+                  size={20}
+                />
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             {isLoading ? (
               <>
                 {[...Array(8)].map((_, i) => (
-                  <div
+                    <div
                     key={i}
-                    className="space-y-2 rounded-xl border px-4 py-2"
-                  >
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
+                    className="flex overflow-hidden rounded-xl border p-4 gap-2"
+                    >
+                    <Skeleton className="h-10 w-2/5" />
+                    <Skeleton className="h-10 flex-1" />
+                    </div>
                 ))}
               </>
             ) : (

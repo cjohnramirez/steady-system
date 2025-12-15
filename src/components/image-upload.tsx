@@ -43,7 +43,7 @@ export default function ImageUpload({
 
   return (
     <div className="row-span-3 flex aspect-square flex-col gap-4">
-      <Label>Article Image</Label>
+      <Label>Image</Label>
 
       <div
         {...getRootProps()}

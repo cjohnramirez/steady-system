@@ -85,18 +85,18 @@ export default function AnnouncementSection() {
         </InputGroup>
       </div>
       {isLoading ? (
-        <div className="grid h-[600px] grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, idx) => (
             <AnnouncementTile key={`skeleton-${idx}`} isLoading={true} />
           ))}
         </div>
       ) : list.length === 0 ? (
-        <div className="flex h-[600px] w-full items-center justify-center gap-4 rounded-2xl border bg-white">
+        <div className="flex w-full items-center justify-center gap-4 rounded-2xl border bg-white py-12">
           <CircleOff strokeWidth={1.25} />
-          <p>No events for this time period</p>
+          <p>No more events</p>
         </div>
       ) : (
-        <div className="grid h-[600px] grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {list.map((data, idx) => (
             <AnnouncementTile
               key={data.id || idx}

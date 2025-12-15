@@ -7,14 +7,14 @@ import NotesSection from "./_components/notes-section";
 import ReasonSection from "./_components/reason-section";
 import { createClient } from "@/utils/supabase/client";
 import { fetchAppointmentCounselor, insertAppointment } from "./actions";
+import { fetchOrganization } from "@/app/home/actions";
 import { useUserStore } from "@/hooks/auth-store";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Tables } from "@/types/supabase";
-import { CircleOff, Phone, UserRoundXIcon } from "lucide-react";
-import { contactObj } from "@/components/footer";
+import { MapPin, Mail, Phone, Clock, UserRoundXIcon } from "lucide-react";
 
 export default function AppointmentPage() {
   const [selectReason, setSelectReason] = useState("Academic");
@@ -26,12 +26,27 @@ export default function AppointmentPage() {
 
   const supabase = createClient();
 
+  const parseTime = (timeString: string): string => {
+    if (!timeString) return "";
+    const timePart = timeString.split("+")[0] || timeString.split("-")[0];
+    const [hours, minutes] = timePart.split(":").slice(0, 2);
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
+
   const {
     data: appointmentCounselor,
     isLoading: isAppointmentCounselorLoading,
   } = useQuery<Tables<"counselor_with_details">[]>({
     queryKey: ["appointment-counselor"],
     queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
+  });
+
+  const { data: organization } = useQuery({
+    queryKey: ["organization"],
+    queryFn: fetchOrganization,
   });
 
   const mutation = useMutation({
@@ -68,18 +83,36 @@ export default function AppointmentPage() {
         </div>
 
         <div className="mt-10 grid grid-cols-1 items-center justify-between gap-5 rounded-2xl border border-gray-200 bg-white p-6">
-          {contactObj.map((contact, index) => (
-            <div key={index} className="flex items-start gap-2">
-              {contact.icon}
-              {contact.link ? (
-                <a href={contact.link} className="text-sm">
-                  {contact.text}
-                </a>
-              ) : (
-                <p className="text-sm">{contact.text}</p>
-              )}
+          {organization?.office_location && (
+            <div className="flex items-start gap-2">
+              <MapPin size={20} strokeWidth={1} />
+              <p className="text-sm">{organization.office_location}</p>
             </div>
-          ))}
+          )}
+          {organization?.email && (
+            <div className="flex items-start gap-2">
+              <Mail size={20} strokeWidth={1} />
+              <a href={`mailto:${organization.email}`} className="text-sm">
+                {organization.email}
+              </a>
+            </div>
+          )}
+          {organization?.phone && (
+            <div className="flex items-start gap-2">
+              <Phone size={20} strokeWidth={1} />
+              <a href={`tel:${organization.phone}`} className="text-sm">
+                {organization.phone}
+              </a>
+            </div>
+          )}
+          {organization?.start_office_hour && organization?.end_office_hour && (
+            <div className="flex items-start gap-2">
+              <Clock size={20} strokeWidth={1} />
+              <p className="text-sm">
+                {parseTime(organization.start_office_hour)} - {parseTime(organization.end_office_hour)}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );

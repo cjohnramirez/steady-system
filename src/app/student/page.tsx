@@ -20,9 +20,7 @@ export default function StudentPage() {
       </div>
       <div className="grid grid-cols-3 gap-4">
         <ProfileSection />
-        <div className="col-span-3 rounded-2xl border border-gray-200 bg-white p-8">
-          <StudentAppointmentSection />
-        </div>
+        <StudentAppointmentSection />
       </div>
     </div>
   );

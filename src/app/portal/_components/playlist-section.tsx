@@ -24,7 +24,7 @@ export default function PlaylistSection() {
   });
 
   const { data: playlists, isLoading } = useQuery({
-    queryKey: ["playlist", search],
+    queryKey: ["playlist", pagination.pageIndex, pagination.pageSize, search, userEmotionalStatus],
     queryFn: () =>
       fetchPlaylistByEmotion(
         supabase,
@@ -46,7 +46,7 @@ export default function PlaylistSection() {
           <p>
             View all music playlists, curated based on your emotional status
             (you can change it{" "}
-            <Link href="student/profile/">
+            <Link href="student/">
               <u className="cursor-pointer">here</u>
             </Link>
             )
@@ -62,7 +62,7 @@ export default function PlaylistSection() {
           />
         </InputGroup>
       </div>
-      <div className="grid h-40 grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {isLoading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <PlaylistTile key={`skeleton-${idx}`} isLoading={true} />

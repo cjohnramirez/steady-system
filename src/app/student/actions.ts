@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { Tables } from "@/types/supabase";
 
 export async function deleteStudentAppointment(
   appointmentID: string,
@@ -19,6 +20,63 @@ export async function deleteStudentAppointment(
   return {
     success: "Appointment cancelled successfully",
   };
+}
+
+export async function fetchContactPersons(
+  studentId: string,
+): Promise<Tables<"contact_person">[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("contact_person")
+    .select("*")
+    .eq("student_id", studentId)
+    .order("created_at", { ascending: true });
+
+  if (error)
+    throw new Error(`Error fetching contact persons: ${error.message}`);
+  return data || [];
+}
+
+export async function updateContactPersons(
+  studentId: string,
+  contactPersons: Array<{
+    id?: string;
+    first_name: string;
+    last_name: string;
+    middle_name: string;
+    phone: string;
+  }>,
+): Promise<Tables<"contact_person">[]> {
+  const supabase = createClient();
+
+  try {
+    const { error: deleteError } = await supabase
+      .from("contact_person")
+      .delete()
+      .eq("student_id", studentId);
+
+    if (deleteError) throw deleteError;
+
+    const contactPersonsToInsert = contactPersons.map((cp) => ({
+      student_id: studentId,
+      first_name: cp.first_name,
+      last_name: cp.last_name,
+      middle_name: cp.middle_name,
+      phone: Number(cp.phone),
+    }));
+
+    const { data, error: insertError } = await supabase
+      .from("contact_person")
+      .insert(contactPersonsToInsert)
+      .select();
+
+    if (insertError) throw insertError;
+
+    return data || [];
+  } catch (error: any) {
+    throw new Error(`Error updating contact persons: ${error.message}`);
+  }
 }
 
 export async function fetchStudentAppointment(

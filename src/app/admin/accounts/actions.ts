@@ -42,7 +42,7 @@ export async function fetchCounselors(
   const to = from + pageSize - 1;
 
   let query = supabase
-    .from("counselor_with_details")
+    .from("counselor")
     .select("*", { count: "exact" });
 
   if (search) {
@@ -92,6 +92,54 @@ export async function fetchAccountCounts(supabase: SupabaseClient) {
   };
 
   return counts;
+}
+
+export async function assignDepartment(
+  counselorID: string,
+  departments: Array<{ department_id: string }>,
+) {
+  const supabase = createClient();
+  const departmentIds = departments.map(d => d.department_id);
+
+  console.log("Assigning departments:", { counselorID, departmentIds });
+
+  // First, verify the departments exist
+  const { data: existingDepts, error: checkError } = await supabase
+    .from("department")
+    .select("id, counselor_id")
+    .in("id", departmentIds);
+
+  console.log("Department check:", { existingDepts, checkError });
+
+  if (checkError) {
+    throw new Error("Error checking departments: " + checkError.message);
+  }
+
+  if (!existingDepts || existingDepts.length === 0) {
+    throw new Error("No departments found with the provided IDs");
+  }
+
+  console.log("Departments exist:", existingDepts);
+
+  // Now update them
+  const { data, error } = await supabase
+    .from("department")
+    .update({ counselor_id: counselorID })
+    .in("id", departmentIds)
+    .select();
+
+  console.log("Update response:", { data, error });
+
+  if (error) {
+    console.error("Full error details:", error);
+    throw new Error("Error assigning department: " + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("Update executed but returned no data. Check if departments were actually updated");
+  }
+
+  return data;
 }
 
 export type AccountType = "students" | "counselors";

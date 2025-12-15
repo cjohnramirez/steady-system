@@ -7,6 +7,39 @@ export async function fetchContactPerson(id: string) {
   const supabase = await createClient()
 }
 
+export async function fetchAvailableDepartments(): Promise<
+  Tables<"department">[] | null
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("department")
+    .select("*")
+    .is("counselor_id", null)
+    .order("title", { ascending: true });
+
+  if (error) throw new Error(`Error fetching departments: ${error.message}`);
+  return data || null;
+}
+
+export async function fetchDepartmentsByCollege(collegeId: string): Promise<
+  Tables<"department">[] | null
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("department")
+    .select("*")
+    .eq("college_id", collegeId)
+    .is("counselor_id", null)
+    .order("title", { ascending: true });
+
+  if (error)
+    throw new Error(`Error fetching departments: ${error.message}`);
+  return data || null;
+}
+
+
 export async function fetchStudent(
   id: string,
 ): Promise<Tables<"student_with_details"> | null> {
