@@ -14,7 +14,7 @@ export async function insertAppointment(
   const { data: student, error: studentError } = await supabase
     .from("student_with_details")
     .select("*")
-    .eq("user_id", userId)
+    .eq("id", userId)
     .single();
 
   if (studentError) throw new Error(String(studentError));
@@ -35,20 +35,18 @@ export async function insertAppointment(
 export async function fetchAppointmentCounselor(
   studentId: string,
   supabase: SupabaseClient,
-): Promise<Tables<"counselor_with_details">> {
+): Promise<Tables<"counselor_with_details">[]> {
   const { data: student, error: studentError } = await supabase
     .from("student_with_details")
     .select("*")
-    .eq("user_id", studentId)
-    .single();
+    .eq("id", studentId);
 
   if (studentError) throw new Error(String(studentError));
 
   const { data: counselor, error: counselorError } = await supabase
     .from("counselor_with_details")
     .select("*")
-    .eq("department_id", student.department_id)
-    .single();
+    .eq("department_id", student[0].department_id);
 
   if (counselorError) throw new Error(String(counselorError));
 

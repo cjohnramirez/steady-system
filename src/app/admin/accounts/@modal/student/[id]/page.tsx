@@ -21,22 +21,21 @@ import { FormInputField } from "@/components/form-input-field";
 import CollegeDropdown from "@/app/auth/signup/components/college-dropdown";
 import DepartmentDropdown from "@/app/auth/signup/components/department-dropdown";
 import FormYearLevelField from "@/components/form-year-level-field";
-import { studentUpdateFormSchema } from "../../schema";
 import EmotionalStatusDropdown from "@/app/auth/signup/components/emotional-status-dropdown";
 import { fetchStudent } from "../../actions";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { studentUpdateFormSchema } from "@/app/auth/signup/schema";
 
 export default function StudentModal() {
   const queryClient = useQueryClient();
 
   const router = useRouter();
-  
-  const [college, setCollege] = useState("");
-  const [emotionalStatus] = useState("");
-
   const { id } = useParams();
   const resolvedId = id as string;
+
+  const [college, setCollege] = useState("");
+  const [emotionalStatus] = useState("");
 
   const { data: student, isLoading } = useQuery({
     queryKey: ["student", resolvedId],
@@ -46,6 +45,7 @@ export default function StudentModal() {
   const updateMutation = useMutation({
     mutationFn: updateStudentProfile,
     onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["student", resolvedId] });
       await queryClient.invalidateQueries({ queryKey: ["students"] });
       toast.success("Student profile updated successfully!");
       router.back();
@@ -61,26 +61,24 @@ export default function StudentModal() {
       last_name: student?.last_name ?? "",
       username: student?.username ?? "",
       department_id: student?.department_id ?? "",
-      university_id: Number(student?.university_id) ?? 0,
+      university_id: student?.university_id ?? 0,
       email: student?.email ?? "",
-      year_level: String(student?.year_level) ?? "",
+      year_level: student?.year_level ?? 0,
       id: student?.id ?? "",
       phone: student?.phone ?? "",
       emotional_status_id: student?.emotional_status_id ?? "",
-      college_id: student?.college_id ?? "",
+      college: student?.college_id ?? "",
     },
     validators: {
       onChange: studentUpdateFormSchema,
     },
     onSubmit: ({ value }) => {
-      updateMutation.mutate({
-        ...value,
-        year_level: Number(value.year_level),
-      });
+      const { college, ...rest } = value;
+      updateMutation.mutate(rest);
     },
   });
 
-  if (isLoading) return
+  if (isLoading) return;
 
   return (
     <Dialog
@@ -145,7 +143,7 @@ export default function StudentModal() {
             </form.Field>
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">
-            <form.Field name="college_id">
+            <form.Field name="college">
               {(field) => (
                 <CollegeDropdown
                   field={field}

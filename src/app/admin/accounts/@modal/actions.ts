@@ -1,9 +1,44 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import z from "zod";
 import { Tables, TablesUpdate } from "@/types/supabase";
-import { counselorFormSchema } from "./schema";
+
+export async function fetchContactPerson(id: string) {
+  const supabase = await createClient()
+}
+
+export async function fetchAvailableDepartments(): Promise<
+  Tables<"department">[] | null
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("department")
+    .select("*")
+    .is("counselor_id", null)
+    .order("title", { ascending: true });
+
+  if (error) throw new Error(`Error fetching departments: ${error.message}`);
+  return data || null;
+}
+
+export async function fetchDepartmentsByCollege(collegeId: string): Promise<
+  Tables<"department">[] | null
+> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("department")
+    .select("*")
+    .eq("college_id", collegeId)
+    .is("counselor_id", null)
+    .order("title", { ascending: true });
+
+  if (error)
+    throw new Error(`Error fetching departments: ${error.message}`);
+  return data || null;
+}
+
 
 export async function fetchStudent(
   id: string,
@@ -14,7 +49,7 @@ export async function fetchStudent(
     .from("student_with_details")
     .select("*")
     .eq("id", id)
-    .single(); 
+    .single();
 
   if (error) throw new Error(error.message);
   return data || null;
@@ -31,7 +66,7 @@ export async function fetchCounselor(
     .eq("id", id)
     .single();
 
-  if (error) throw new Error("Error fetching counselor: ", error);
+  if (error) throw new Error(`Error fetching counselor: ${error.message}`);
   return data || null;
 }
 
@@ -42,7 +77,7 @@ export async function fetchEmotionalStatus(): Promise<
 
   const { data, error } = await supabase.from("emotional_status").select("*");
 
-  if (error) throw new Error("Error fetching emotional status: ", error);
+  if (error) throw new Error(`Error fetching emotional status: ${error.message}`);
   return data || null;
 }
 
@@ -55,40 +90,40 @@ export async function updateStudentEmotionalStatus(
   const { data, error } = await supabase
     .from("student")
     .update({ emotional_status_id: emotionalStatusId })
-    .eq("user_id", studentId)
+    .eq("id", studentId)
     .select("*")
     .single();
 
-  if (error) throw new Error("Error updating student emotional status: ", error);
+  if (error)
+    throw new Error(`Error updating student emotional status: ${error.message}`);
   return data || null;
 }
 
-export async function updateStudentProfile(
-  values: TablesUpdate<"student">,
-) {
+export async function updateStudentProfile(values: TablesUpdate<"student">) {
   const supabase = await createClient();
 
   const { error } = await supabase
     .from("student")
     .update(values)
     .eq("id", values.id ?? "")
-    .select("*").single();
+    .select("*")
+    .single();
 
-  if (error) throw new Error("Error updating student profile: ", error);
+  if (error) throw new Error(`Error updating student profile: ${error.message}`);
 }
 
 export async function updateCounselorProfile(
-  values: z.infer<typeof counselorFormSchema>,
+  values: TablesUpdate<"counselor">,
 ): Promise<Tables<"counselor"> | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("counselor")
     .update(values)
-    .eq("id", values.id)
+    .eq("id", values?.id ?? "")
     .select("*")
-    .single(); 
+    .single();
 
-  if (error) throw new Error("Error updating counselor profile: ", error);
+  if (error) throw new Error(`Error updating counselor profile: ${error.message}`);
   return data || null;
 }

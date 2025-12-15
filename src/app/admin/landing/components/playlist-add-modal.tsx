@@ -15,24 +15,13 @@ import { useForm } from "@tanstack/react-form";
 import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
-import { insertAnnouncement, insertArticle, insertPlaylist } from "../actions";
-import {
-  announcementInsertFormSchema,
-  articleInsertFormSchema,
-  playlistInsertFormSchema,
-} from "../schema";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Calendar } from "@/components/ui/calendar";
-import { DropdownMenu } from "@/components/ui/dropdown-menu";
-import {
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { insertPlaylist } from "../actions";
+import { playlistInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { uploadToCloudinary } from "@/app/actions";
+import ImageUpload from "@/components/image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -44,19 +33,19 @@ export default function PlaylistAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const updateMutation = useMutation({
     mutationFn: insertPlaylist,
     onSuccess: async () => {
-      toast.success("Announcement added successfully!");
+      toast.success("Playlist added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to add playlist");
     },
   });
 
@@ -65,13 +54,32 @@ export default function PlaylistAddModal({
       title: "",
       link: "",
       creator: "",
-      emotional_status_id: emotionalStatus,
+      emotional_status_id: "",
+      image: "",
     },
     validators: {
       onChange: playlistInsertFormSchema,
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      let finalValues = { ...value };
+
+      if (file) {
+        setIsUploading(true);
+        try {
+          const result = await uploadToCloudinary(file, "playlists");
+
+          if (result && result.optimizedUrl) {
+            finalValues.image = result.optimizedUrl;
+          }
+        } catch (error) {
+          toast.error("Failed to upload playlist image");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      setIsUploading(false);
+      updateMutation.mutate(finalValues);
     },
   });
 
@@ -85,8 +93,8 @@ export default function PlaylistAddModal({
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
-        onInteractOutside={() => {
-          setOpen(false);
+        onInteractOutside={(e) => {
+          if (isUploading) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -100,40 +108,18 @@ export default function PlaylistAddModal({
             form.handleSubmit();
           }}
         >
-          <div className="row-span-3 flex flex-col gap-4">
-            <Label>Playlist Image</Label>
-            <div className="h-full rounded-2xl border p-2">
-              <label
-                htmlFor="fileUpload"
-                className="row-span-3 flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center"
-              >
-                <Upload strokeWidth={1.25} />
-                <p>Click to upload the image.</p>
-              </label>
-              <input
-                type="file"
-                id="fileUpload"
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
+          <div className="row-span-3">
+            <ImageUpload
+              initialURL={form.state.values.image}
+              setFile={setFile}
+            />
           </div>
-
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
-                  field={field}
-                />
-              )}
-            </form.Field>
-            <form.Field name="link">
-              {(field) => (
-                <FormInputField
-                  label="Link"
-                  placeholder="Enter link"
+                  placeholder="Enter title of announcement"
                   field={field}
                 />
               )}
@@ -149,11 +135,26 @@ export default function PlaylistAddModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
+          </div>
+          <div className="col-span-2 flex h-full w-full gap-2">
+            <form.Field name="link">
+              {(field) => (
+                <FormInputField
+                  label="Link"
+                  placeholder="Enter link"
+                  field={field}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>
@@ -163,7 +164,7 @@ export default function PlaylistAddModal({
             form="update-student-profile-form"
           >
             {updateMutation.isPending ? <Spinner /> : "Add"}
-          </Button>
+          </Button>   
           <DialogClose asChild>
             <Button
               variant="outline"

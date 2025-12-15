@@ -62,19 +62,19 @@ export async function fetchCounselorAppointments(
 
 export async function countCounselorAppointments(
   supabase: SupabaseClient,
-  id: string,
+  counselorID: string,
 ) {
   const { count: totalCount, error: totalError } = await supabase
     .from("appointment_with_details")
     .select("id", { count: "exact", head: true })
-    .eq("counselor_id", id);
+    .eq("counselor_id", counselorID);
 
   if (totalError) throw totalError;
 
   const { count: approvedCount, error: approvedError } = await supabase
     .from("appointment_with_details")
     .select("id", { count: "exact", head: true })
-    .eq("counselor_id", id)
+    .eq("counselor_id", counselorID)
     .eq("status", "approved");
 
   if (approvedError) throw approvedError;
@@ -82,7 +82,7 @@ export async function countCounselorAppointments(
   const { count: pendingCount, error: pendingError } = await supabase
     .from("appointment_with_details")
     .select("id", { count: "exact", head: true })
-    .eq("counselor_id", id)
+    .eq("counselor_id", counselorID)
     .eq("status", "pending");
 
   if (pendingError) throw pendingError;
@@ -103,7 +103,7 @@ export async function fetchCounselorProfile(
     await supabase
       .from("counselor_with_details")
       .select("*")
-      .eq("id", id)
+      .eq("id", id).limit(1)
       .maybeSingle();
 
   if (counselorProfileError) throw counselorProfileError;
@@ -117,13 +117,13 @@ export async function fetchCounselorProfile(
 
 export async function fetchCounselorDeparments(
   supabase: SupabaseClient,
-  userID: string,
+  counselorID: string,
 ): Promise<Tables<"department">[]> {
   const { data: counselorDeparmentData, error: counselorDepartmentError } =
     await supabase
       .from("department")
       .select("*")
-      .eq("counselor_id", userID);
+      .eq("counselor_id", counselorID);
 
   if (counselorDepartmentError) throw counselorDepartmentError;
 
@@ -151,13 +151,13 @@ export async function updateCounselorProfile(
 }
 
 export async function updateCounselorAvailability(
-  values: TablesUpdate<"availability">
+  values: TablesUpdate<"counselor">
 ) {
 
   const supabase = createClient()
 
   const { error } = await supabase
-    .from("availability")
+    .from("counselor")
     .update(values)
     .eq("id", values.id)
     .select("*").single();

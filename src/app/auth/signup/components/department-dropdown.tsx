@@ -14,6 +14,7 @@ import {
 import { Spinner } from "@/components/ui/spinner";
 import { fetchDepartment } from "../actions";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 interface FieldMeta {
   isTouched: boolean;
@@ -39,12 +40,15 @@ interface FormDropdownInputProps<TValue = string> {
   enableDescription?: boolean;
 }
 
+export const SHS_UUID = "532700f7-bf4d-47a4-835d-d5fd3530f4e6"
+
 export default function DepartmentDropdown({
   field,
   college,
   enableDescription = true,
 }: FormDropdownInputProps) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const isSHS = college === SHS_UUID;
 
   const { data: departmentData = [], isLoading: isDepartmentLoading } =
     useQuery({
@@ -52,9 +56,11 @@ export default function DepartmentDropdown({
       queryFn: () => fetchDepartment(college),
     });
 
+  const departmentOrSHS = isSHS ? "Strand" : "Department"
+
   return (
     <Field data-invalid={isInvalid}>
-      <FieldLabel htmlFor={field.name}>Department</FieldLabel>
+      <FieldLabel htmlFor={field.name}>{departmentOrSHS}</FieldLabel>
       <Select
         name={field.name}
         value={field.state.value ?? ""}
@@ -65,10 +71,12 @@ export default function DepartmentDropdown({
           {isDepartmentLoading && college != "" ? (
             <div className="flex items-center gap-2">
               <Spinner />
-              <p>Loading Department</p>
+              <p>Loading {departmentOrSHS}</p>
             </div>
           ) : (
-            <SelectValue placeholder="Select Deparment" />
+            <SelectValue
+              placeholder={`Select ${departmentOrSHS}`}
+            />
           )}
         </SelectTrigger>
         <SelectContent position="item-aligned">

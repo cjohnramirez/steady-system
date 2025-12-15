@@ -2,7 +2,6 @@
 
 import AdminProfile from "./_components/profile-information";
 import ChangePassword from "./_components/change-password";
-import ProfilePicture from "./_components/profile-picture";
 import { useSearchParams } from "next/navigation";
 import { CircleOff } from "lucide-react";
 import { Suspense } from "react";
@@ -20,11 +19,7 @@ const settingSectionObj: SettingSection[] = [
   {
     name: "Change Password",
     section: <ChangePassword />,
-  },
-  {
-    name: "Profile Picture",
-    section: <ProfilePicture />,
-  },
+  }
 ];
 
 export default function AccountSettingsPage() {

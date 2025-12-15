@@ -5,22 +5,34 @@ import { useState } from "react";
 import { fetchPlaylistByEmotion } from "../actions";
 import { createClient } from "@/utils/supabase/client";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Tables } from "@/types/supabase";
 import { useUserStore } from "@/hooks/auth-store";
 import Link from "next/link";
 import PlaylistTile from "./playlist-tile";
+import { PaginationState } from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
 
 export default function PlaylistSection() {
   const supabase = createClient();
-
-  const [search, setSearch] = useState("");
   const userEmotionalStatus = useUserStore().emotionalStatus;
 
+  const [search, setSearch] = useState("");
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 3,
+  });
+
   const { data: playlists, isLoading } = useQuery({
-    queryKey: ["playlist", search],
+    queryKey: ["playlist", pagination.pageIndex, pagination.pageSize, search, userEmotionalStatus],
     queryFn: () =>
-      fetchPlaylistByEmotion(supabase, search, userEmotionalStatus),
+      fetchPlaylistByEmotion(
+        supabase,
+        pagination.pageIndex,
+        pagination.pageSize,
+        search,
+        userEmotionalStatus,
+      ),
   });
 
   const list: Tables<"playlist_with_details">[] = playlists?.data || [];
@@ -34,7 +46,7 @@ export default function PlaylistSection() {
           <p>
             View all music playlists, curated based on your emotional status
             (you can change it{" "}
-            <Link href="student/profile/">
+            <Link href="student/">
               <u className="cursor-pointer">here</u>
             </Link>
             )
@@ -50,7 +62,7 @@ export default function PlaylistSection() {
           />
         </InputGroup>
       </div>
-      <div className="grid h-40 grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {isLoading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <PlaylistTile key={`skeleton-${idx}`} isLoading={true} />
@@ -67,6 +79,32 @@ export default function PlaylistSection() {
         <p>
           Showing {list.length} of {count} result(s)
         </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={pagination.pageIndex === 0}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                pageIndex: Math.max(prev.pageIndex - 1, 0),
+              }))
+            }
+          >
+            <ChevronLeft />
+          </Button>
+          <Button
+            variant="outline"
+            disabled={list.length < pagination.pageSize}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                pageIndex: prev.pageIndex + 1,
+              }))
+            }
+          >
+            <ChevronRight />
+          </Button>
+        </div>
       </div>
     </section>
   );

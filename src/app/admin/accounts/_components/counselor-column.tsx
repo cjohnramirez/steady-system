@@ -1,15 +1,18 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Eye } from "lucide-react";
+import { useState } from "react";
+import AssignDepartmentModal from "./assign-department-modal";
 
 function getTodayBool(days: boolean[]) {
   const jsDay = new Date().getDay();
-  const dayIndex = jsDay === 0 ? 7 : jsDay;
-  return days[dayIndex] ?? false;
+  const dayIndex = jsDay;
+  return days && days.length > dayIndex ? days[dayIndex] : false;
 }
 
 export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
@@ -62,13 +65,6 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
   {
     accessorKey: "username",
     header: "Username",
-    cell: ({ row }) => {
-      return (
-        <div className="w-fit rounded-3xl border border-gray-300 p-1 px-4 text-center text-xs">
-          {row.getValue("username")}
-        </div>
-      );
-    },
   },
   {
     accessorKey: "availability",
@@ -76,15 +72,12 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      const availabilityArray = row.getValue("availability") ?? "";
-
+      const dayOfWeekArray = originalRow.day_of_week ?? [];
       const isActive = originalRow.is_active;
 
       const status =
-        isActive === true
-          ? getTodayBool(
-              (Array.isArray(availabilityArray) && availabilityArray) || [],
-            )
+        isActive === null
+          ? getTodayBool(Array.isArray(dayOfWeekArray) ? dayOfWeekArray : [])
           : false;
 
       const statusColor = clsx("text-black", {
@@ -103,4 +96,37 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
       return filterValue.includes(row.getValue(columnId));
     },
   },
+  {
+    header: "Department/s",
+    cell: ({ row }) => {
+      // Move state to a component to avoid hook errors
+      function DepartmentCell() {
+        const [openAssignDepartment, setOpenAssignDepartment] = useState(false);
+
+        return (
+          <>
+            {openAssignDepartment && (
+              <AssignDepartmentModal
+                open={openAssignDepartment}
+                setOpen={setOpenAssignDepartment}
+                counselorId={row.original.id ?? ""}
+              />
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenAssignDepartment(true);
+              }}
+            >
+              <Eye />
+              View Department
+            </Button>
+          </>
+        );
+      }
+      return <DepartmentCell />;
+    }
+  }
 ];

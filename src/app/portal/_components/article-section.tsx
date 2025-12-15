@@ -24,7 +24,7 @@ export default function ArticleSection() {
   const userEmotionalStatus = useUserStore().emotionalStatus;
 
   const { data: articles, isLoading } = useQuery({
-    queryKey: ["articles", pagination.pageIndex, pagination.pageSize, search],
+    queryKey: ["articles", pagination.pageIndex, pagination.pageSize, search, userEmotionalStatus],
     queryFn: () =>
       fetchArticlesByEmotion(
         supabase,
@@ -39,14 +39,14 @@ export default function ArticleSection() {
   const count = articles?.count;
 
   return (
-    <section className="flex flex-col gap-4" id="articles">
+    <section className="flex flex-col gap-4 h-fit" id="articles">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-medium">Articles</p>
           <p>
             View all articles, curated based on your emotional status (you can
             change it{" "}
-            <Link href="student/profile/">
+            <Link href="student/">
               <u className="cursor-pointer">here</u>
             </Link>
             )
@@ -63,13 +63,13 @@ export default function ArticleSection() {
         </InputGroup>
       </div>
       {isLoading ? (
-        <div className="grid h-[600px] grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, idx) => (
             <ArticleTile key={`skeleton-${idx}`} isLoading={true} />
           ))}
         </div>
       ) : list.length > 0 ? (
-        <div className="grid h-[600px] grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {list.map((data, idx) => (
             <ArticleTile
               key={data.id || idx}
@@ -79,9 +79,9 @@ export default function ArticleSection() {
           ))}
         </div>
       ) : (
-        <div className="flex h-[600px] w-full items-center justify-center gap-4 rounded-2xl border bg-white">
+        <div className="flex w-full items-center justify-center gap-4 rounded-2xl border bg-white">
           <CircleOff strokeWidth={1.25} />
-          <p>No events for this time period</p>
+          <p>No more articles</p>
         </div>
       )}
 

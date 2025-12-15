@@ -12,12 +12,13 @@ interface JwtCustomPayload {
   sub: string;
 }
 
-export default async function LoginFormAction(
-  formData: FormData,
-  role: roles,
-): Promise<{
-  error?: string;
-  success?: string;
+interface LoginData {
+  email: string;
+  password: string;
+  role: roles;
+}
+
+export default async function LoginFormAction(data: LoginData): Promise<{
   data?: {
     userName: string;
     emotionalStatus?: string;
@@ -32,12 +33,12 @@ export default async function LoginFormAction(
 
   const { data: userData, error: signInError } =
     await supabase.auth.signInWithPassword({
-      email: formData.get("email")?.toString() || "",
-      password: formData.get("password")?.toString() || "",
+      email: data.email,
+      password: data.password,
     });
 
   if (signInError) {
-    return { error: signInError.message };
+    throw new Error(signInError.message);
   }
 
   const {
@@ -46,17 +47,17 @@ export default async function LoginFormAction(
 
   if (session) {
     const jwt = jwtDecode<JwtCustomPayload>(session.access_token);
-    if (jwt.user_role !== role) {
+    if (jwt.user_role !== data.role) {
       supabase.auth.signOut();
-      return { error: "Unauthorized access for this role" };
+      throw new Error("Unauthorized access for this role");
     }
   }
 
   if (!userData.user) {
-    return { error: "User data not available" };
+    throw new Error("User data not available");
   }
 
-  if (role === "student") {
+  if (data.role === "student") {
     const { data: studentProfileData, error: studentProfileError } =
       await supabaseAdmin
         .from("student_with_details")
@@ -73,26 +74,25 @@ export default async function LoginFormAction(
     );
 
     if (analyticsError) {
-      return { error: `Failed to update analytics: ${analyticsError.message}` };
+      throw new Error(`Failed to update analytics: ${analyticsError.message}`);
     }
 
     return {
-      success: "Authentication Successful",
       data: {
         userName: studentProfileData?.username ?? "test",
         emotionalStatus,
-        id: userData.user.id,
+        id: studentProfileData?.id ?? "",
       },
     };
   } else {
     const { data: profileData, error: profileError } = await supabaseAdmin
-      .from(`${role}`)
+      .from(`${data.role}`)
       .select("*")
       .eq("user_id", userData.user!.id)
       .single();
 
     if (profileError) {
-      return { error: "Failed to retrieve profile data" };
+      throw new Error("Failed to retrieve profile data");
     }
 
     const { error: analyticsError } = await supabaseAdmin.rpc(
@@ -100,11 +100,10 @@ export default async function LoginFormAction(
     );
 
     if (analyticsError) {
-      return { error: `Failed to update analytics: ${analyticsError.message}` };
+      throw new Error(`Failed to update analytics: ${analyticsError.message}`);
     }
 
     return {
-      success: "Authentication Successful",
       data: {
         firstName: profileData.first_name,
         userName: profileData.username,
@@ -112,4 +111,52 @@ export default async function LoginFormAction(
       },
     };
   }
+}
+
+export async function sendResetPasswordEmail(email: string): Promise<{
+  error?: string;
+  success?: string;
+}> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+  if (error)
+    return {
+      error: `Password reset email was not sent. Please check if your email exists`,
+    };
+
+  return { success: "Password reset email sent successfully." };
+}
+
+export async function updatePassword(password: string): Promise<{
+  error?: string;
+  success?: string;
+}> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) return { error: "Password reset failed" };
+
+  return { success: "Password reset successfully" };
+}
+
+export async function sendPasswordResetEmail(email: string): Promise<{
+  error?: string;
+  success?: string;
+}> {
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/auth/forget-password`,
+  });
+
+  if (error) {
+    return { error: error.message || "Failed to send reset email" };
+  }
+
+  return { success: "Password reset email sent successfully" };
 }

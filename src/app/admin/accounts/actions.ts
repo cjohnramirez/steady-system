@@ -1,5 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { dataTableParams } from "../appointments/actions";
+import { createClient } from "@/utils/supabase/client";
+import { json2csv } from "json-2-csv";
 
 export async function fetchStudents(
   supabase: SupabaseClient,
@@ -30,14 +32,17 @@ export async function fetchStudents(
   };
 }
 
-export async function fetchCounselors(supabase: SupabaseClient, params: dataTableParams) {
+export async function fetchCounselors(
+  supabase: SupabaseClient,
+  params: dataTableParams,
+) {
   const { page, pageSize, search } = params;
 
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
   let query = supabase
-    .from("counselor_with_details")
+    .from("counselor")
     .select("*", { count: "exact" });
 
   if (search) {
@@ -54,4 +59,125 @@ export async function fetchCounselors(supabase: SupabaseClient, params: dataTabl
     data: data || [],
     count: count || 0,
   };
+}
+
+export async function fetchCounselorDepartment(counselorID: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("department")
+    .select(`*`)
+    .eq("counselor_id", counselorID);
+
+  if (error) throw new Error("Error fetching counselor departments: ", error);
+  return data || [];
+}
+
+export async function fetchAccountCounts(supabase: SupabaseClient) {
+  const { count: studentCount, error: studentError } = await supabase
+    .from("student")
+    .select("*", { count: "exact", head: true });
+
+  if (studentError) throw studentError;
+
+  const { count: counselorCount, error: counselorError } = await supabase
+    .from("counselor")
+    .select("*", { count: "exact", head: true });
+
+  if (counselorError) throw counselorError;
+
+  const counts = {
+    students: studentCount || 0,
+    counselors: counselorCount || 0,
+  };
+
+  return counts;
+}
+
+export async function assignDepartment(
+  counselorID: string,
+  departments: Array<{ department_id: string }>,
+) {
+  const supabase = createClient();
+  const departmentIds = departments.map(d => d.department_id);
+
+  console.log("Assigning departments:", { counselorID, departmentIds });
+
+  // First, verify the departments exist
+  const { data: existingDepts, error: checkError } = await supabase
+    .from("department")
+    .select("id, counselor_id")
+    .in("id", departmentIds);
+
+  console.log("Department check:", { existingDepts, checkError });
+
+  if (checkError) {
+    throw new Error("Error checking departments: " + checkError.message);
+  }
+
+  if (!existingDepts || existingDepts.length === 0) {
+    throw new Error("No departments found with the provided IDs");
+  }
+
+  console.log("Departments exist:", existingDepts);
+
+  // Now update them
+  const { data, error } = await supabase
+    .from("department")
+    .update({ counselor_id: counselorID })
+    .in("id", departmentIds)
+    .select();
+
+  console.log("Update response:", { data, error });
+
+  if (error) {
+    console.error("Full error details:", error);
+    throw new Error("Error assigning department: " + error.message);
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("Update executed but returned no data. Check if departments were actually updated");
+  }
+
+  return data;
+}
+
+export type AccountType = "students" | "counselors";
+export type FileType = "csv" | "json";
+
+export async function exportAccounts(
+  supabase: SupabaseClient,
+  accountType: AccountType,
+  fileType: FileType,
+  amountOfData?: number,
+) {
+  const tableName =
+    accountType === "students"
+      ? "student_with_details"
+      : "counselor_with_details";
+
+  let query = supabase.from(tableName).select("*");
+
+  if (amountOfData) {
+    query = query.range(0, amountOfData);
+  }
+
+  const { data } = await query;
+
+  if (!data) {
+    return;
+  }
+
+  const csv = json2csv(data);
+
+  const url = URL.createObjectURL(
+    new Blob([fileType === "csv" ? csv : JSON.stringify(data, null, 2)], {
+      type: fileType === "csv" ? "text/csv" : "application/json",
+    }),
+  );
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `export.${fileType}`;
+  a.click();
 }

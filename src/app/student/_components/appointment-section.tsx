@@ -11,7 +11,7 @@ import { studentAppointmentColumns } from "./appointment-column";
 
 export default function StudentAppointmentSection() {
   const supabase = createClient();
-  const getUserID = useUserStore.getState().id;
+  const studentID = useUserStore.getState().id;
 
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState<PaginationState>({
@@ -22,45 +22,47 @@ export default function StudentAppointmentSection() {
   const { data: studentAppointment, isLoading: isStudentAppointmentLoading } =
     useQuery({
       queryKey: [
-        "student-appointment",
+        "student-appointments",
         pagination.pageIndex,
         pagination.pageSize,
         search,
       ],
       queryFn: () =>
-        fetchStudentAppointment({
-          page: pagination.pageIndex,
-          pageSize: pagination.pageSize,
-          search: search,
+        fetchStudentAppointment(
+          pagination.pageIndex,
+          pagination.pageSize,
+          studentID,
+          search,
           supabase,
-          id: getUserID,
-        }),
+        ),
     });
 
   const studentAppointmentData = studentAppointment?.data || [];
   const rowCount = studentAppointment?.count || 0;
 
   return (
-    <DataTable
-      isLoading={isStudentAppointmentLoading}
-      columns={studentAppointmentColumns}
-      data={studentAppointmentData}
-      rowCount={rowCount}
-      pagination={pagination}
-      onPaginationChange={setPagination}
-      onSearchChange={(val) => {
-        setSearch(val);
-        setPagination((p) => ({ ...p, pageIndex: 0 }));
-      }}
-      toolbarExtra={
-        <div className="h-full items-center">
-          <p className="font-medium">Appointment</p>
-          <p>
-            You can edit some details about your appointments if you wished to
-            do so
-          </p>
-        </div>
-      }
-    />
+    <div className="col-span-3 rounded-2xl border border-gray-200 bg-white p-8">
+      <DataTable
+        isLoading={isStudentAppointmentLoading}
+        columns={studentAppointmentColumns}
+        data={studentAppointmentData}
+        rowCount={rowCount}
+        pagination={pagination}
+        onPaginationChange={setPagination}
+        onSearchChange={(val) => {
+          setSearch(val);
+          setPagination((p) => ({ ...p, pageIndex: 0 }));
+        }}
+        toolbarExtra={
+          <div className="h-full items-center">
+            <p className="font-medium">Appointment</p>
+            <p>
+              You can edit some details about your appointments if you wished to
+              do so
+            </p>
+          </div>
+        }
+      />
+    </div>
   );
 }

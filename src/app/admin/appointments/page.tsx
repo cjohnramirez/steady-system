@@ -57,7 +57,7 @@ export default function AppointmentPage() {
         <Info strokeWidth={1.25} />
         <div className="flex-1">
           <p className="font-medium">Data Privacy Act and Confidentiality Clause</p>
-          <p className="text-sm ">Counselling appointment data is obfuscated to protect client privacy and comply with confidentiality regulations.</p>
+          <p className="text-sm ">Counseling appointment data is obfuscated to protect client privacy and comply with confidentiality regulations.</p>
         </div>
       </div>
       <DataTable

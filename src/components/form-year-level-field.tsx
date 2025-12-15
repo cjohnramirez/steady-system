@@ -1,5 +1,6 @@
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
@@ -10,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useEffect } from "react";
 
 interface FieldMeta {
   isTouched: boolean;
@@ -22,18 +24,22 @@ interface FieldState<TValue> {
   meta: FieldMeta;
 }
 
-interface FieldLike<TValue = string> {
+interface FieldLike<TValue = number> {
   name: string;
   state: FieldState<TValue>;
   handleBlur: () => void;
   handleChange: (value: TValue) => void;
 }
 
-interface FormYearLevelProps<TValue = string> {
+interface FormYearLevelProps<TValue = number> {
   field: FieldLike<TValue>;
+  enableDescription?: boolean;
 }
 
-export default function FormYearLevelField({ field }: FormYearLevelProps) {
+export default function FormYearLevelField({
+  field,
+  enableDescription = true,
+}: FormYearLevelProps) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
@@ -42,7 +48,7 @@ export default function FormYearLevelField({ field }: FormYearLevelProps) {
       <Select
         name={field.name}
         value={field.state.value ? field.state.value.toString() : ""}
-        onValueChange={(value) => field.handleChange(value)}
+        onValueChange={(value) => field.handleChange(Number(value))}
       >
         <SelectTrigger id="select-year-level" aria-invalid={isInvalid}>
           <SelectValue placeholder="Select Year Level" />
@@ -64,7 +70,9 @@ export default function FormYearLevelField({ field }: FormYearLevelProps) {
       {isInvalid ? (
         <FieldError errors={field.state.meta.errors} />
       ) : (
-        <></>
+        <FieldDescription>
+          {enableDescription && "Ensure the year level is valid"}
+        </FieldDescription>
       )}
     </Field>
   );

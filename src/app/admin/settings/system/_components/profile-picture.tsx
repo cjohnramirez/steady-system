@@ -2,22 +2,18 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Edit2 } from "lucide-react";
-import { fetchAdminProfile } from "../actions";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProfilePicture() {
-  const { isLoading } = useQuery({
-    queryKey: ["adminProfile"],
-    queryFn: fetchAdminProfile,
-  });
+  const isLoading = false;
 
   return (
     <section className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-8">
       <div>
-        <h2 className="mb-1 text-lg font-semibold">Profile Picture</h2>
+        <h2 className="mb-1 text-lg font-semibold">Organization Icon</h2>
         <p className="text-sm">
-          Upload or update your profile photo. Click the profile icon to upload
+          Upload or update the organization icon. Click the icon to upload
           a new photo.
         </p>
       </div>

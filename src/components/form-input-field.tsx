@@ -34,14 +34,21 @@ interface FormInputFieldProps<TValue = string> {
   type?: string;
 }
 
-export function FormInputField({
+export function FormInputField<TValue = string>({
   field,
   label,
   placeholder,
   description,
   type = "text",
-}: FormInputFieldProps) {
+}: FormInputFieldProps<TValue>) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    field.handleChange(
+      type === "number" ? (Number(value) as TValue) : (value as TValue)
+    );
+  };
 
   return (
     <Field data-invalid={isInvalid}>
@@ -50,9 +57,9 @@ export function FormInputField({
         id={field.name}
         name={field.name}
         type={type}
-        value={field.state.value ?? ""}
+        value={String(field.state.value ?? "")}
         onBlur={field.handleBlur}
-        onChange={(e) => field.handleChange(e.target.value)}
+        onChange={handleChange}
         aria-invalid={isInvalid}
         placeholder={placeholder}
       />

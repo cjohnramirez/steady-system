@@ -26,59 +26,49 @@ import { Eye, EyeClosed } from "lucide-react";
 import { roles } from "@/types/main";
 import LoginFormAction from "../actions";
 import { FormInputField } from "@/components/form-input-field";
+import { useMutation } from "@tanstack/react-query";
+import { LoginFormSchema } from "../schema";
 import { useUserStore } from "@/hooks/auth-store";
-
-const formSchema = z.object({
-  email: z.email({ error: "Invalid email" }),
-  password: z
-    .string()
-    .min(8, "8 or more characters required")
-    .max(255, "255 or less characters required"),
-});
 
 export default function LoginForm({ role }: { role: roles }) {
   const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const updateMutation = useMutation({
+    mutationFn: LoginFormAction,
+    onSuccess: async (res) => {
+      setIsLoginLoading(false);
+      toast.success("Login successful");
+
+      useUserStore.getState().setUserName(res.data?.userName ?? "");
+      useUserStore.getState().setUserRole(role ?? "");
+      useUserStore
+        .getState()
+        .setEmotionalStatus(res.data?.emotionalStatus ?? "");
+      useUserStore.getState().setId(res.data?.id ?? "");
+
+      router.push("/");
+    },
+    onError: (err) => {
+      setIsLoginLoading(false);
+      toast.error(err.message);
+    },
+  });
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
+      role: role,
     },
     validators: {
-      onSubmit: formSchema,
+      onSubmit: LoginFormSchema,
     },
-    onSubmit: async (form) => {
-      setIsLoading(true);
-
-      try {
-        const formData = new FormData();
-        formData.append("email", form.value.email);
-        formData.append("password", form.value.password);
-
-        const res = await LoginFormAction(formData, role);
-
-        if (res?.error) {
-          toast.error(res.error);
-          return;
-        }
-
-        if (res?.success) {
-          toast.success(res.success);
-          useUserStore.getState().setUserName(res.data?.userName ?? "");
-          useUserStore.getState().setUserRole(role ?? "");
-          useUserStore
-            .getState()
-            .setEmotionalStatus(res.data?.emotionalStatus ?? "");
-          useUserStore.getState().setId(res.data?.id ?? "");
-        }
-
-        router.push("/");
-      } finally {
-        setIsLoading(false);
-      }
+    onSubmit: async ({ value }) => {
+      setIsLoginLoading(true);
+      updateMutation.mutate(value);
     },
   });
 
@@ -116,7 +106,15 @@ export default function LoginForm({ role }: { role: roles }) {
                 field.state.meta.isTouched && !field.state.meta.isValid;
               return (
                 <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                    <p
+                      onClick={() => router.push("/auth/forget-password")}
+                      className="flex cursor-pointer items-center gap-2"
+                    >
+                      Forget Password?
+                    </p>
+                  </div>
                   <InputGroup>
                     <InputGroupInput
                       id={field.name}
@@ -151,9 +149,9 @@ export default function LoginForm({ role }: { role: roles }) {
           type="submit"
           form="login-form"
           className="w-full"
-          disabled={isLoading}
+          disabled={isLoginLoading}
         >
-          {isLoading ? (
+          {isLoginLoading ? (
             <>
               <Spinner />
               <p>Submitting</p>

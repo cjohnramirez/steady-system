@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { Tables } from "@/types/supabase";
 import { z } from "zod";
-import { adminPasswordFormSchema, adminProfileFormSchema } from "./schema";
+import { adminProfileFormSchema, resetPasswordFormSchema } from "./schema";
 
 export async function fetchAdminProfile(): Promise<Tables<"admin"> | null> {
   const supabase = await createClient();
@@ -41,7 +41,7 @@ export async function updateAdminProfile(
 }
 
 export async function updateAdminPassword(
-  values: z.infer<typeof adminPasswordFormSchema>,
+  values: z.infer<typeof resetPasswordFormSchema>,
 ): Promise<Tables<"admin"> | null> {
   const supabase = await createClient();
 

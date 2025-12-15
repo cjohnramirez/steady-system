@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MapPin } from "lucide-react";
 import Image from "next/image";
-import img from "../../../assets/hero.jpg"
+import img from "../../../assets/hero.jpg";
 import { useRouter } from "next/navigation";
 
 export default function HomeSection() {
@@ -17,7 +17,7 @@ export default function HomeSection() {
           <p className="w-2/3">
             The Guidance and Counseling Services (GCS) of USTP-CDO is dedicated
             to the holistic development of every student — fostering emotional,
-            psychological, and academic balance through support, counseling, and
+            psychological, and academic balance through support, Counseling, and
             care.
           </p>
           <div className="flex items-center gap-4">
@@ -28,7 +28,11 @@ export default function HomeSection() {
               Book an Appointment
               <ArrowRight />
             </Button>
-            <Button variant="outline" size="cta" onClick={() => router.push("/portal")}>
+            <Button
+              variant="outline"
+              size="cta"
+              onClick={() => router.push("/portal")}
+            >
               Go to GCS Portal
             </Button>
           </div>

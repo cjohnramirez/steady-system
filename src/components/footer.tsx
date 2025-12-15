@@ -1,48 +1,41 @@
+"use client";
+
 import Image from "next/image";
-import { NavBar } from "../app/home/_lib/nav-data";
 import { ArrowUpRight, CalendarCheck2, Home, Mail, Phone } from "lucide-react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { fetchOrganization } from "@/app/home/actions";
+import { NavBar } from "@/app/home/_lib/nav-data";
 
-type ContactInfo = {
-  icon: React.ReactNode;
-  text: string;
-  link?: string;
-};
+export default function Footer({ navBarObj }: { navBarObj?: NavBar[] }) {
+  const { data: organization } = useQuery({
+    queryKey: ["organization"],
+    queryFn: fetchOrganization,
+  });
 
-const contactObj: ContactInfo[] = [
-  {
-    icon: <Home size={20} strokeWidth={1} />,
-    text: "Room 41-109, Claro M. Recto Avenue, Lapasan, Cagayan de Oro City 9000",
-  },
-  {
-    icon: <Mail size={20} strokeWidth={1} />,
-    text: "guidance@ustp.edu.ph",
-    link: "mailto:guidance@ustp.edu.ph",
-  },
-  {
-    icon: <Phone size={20} strokeWidth={1} />,
-    text: "(088) 857-1739 local 123",
-    link: "tel:+63888571739",
-  },
-  {
-    icon: <CalendarCheck2 size={20} strokeWidth={1} />,
-    text: "Monday - Friday, 8:00 AM - 5:00 PM",
-  },
-];
+  const parseTime = (timeString: string): string => {
+    if (!timeString) return "";
+    // Extract HH:MM from format like "08:00:00+08"
+    const timePart = timeString.split("+")[0] || timeString.split("-")[0];
+    const [hours, minutes] = timePart.split(":").slice(0, 2);
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
 
-export default function Footer({ navBarObj }: { navBarObj: NavBar[] }) {
   return (
-    <section className="border-t-1 border-gray-200 bg-white p-15">
+    <section className="border-t border-gray-200 bg-white p-15">
       <div className="m-auto flex max-w-[1600px] justify-between gap-4">
         <div className="w-1/3 space-y-10">
           <section className="flex items-center gap-4">
             <Image src="/icon.png" alt="logo" width={40} height={40} />
-            <p className="font-medium">Guidance and Counselling Services</p>
+            <p className="font-medium">{organization?.name || "Guidance and Counseling Services"}</p>
           </section>
           <p>
             We are dedicated to the holistic development of every student
             fostering emotional, psychological, and academic balance through
-            support, counseling, and care.
+            support, Counseling, and care.
           </p>
           <div className="space-y-2">
             <Link
@@ -63,34 +56,50 @@ export default function Footer({ navBarObj }: { navBarObj: NavBar[] }) {
         </div>
         <div className="flex gap-20">
           <div className="space-y-10">
-            {navBarObj.length !== 0 && (
-              <>
-                <p className="font-medium">Fast Links</p>
-                <div className="flex flex-col gap-4">
-                  {navBarObj.map((nav) => (
-                    <a href={nav.link} key={nav.title}>
-                      {nav.title}
-                    </a>
-                  ))}
-                </div>
-              </>
-            )}
+            <p className="font-medium">Fast Links</p>
+            <div className="flex flex-col gap-4">
+              {navBarObj && navBarObj.length > 0 ? (
+                navBarObj.map((nav) => (
+                  <Link key={nav.link} href={nav.link}>
+                    {nav.title}
+                  </Link>
+                ))
+              ) : (
+                <>
+                  <Link href="/">Home</Link>
+                  <Link href="/about">About</Link>
+                  <Link href="/services">Services</Link>
+                </>
+              )}
+            </div>
           </div>
           <div className="space-y-10">
             <p className="font-medium">Contact Info</p>
             <div className="flex flex-col gap-4">
-              {contactObj.map((contact, index) => (
-                <div key={index} className="flex items-start gap-2">
-                  {contact.icon}
-                  {contact.link ? (
-                    <a href={contact.link} className="text-sm">
-                      {contact.text}
-                    </a>
-                  ) : (
-                    <p className="text-sm">{contact.text}</p>
-                  )}
+              {organization?.office_location && (
+                <div className="flex items-start gap-2">
+                  <Home size={20} strokeWidth={1} />
+                  <p className="text-sm">{organization.office_location}</p>
                 </div>
-              ))}
+              )}
+              {organization?.email && (
+                <div className="flex items-start gap-2">
+                  <Mail size={20} strokeWidth={1} />
+                  <a href={`mailto:${organization.email}`} className="text-sm">{organization.email}</a>
+                </div>
+              )}
+              {organization?.phone && (
+                <div className="flex items-start gap-2">
+                  <Phone size={20} strokeWidth={1} />
+                  <a href={`tel:${String(organization.phone).replace(/\D/g, "")}`} className="text-sm">0{organization.phone}</a>
+                </div>
+              )}
+              {organization?.start_office_hour && organization?.end_office_hour && (
+                <div className="flex items-start gap-2">
+                  <CalendarCheck2 size={20} strokeWidth={1} />
+                  <p className="text-sm">{parseTime(organization.start_office_hour)} - {parseTime(organization.end_office_hour)}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

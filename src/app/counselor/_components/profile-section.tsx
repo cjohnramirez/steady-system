@@ -9,17 +9,24 @@ import AvailabilityModal from "./availability-modal";
 import DepartmentModal from "./department-modal";
 import CounselorProfileModal from "./profile-modal";
 import { useUserStore } from "@/hooks/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import { fetchCounselorProfile } from "../actions";
+import { createClient } from "@/utils/supabase/client";
 
-export default function CounselorProfileSection({
-  counselorProfile,
-}: {
-  counselorProfile: Tables<"counselor_with_details"> | undefined;
-}) {
+export default function CounselorProfileSection() {
+  const supabase = createClient();
+  const counselorID = useUserStore.getState().id;
+
   const [openAvailability, setOpenAvailability] = useState(false);
   const [openDepartment, setOpenDepartment] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
 
-  const userID = useUserStore.getState().id
+  const userID = useUserStore.getState().id;
+
+  const { data: counselorProfile } = useQuery({
+    queryKey: ["counselor-profile"],
+    queryFn: () => fetchCounselorProfile(supabase, counselorID),
+  });
 
   return (
     <>
@@ -34,7 +41,11 @@ export default function CounselorProfileSection({
         <DepartmentModal open={openDepartment} setOpen={setOpenDepartment} />
       )}
       {openProfile && (
-        <CounselorProfileModal open={openProfile} setOpen={setOpenProfile} userID={userID} />
+        <CounselorProfileModal
+          open={openProfile}
+          setOpen={setOpenProfile}
+          userID={userID}
+        />
       )}
       <div className="col-span-2 rounded-2xl border border-gray-200 bg-white p-8">
         <div className="flex items-center justify-between">

@@ -7,24 +7,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   fetchEmotionalStatus,
   updateStudentEmotionalStatus,
 } from "@/app/admin/accounts/@modal/actions";
-import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { strToTitleCase } from "@/lib/format";
 
 export default function FormEmotionalStatusField({
   emotionalStatus,
   setEmotionalStatus,
-  user_id,
+  studentID,
   enableDescription = true,
 }: {
   emotionalStatus: string;
   setEmotionalStatus: (emotionalStatus: string) => void;
-  user_id?: string;
+  studentID?: string;
   enableDescription?: boolean;
 }) {
   const {
@@ -37,7 +36,7 @@ export default function FormEmotionalStatusField({
 
   const mutation = useMutation({
     mutationFn: (newStatus: string) => {
-      return updateStudentEmotionalStatus(user_id ?? "", newStatus);
+      return updateStudentEmotionalStatus(studentID ?? "", newStatus);
     },
     onSuccess: () => {
       toast.success("Emotional status updated!");
@@ -49,7 +48,7 @@ export default function FormEmotionalStatusField({
 
   const handleEmotionalStatusChange = (newStatus: string) => {
     setEmotionalStatus(newStatus);
-    if (user_id) mutation.mutate(newStatus);
+    if (studentID) mutation.mutate(newStatus);
   };
 
   return (
@@ -69,10 +68,10 @@ export default function FormEmotionalStatusField({
             <SelectValue placeholder="Select Emotional Status" />
           )}
         </SelectTrigger>
-        <SelectContent position="item-aligned">
+        <SelectContent align="center">
           {emotionalStatusData &&
-            emotionalStatusData.map((emotion, idx) => (
-              <SelectItem value={emotion.id} key={idx}>
+            emotionalStatusData.map((emotion) => (
+              <SelectItem value={emotion.id} key={emotion.id}>
                 {strToTitleCase(emotion.name)}
               </SelectItem>
             ))}

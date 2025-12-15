@@ -143,10 +143,6 @@ export function DataTable<TData, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline">
-            <Download />
-            Export
-          </Button>
         </div>
       </div>
       <div className="mt-8 overflow-hidden rounded-md border bg-white">

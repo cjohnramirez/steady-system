@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/types/supabase";
 import { ArrowUpRight } from "lucide-react";
+import { CldImage } from "next-cloudinary";
 import Image from "next/image";
 
 export default function PlaylistTile({
@@ -12,7 +13,7 @@ export default function PlaylistTile({
 }) {
   if (isLoading) {
     return (
-      <div className="flex h-full gap-2 rounded-x bg-white p-4">
+      <div className="rounded-x flex h-full gap-2 bg-white p-4">
         <div className="relative w-1/2 justify-between">
           <div className="h-full w-full rounded-2xl bg-gray-100">
             <div className="absolute inset-0 flex items-center justify-center">
@@ -44,12 +45,23 @@ export default function PlaylistTile({
   return (
     <div className="flex h-full gap-2 rounded-xl border border-gray-200 bg-white p-4">
       <div className="relative w-1/2 justify-between">
-        <Image
-          src="/placeholder.png"
-          alt="placeholder"
-          fill
-          className="rounded-2xl object-cover"
-        />
+        {playlistData.image?.length ? (
+          <CldImage
+            src={playlistData.image}
+            alt={`${playlistData.title}-image`}
+            fill
+            className="rounded-2xl border object-cover"
+            sizes="100vw"
+          />
+        ) : (
+          <Image
+            src="/placeholder.png"
+            alt="placeholder"
+            fill
+            className="rounded-2xl border object-cover"
+            sizes="100vw"
+          />
+        )}
       </div>
       <div className="w-1/2 space-y-2 rounded-xl border border-gray-200">
         <div className="relative flex h-full flex-col justify-end p-4">

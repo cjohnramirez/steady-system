@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/hooks/auth-store";
 import { useEffect, useState } from "react";
+import { Session } from "@supabase/supabase-js";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,26 +14,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ChevronsUpDown } from "lucide-react";
-import { handleChange } from "@/app/admin/_components/navigation";
 import { NavBar } from "../app/home/_lib/nav-data";
+import { useConfirmStore } from "@/hooks/confirm-store";
+import { createClient } from "@/utils/supabase/client";
 
 export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
+  const { confirm, startLoading, stopLoading } = useConfirmStore();
+
   const router = useRouter();
-  const [userName, setUserName] = useState(useUserStore.getState().userName);
-  const userRole = useUserStore.getState().userRole;
+  const [session, setSession] = useState<Session | null>(null);
+  const supabase = createClient();
 
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const userName = useUserStore((state) => state.userName);
+  const userRole = useUserStore((state) => state.userRole);
 
   useEffect(() => {
-    const unsubscribe = useUserStore.subscribe((state) => {
-      setUserName(state.userName);
+    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
     });
-    return () => unsubscribe();
-  }, []);
+
+    return () => {
+      data?.subscription?.unsubscribe();
+    };
+  }, [supabase]);
+
+  const handleChange = async () => {
+    const ok = await confirm(
+      "Log out?",
+      "Are you sure you want to log out? This will end your current session.",
+    );
+
+    if (!ok) return;
+    startLoading();
+
+    useUserStore.getState().setUserName("");
+    useUserStore.getState().setUserRole("");
+
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
+
+    stopLoading();
+    router.push("/home");
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white p-6">
@@ -42,7 +65,7 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
           onClick={() => router.push("/home")}
         >
           <Image src="/icon.png" alt="logo" width={40} height={40} />
-          <p>Guidance and Counselling Services</p>
+          <p>Guidance and Counseling Services</p>
         </section>
         {navBarObj.length !== 0 && (
           <section className="flex items-center gap-10">
@@ -55,13 +78,13 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
         )}
 
         <section className="flex space-x-4">
-          {isClient && userName != "" ? (
+          {session ? (
             <>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger className="flex items-center gap-4">
                   <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
-                  <p>{userName}</p>
-                  <Badge variant="secondary">{userRole}</Badge>
+                  <p>{userName || "User"}</p>
+                  {userRole && <Badge variant="secondary">{userRole}</Badge>}
                   <ChevronsUpDown size={20} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>

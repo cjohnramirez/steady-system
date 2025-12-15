@@ -16,12 +16,12 @@ import { Upload } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { insertArticle } from "../actions";
-import {
-  articleInsertFormSchema,
-} from "../schema";
+import { articleInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { uploadToCloudinary } from "@/app/actions";
+import ImageUpload from "@/components/image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -33,19 +33,19 @@ export default function ArticleAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const updateMutation = useMutation({
     mutationFn: insertArticle,
     onSuccess: async () => {
-      toast.success("Announcement added successfully!");
+      toast.success("Article added successfully!");
       setOpen(false);
 
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      queryClient.invalidateQueries({ queryKey: ["articles"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add annoucements");
+      toast.error(err.message || "Failed to add article");
     },
   });
 
@@ -57,12 +57,35 @@ export default function ArticleAddModal({
       emotional_status_id: "",
       publisher_name: "",
       link: "",
+      article_image: "",
+    },
+    onSubmitInvalid: ({ formApi }) => {
+      console.log(formApi.state.errors);
+      console.log(formApi.state.values);
     },
     validators: {
       onChange: articleInsertFormSchema,
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value);
+      let finalValues = { ...value };
+
+      if (file) {
+        setIsUploading(true);
+        try {
+          const result = await uploadToCloudinary(file, "articles");
+
+          if (result && result.optimizedUrl) {
+            finalValues.article_image = result.optimizedUrl;
+          }
+        } catch (error) {
+          toast.error("Failed to upload article image");
+          setIsUploading(false);
+          return;
+        }
+      }
+
+      setIsUploading(false);
+      updateMutation.mutate(finalValues);
     },
   });
 
@@ -76,8 +99,8 @@ export default function ArticleAddModal({
       <DialogContent
         className="sm:max-w-[800px]"
         showCloseButton={false}
-        onInteractOutside={() => {
-          setOpen(false);
+        onInteractOutside={(e) => {
+          if (isUploading) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -85,37 +108,24 @@ export default function ArticleAddModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-student-profile-form"
+          id="add-article-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
-          <div className="row-span-3 flex flex-col gap-4">
-            <Label>Article Image</Label>
-            <div className="h-full rounded-2xl border p-2">
-              <label
-                htmlFor="fileUpload"
-                className="row-span-3 flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center"
-              >
-                <Upload strokeWidth={1.25} />
-                <p>Click to upload the image.</p>
-              </label>
-              <input
-                type="file"
-                id="fileUpload"
-                className="hidden"
-                accept="image/*"
-              />
-            </div>
+          <div className="row-span-3">
+            <ImageUpload
+              initialURL={form.state.values.article_image}
+              setFile={setFile}
+            />
           </div>
-
           <div className="col-span-2 flex h-full w-full gap-2">
             <form.Field name="title">
               {(field) => (
                 <FormInputField
                   label="Title"
-                  placeholder="Enter title of annoucement"
+                  placeholder="Enter title of announcement"
                   field={field}
                 />
               )}
@@ -160,20 +170,25 @@ export default function ArticleAddModal({
                 />
               )}
             </form.Field>
-            <FormEmotionalStatusField
-              emotionalStatus={emotionalStatus}
-              setEmotionalStatus={setEmotionalStatus}
-              enableDescription={false}
-            />
+            <form.Field name="emotional_status_id">
+              {(field) => (
+                <FormEmotionalStatusField
+                  emotionalStatus={field.state.value}
+                  setEmotionalStatus={(value) => field.setValue(value)}
+                  enableDescription={false}
+                />
+              )}
+            </form.Field>
           </div>
         </form>
         <DialogFooter>
           <Button
             type="submit"
             disabled={updateMutation.isPending}
-            form="update-student-profile-form"
+            form="add-article-form"
           >
-            {updateMutation.isPending ? <Spinner /> : "Add"}
+            {updateMutation.isPending || (isUploading && <Spinner />)}
+            <p>Update</p>
           </Button>
           <DialogClose asChild>
             <Button
@@ -181,6 +196,7 @@ export default function ArticleAddModal({
               onClick={() => {
                 setOpen(false);
               }}
+              disabled={isUploading}
             >
               Cancel
             </Button>

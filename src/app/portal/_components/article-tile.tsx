@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import ExternalLinkModal from "./external-link-modal";
+import { CldImage } from "next-cloudinary";
 
 export function formatAnnouncementDate(date: string | Date): string {
   const d = typeof date === "string" ? new Date(date) : date;
@@ -30,17 +31,17 @@ export default function ArticleTile({
   if (isLoading) {
     return (
       <div className="flex h-full flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4">
-        <div className="relative h-1/2 justify-between">
+        <div className="relative h-64 justify-between">
           <Skeleton className="h-full w-full rounded-2xl" />
         </div>
 
-        <div className="h-1/2 space-y-2 rounded-xl border border-gray-200">
+        <div className="h-fit space-y-2 rounded-xl border border-gray-200 flex flex-col justify-start">
           <div className="space-y-2 p-4">
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
           </div>
-          <div className="flex h-1/2 flex-col justify-center space-y-2 border-t border-gray-200 p-4">
+          <div className="flex h-fit flex-col justify-start space-y-2 border-t border-gray-200 p-4">
             <div className="flex items-center gap-4">
               <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
               <div>
@@ -72,20 +73,31 @@ export default function ArticleTile({
         className="flex h-full cursor-pointer flex-col gap-2 rounded-xl border border-gray-200 bg-white p-4"
         onClick={() => setOpen(true)}
       >
-        <div className="relative h-1/2 justify-between">
-          <Image
-            src="/placeholder.png"
-            alt="placeholder"
-            fill
-            className="rounded-2xl object-cover"
-          />
+        <div className="relative h-64 justify-between">
+          {articleData.article_image?.length ? (
+            <CldImage
+              src={articleData.article_image}
+              alt={`${articleData.title}-image`}
+              fill
+              className="rounded-2xl border object-cover"
+              sizes="100vw"
+            />
+          ) : (
+            <Image
+              src="/placeholder.png"
+              alt="placeholder"
+              fill
+              className="rounded-2xl border object-cover"
+              sizes="100vw"
+            />
+          )}
         </div>
-        <div className="h-1/2 space-y-2 rounded-xl border border-gray-200">
+        <div className="h-fit space-y-2 rounded-xl border border-gray-200 flex flex-col justify-start">
           <div className="space-y-2 p-4">
             <p className="font-medium">{articleData.title}</p>
             <p>{articleData.content}</p>
           </div>
-          <div className="flex h-1/2 flex-col justify-center space-y-2 border-t border-gray-200 p-4">
+          <div className="flex h-fit flex-col justify-start space-y-2 border-t border-gray-200 p-4">
             <div className="flex items-center gap-4">
               <Info
                 className="rounded-full border border-gray-200 p-2"

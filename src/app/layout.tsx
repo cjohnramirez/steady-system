@@ -17,15 +17,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gcs-system.vercel.app/"),
   title: "GCS System | University Guidance & Counseling",
-  description: "Official Guidance and Counseling Services platform for students, providing announcements, workshops, and counseling sessions.",
+  description: "Official Guidance and Counseling Services platform for students, providing announcements, workshops, and Counseling sessions.",
   keywords: ["Guidance", "Counseling", "University", "Student Support", "Workshops", "Announcements"],
   authors: [{ name: "University GCS Unit" }],
   creator: "University GCS Unit",
   publisher: "University GCS Unit",
+  verification: {
+    google: "YW8hRYwXwmkr7hv5hBSVypGhAUlXzyz4hUmphqjMf-A",
+  },
   openGraph: {
     title: "GCS System | University Guidance & Counseling",
-    description: "Stay updated with announcements, events, and counseling programs from the Guidance and Counseling Services Unit.",
+    description: "Stay updated with announcements, events, and Counseling programs from the Guidance and Counseling Services Unit.",
     url: "https://gcs-system.vercel.app/",
     siteName: "GCS System",
     images: [
@@ -40,8 +44,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "GCS System | University Guidance & Counseling",
-    description: "Official platform for announcements, events, and counseling sessions.",
-    images: ["/home-page.png"],
+    description: "Official platform for announcements, events, and Counseling sessions.",
+    images: "/home-page.png",
   },
 };
 
@@ -56,10 +60,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} w-full font-sans text-sm antialiased h-full bg-gray-50 `}
       >
-        <Providers>{children}</Providers>
         <Toaster position="top-left" className="font-normal" />
         <ConfirmModal />
         <TrackHomePage />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
