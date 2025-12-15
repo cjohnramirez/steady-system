@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   authors: [{ name: "University GCS Unit" }],
   creator: "University GCS Unit",
   publisher: "University GCS Unit",
+  verification: {
+    google: "YW8hRYwXwmkr7hv5hBSVypGhAUlXzyz4hUmphqjMf-A",
+  },
   openGraph: {
     title: "GCS System | University Guidance & Counseling",
     description: "Stay updated with announcements, events, and Counseling programs from the Guidance and Counseling Services Unit.",
