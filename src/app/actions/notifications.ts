@@ -163,6 +163,10 @@ async function sendFCMNotification(
   tokens: string[],
   payload: NotificationPayload
 ) {
+  if (!firebaseAdmin) {
+    console.error("Firebase Admin not initialized");
+    return { successCount: 0, failureCount: tokens.length, responses: [] };
+  }
   const messaging = firebaseAdmin.messaging();
 
   const message = {

@@ -83,7 +83,13 @@ export async function POST(request: NextRequest) {
     const fcmTokens = tokens.map((t) => t.token);
     const uniqueUserIds = [...new Set(tokens.map((t) => t.user_id))];
 
-    // Send FCM notifications
+    if (!firebaseAdmin) {
+      return NextResponse.json(
+        { error: "Firebase Admin SDK is not initialized" },
+        { status: 500 }
+      );
+    }
+    
     const messaging = firebaseAdmin.messaging();
     
     const fcmMessage = {
