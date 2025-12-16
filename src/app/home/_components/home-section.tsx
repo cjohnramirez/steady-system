@@ -46,13 +46,13 @@ export default function HomeSection() {
             />
             <p className="font-medium">Location</p>
           </div>
-          <div className="space-y-2 p-6">
+          <div className="space-y-2 p-6 flex flex-col">
             <p className="font-medium">
               Claro M. Recto Avenue, Lapasan 9000 Cagayan de Oro City,
               Philippines
             </p>
             <p>Room 1, Bldg 02, Science Complex</p>
-            <Button className="mt-2">See Location in Maps</Button>
+            <a className="mt-2 bg-brand-normal text-white p-3 w-fit rounded-md font-medium" href="https://www.google.com/maps/place/University+of+Science+and+Technology+of+Southern+Philippines+-+CDO+Campus/@8.4852052,124.6563621,18z/data=!4m6!3m5!1s0x32fff2c3ca5ae8c7:0x880805868ab84491!8m2!3d8.4847692!4d124.6567168!16s%2Fg%2F11cs6lpz3h?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoASAFQAw%3D%3D" target="_blank">See Location in Maps</a>
           </div>
         </div>
       </div>

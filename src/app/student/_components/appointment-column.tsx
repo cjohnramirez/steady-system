@@ -8,9 +8,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import clsx from "clsx";
 import { ArrowUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { deleteStudentAppointment } from "../actions";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { cancelStudentAppointment } from "../actions";
 
 export const studentAppointmentColumns: ColumnDef<
   Tables<"appointment_with_details">
@@ -85,7 +85,7 @@ export const studentAppointmentColumns: ColumnDef<
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      return <p>{dateToString(originalRow.scheduled_at ?? "")}</p>;
+      return <p>{dateToString(originalRow.scheduled_at ?? "", true)}</p>;
     },
   },
   {
@@ -109,7 +109,7 @@ const AppointmentActionsCell = ({ row }: { row: any }) => {
     if (!ok) return;
 
     startLoading();
-    const res = await deleteStudentAppointment(row.original.id ?? "");
+    const res = await cancelStudentAppointment(row.original.id ?? "");
 
     if (res.error) {
       toast.error(res.error);

@@ -95,7 +95,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/auth/login/student")
     ) {
       const url = request.nextUrl.clone();
-      url.pathname = "/student/profile";
+      url.pathname = "/student/";
       return NextResponse.redirect(url);
     }
 

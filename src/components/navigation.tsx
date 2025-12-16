@@ -17,6 +17,7 @@ import { ChevronsUpDown } from "lucide-react";
 import { NavBar } from "../app/home/_lib/nav-data";
 import { useConfirmStore } from "@/hooks/confirm-store";
 import { createClient } from "@/utils/supabase/client";
+import { NotificationDropdown } from "./notification-dropdown";
 
 export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
   const { confirm, startLoading, stopLoading } = useConfirmStore();
@@ -79,7 +80,7 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
 
         <section className="flex space-x-4">
           {session ? (
-            <>
+            <>    
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger className="flex items-center gap-4">
                   <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
@@ -113,6 +114,7 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
                   Go to Counselor Dashboard
                 </Button>
               )}
+              <NotificationDropdown />
             </>
           ) : (
             <>

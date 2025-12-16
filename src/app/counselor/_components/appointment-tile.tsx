@@ -8,11 +8,6 @@ import { useState } from "react";
 import CounselorAppointmentModal from "./appointment-modal";
 import { dateToString } from "@/lib/format";
 import RescheduleModal from "./reschedule-modal";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateAppointment } from "../actions";
-import { toast } from "sonner";
-import { deleteStudentAppointment } from "@/app/student/actions";
-import { useConfirmStore } from "@/hooks/confirm-store";
 
 export default function CounselorAppointmentTile({
   appointment,
@@ -23,36 +18,6 @@ export default function CounselorAppointmentTile({
 }) {
   const [openAppointment, setOpenAppointment] = useState(false);
   const [openReschedule, setOpenReschedule] = useState(false);
-
-  const queryClient = useQueryClient();
-  const { confirm, startLoading, stopLoading } = useConfirmStore();
-
-  const updateMutation = useMutation({
-    mutationFn: updateAppointment,
-    onSuccess: async () => {
-      toast.success("Appointment updated successfully!");
-      stopLoading();
-      queryClient.invalidateQueries({ queryKey: ["counselor-appointments"] });
-    },
-    onError: (err: Error) => {
-      stopLoading();
-      toast.error(err.message || "Failed to update appointment");
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteStudentAppointment,
-    onSuccess: async () => {
-      toast.success("Appointment deleted successfully!");
-      stopLoading();
-      queryClient.invalidateQueries({ queryKey: ["counselor-appointments"] });
-    },
-    onError: (err: Error) => {
-      stopLoading();
-      toast.error(err.message || "Failed to delete appointment");
-    },
-  });
-
 
   if (isLoading)
     return (
@@ -156,40 +121,6 @@ export default function CounselorAppointmentTile({
           >
             View Appointment
           </Button>
-          {appointment.status === "pending" && (
-            <>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  const ok = await confirm(
-                    "Accept appointment?",
-                    "This appointment will be marked as approved.",
-                  );
-                  if (ok) {
-                    startLoading();
-                    updateMutation.mutate({ status: "approved" });
-                  }
-                }}
-              >
-                Accept
-              </Button>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  const ok = await confirm(
-                    "Reject appointment?",
-                    "This appointment will be deleted.",
-                  );
-                  if (ok) {
-                    startLoading();
-                    deleteMutation.mutate(appointment.id ?? "");
-                  }
-                }}
-              >
-                Reject
-              </Button>
-            </>
-          )}
         </div>
       </div>
     </>

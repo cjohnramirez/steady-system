@@ -15,16 +15,20 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Tables } from "@/types/supabase";
 import { MapPin, Mail, Phone, Clock, UserRoundXIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AppointmentPage() {
   const [selectReason, setSelectReason] = useState("Academic");
-  const [date, setDate] = useState<Date | undefined>();
+  const [isTimeSelected, setIsTimeSelected] = useState(false);
+
+  const [date, setDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const getUserID = useUserStore.getState().id;
 
   const supabase = createClient();
+  const router = useRouter();
 
   const parseTime = (timeString: string): string => {
     if (!timeString) return "";
@@ -64,6 +68,7 @@ export default function AppointmentPage() {
     onSuccess: () => {
       toast.success("Appointment added successfully");
       setIsLoading(false);
+      router.replace("/student");
     },
     onError: () => {
       toast.error("Failed to add appointment");
@@ -109,7 +114,8 @@ export default function AppointmentPage() {
             <div className="flex items-start gap-2">
               <Clock size={20} strokeWidth={1} />
               <p className="text-sm">
-                {parseTime(organization.start_office_hour)} - {parseTime(organization.end_office_hour)}
+                {parseTime(organization.start_office_hour)} -{" "}
+                {parseTime(organization.end_office_hour)}
               </p>
             </div>
           )}
@@ -121,6 +127,8 @@ export default function AppointmentPage() {
     (appointmentCounselor[0].first_name ?? "") +
     " " +
     (appointmentCounselor[0].last_name ?? "");
+
+  console.log(date);
 
   return (
     <div className="space-y-6 p-10">
@@ -147,12 +155,19 @@ export default function AppointmentPage() {
             date={date}
             setDate={setDate}
             isLoading={isAppointmentCounselorLoading}
+            setIsTimeSelected={setIsTimeSelected}
           />
         </div>
       </div>
       <div className="flex justify-end space-x-4">
         <Button variant="outline">Cancel</Button>
-        <Button type="submit" onClick={() => mutation.mutate()}>
+        <Button
+          type="submit"
+          onClick={() => {
+            if (isTimeSelected) mutation.mutate();
+          }}
+          disabled={!isTimeSelected}
+        >
           {isLoading ? <Spinner /> : <></>}
           Book an Appointment
         </Button>

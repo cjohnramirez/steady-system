@@ -9,13 +9,14 @@ export function generateRange(max: number, step: number) {
   return arr;
 }
 
-export function dateToString(dateString?: string): string {
+export function dateToString(dateString?: string, includeTime: boolean = false): string {
   if (!dateString) return "No schedule";
   return new Date(dateString).toLocaleString(undefined, {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
+    ...(includeTime && { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
   });
 }
 
@@ -26,12 +27,10 @@ export function strToTitleCase(str: string) {
   );
 }
 
-// Date and Time parsing shit, for Supabase and NextJS compatibility
 export function generateTimeSlots(
   startTime: string,
   endTime: string,
 ): string[] {
-  // Parse time format "HH:MM:SS+TZ" or "HH:MM:SS" to "HH:MM"
   const parseTimeString = (timeStr: string): [number, number] => {
     const timePart = timeStr.includes("+") 
       ? timeStr.split("+")[0] 

@@ -16,11 +16,11 @@ import {
   updateAppointment,
 } from "../actions";
 import { createClient } from "@/utils/supabase/client";
-import DateTimeSection from "@/app/student/appointment/_components/date-time-section";
 import { useState } from "react";
 import { useUserStore } from "@/hooks/auth-store";
 import { useConfirmStore } from "@/hooks/confirm-store";
 import { toast } from "sonner";
+import DateTimeSection from "@/app/student/appointment/_components/date-time-section";
 
 interface RescheduleModalProps {
   open: boolean;
@@ -39,7 +39,8 @@ export default function RescheduleModal({
   const queryClient = useQueryClient();
   const userID = useUserStore.getState().id;
 
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | null>(new Date());
+  const [isTimeResetted, setIsTimeResetted] = useState(false);
 
   const { data: counselorAppointment } = useQuery({
     queryKey: ["counselor-appointment", id],
@@ -111,10 +112,13 @@ export default function RescheduleModal({
           isLoading={isCounselorProfileLoading}
           isRescheduleModal={true}
           appointmentData={counselorAppointment}
+          setIsTimeResetted={setIsTimeResetted}
         />
         <DialogFooter>
           <div className="flex gap-2">
-            <Button onClick={handleSubmit}>Reschedule</Button>
+            <Button onClick={handleSubmit} disabled={!isTimeResetted}>
+              Reschedule
+            </Button>
             <DialogClose asChild>
               <Button
                 variant="outline"

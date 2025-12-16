@@ -389,19 +389,19 @@ export type Database = {
       }
       department: {
         Row: {
-          college_id: string
+          college_id: string | null
           counselor_id: string | null
           id: string
           title: string
         }
         Insert: {
-          college_id: string
+          college_id?: string | null
           counselor_id?: string | null
           id?: string
           title: string
         }
         Update: {
-          college_id?: string
+          college_id?: string | null
           counselor_id?: string | null
           id?: string
           title?: string
@@ -463,6 +463,72 @@ export type Database = {
         Update: {
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      fcm_token: {
+        Row: {
+          created_at: string | null
+          device_info: string | null
+          id: string
+          role: string
+          token: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          role: string
+          token: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          role?: string
+          token?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_dismissed: boolean | null
+          link: string | null
+          message: string | null
+          title: string
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          link?: string | null
+          message?: string | null
+          title: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          link?: string | null
+          message?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -859,6 +925,15 @@ export type Database = {
         | "department.update"
         | "department.insert"
         | "organization.update"
+        | "department.select"
+        | "notification.update"
+        | "notification.insert"
+        | "notification.select"
+        | "notification.delete"
+        | "fcm_token.insert"
+        | "fcm_token.select"
+        | "fcm_token.delete"
+        | "fcm_token.update"
       app_role: "admin" | "counselor" | "student"
     }
     CompositeTypes: {
@@ -1043,6 +1118,15 @@ export const Constants = {
         "department.update",
         "department.insert",
         "organization.update",
+        "department.select",
+        "notification.update",
+        "notification.insert",
+        "notification.select",
+        "notification.delete",
+        "fcm_token.insert",
+        "fcm_token.select",
+        "fcm_token.delete",
+        "fcm_token.update",
       ],
       app_role: ["admin", "counselor", "student"],
     },

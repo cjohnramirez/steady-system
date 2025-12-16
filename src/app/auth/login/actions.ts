@@ -24,7 +24,9 @@ export default async function LoginFormAction(data: LoginData): Promise<{
     emotionalStatus?: string;
     id: string;
     firstName?: string;
+    userId: string;
   };
+  status_code?: number;
 }> {
   let emotionalStatus: string | undefined;
 
@@ -38,126 +40,80 @@ export default async function LoginFormAction(data: LoginData): Promise<{
     });
 
   if (signInError) {
-    throw new Error(signInError.message);
+    return { status_code: 401 };
   }
 
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Skip strict role validation for now - just proceed with login
-  // if (session) {
-  //   const jwt = jwtDecode<JwtCustomPayload>(session.access_token);
-  //   let userRole = jwt.user_role;
-  //   
-  //   if (!userRole) {
-  //     try {
-  //       const { data: roleData, error: roleError } = await supabaseAdmin
-  //         .from("user_roles")
-  //         .select("role")
-  //         .eq("user_id", userData.user!.id)
-  //         .single();
-  //       
-  //       if (!roleError && roleData) {
-  //         userRole = roleData.role;
-  //       }
-  //     } catch (err) {
-  //       // Silently fail role validation
-  //     }
-  //   }
-  // }
+  if (session) {
+    const jwt = jwtDecode<JwtCustomPayload>(session.access_token);
+    if (jwt.user_role !== data.role) {
+      supabase.auth.signOut();
+      return { status_code: 403 };
+    }
+  }
 
   if (!userData.user) {
-    throw new Error("User data not available");
+    return { status_code: 400 };
   }
 
   if (data.role === "student") {
-    try {
-      const { data: studentProfileData, error: studentProfileError } =
-        await supabaseAdmin
-          .from("student_with_details")
-          .select("*")
-          .eq("user_id", userData.user!.id)
-          .single();
-
-      if (!studentProfileError && studentProfileData) {
-        emotionalStatus = studentProfileData.emotional_status ?? "";
-      }
-
-      const { error: analyticsError } = await supabaseAdmin.rpc(
-        "increment_daily_login",
-      );
-
-      // Don't throw on analytics error - it shouldn't block login
-      if (analyticsError) {
-        console.warn("Analytics update failed:", analyticsError);
-      }
-
-      return {
-        data: {
-          userName: studentProfileData?.username ?? "test",
-          emotionalStatus,
-          id: studentProfileData?.id ?? "",
-        },
-      };
-    } catch (err) {
-      console.error("Student profile fetch error:", err);
-      // Return minimal data on error
-      return {
-        data: {
-          userName: "student",
-          emotionalStatus: "",
-          id: userData.user.id,
-        },
-      };
-    }
-  } else {
-    try {
-      const { data: profileData, error: profileError } = await supabaseAdmin
-        .from(`${data.role}`)
+    const { data: studentProfileData, error: studentProfileError } =
+      await supabaseAdmin
+        .from("student_with_details")
         .select("*")
         .eq("user_id", userData.user!.id)
         .single();
 
-      if (profileError) {
-        console.error("Profile fetch error:", profileError);
-        // Return minimal data on error
-        return {
-          data: {
-            firstName: "",
-            userName: data.role,
-            id: userData.user.id,
-          },
-        };
-      }
-
-      const { error: analyticsError } = await supabaseAdmin.rpc(
-        "increment_daily_login",
-      );
-
-      // Don't throw on analytics error - it shouldn't block login
-      if (analyticsError) {
-        console.warn("Analytics update failed:", analyticsError);
-      }
-
-      return {
-        data: {
-          firstName: profileData.first_name,
-          userName: profileData.username,
-          id: profileData.id,
-        },
-      };
-    } catch (err) {
-      console.error("Non-student profile fetch error:", err);
-      // Return minimal data on error
-      return {
-        data: {
-          firstName: "",
-          userName: data.role,
-          id: userData.user.id,
-        },
-      };
+    if (!studentProfileError && studentProfileData) {
+      emotionalStatus = studentProfileData.emotional_status ?? "";
     }
+
+    const { error: analyticsError } = await supabaseAdmin.rpc(
+      "increment_daily_login",
+    );
+
+    if (analyticsError) {
+      return { status_code: 500 };
+    }
+
+    return {
+      data: {
+        userName: studentProfileData?.username ?? "test",
+        emotionalStatus,
+        id: studentProfileData?.id ?? "",
+        userId: session?.user.id ?? ""
+      },
+    };
+  } else {
+    const { data: profileData, error: profileError } = await supabaseAdmin
+      .from(`${data.role}`)
+      .select("*")
+      .eq("user_id", userData.user!.id)
+      .single();
+
+    if (profileError) {
+      return { status_code: 400 };
+    }
+
+    const { error: analyticsError } = await supabaseAdmin.rpc(
+      "increment_daily_login",
+    );
+
+    if (analyticsError) {
+      return { status_code: 500 };
+    }
+
+    return {
+      data: {
+        firstName: profileData.first_name,
+        userName: profileData.username,
+        id: profileData.id,
+        userId: session?.user.id ?? ""
+      }
+    };
   }
 }
 

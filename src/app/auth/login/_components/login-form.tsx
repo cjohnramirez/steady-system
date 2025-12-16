@@ -40,6 +40,18 @@ export default function LoginForm({ role }: { role: roles }) {
     mutationFn: LoginFormAction,
     onSuccess: async (res) => {
       setIsLoginLoading(false);
+
+      if (res.status_code) {
+        const errorMessages: { [key: number]: string } = {
+          400: "Invalid credentials or user data",
+          401: "Invalid email or password",
+          403: "Unauthorized access for this role",
+          500: "Server error occurred",
+        };
+        toast.error(errorMessages[res.status_code] || "An error occurred");
+        return;
+      }
+
       toast.success("Login successful");
 
       useUserStore.getState().setUserName(res.data?.userName ?? "");
@@ -48,6 +60,9 @@ export default function LoginForm({ role }: { role: roles }) {
         .getState()
         .setEmotionalStatus(res.data?.emotionalStatus ?? "");
       useUserStore.getState().setId(res.data?.id ?? "");
+      useUserStore.getState().setUserId(res.data?.userId ?? "");
+
+      console.log(res.data)
 
       router.push("/");
     },

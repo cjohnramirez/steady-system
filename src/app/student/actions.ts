@@ -2,14 +2,14 @@ import { createClient } from "@/utils/supabase/client";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Tables } from "@/types/supabase";
 
-export async function deleteStudentAppointment(
+export async function cancelStudentAppointment(
   appointmentID: string,
 ): Promise<{ error?: string; success?: string }> {
   const supabase = createClient();
 
   const { error } = await supabase
     .from("appointment")
-    .delete()
+    .update({ status: "cancelled" })
     .eq("id", appointmentID);
 
   if (error)
