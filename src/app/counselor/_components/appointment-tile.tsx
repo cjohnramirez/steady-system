@@ -8,6 +8,10 @@ import { useState } from "react";
 import CounselorAppointmentModal from "./appointment-modal";
 import { dateToString } from "@/lib/format";
 import RescheduleModal from "./reschedule-modal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateAppointment } from "../actions";
+import { toast } from "sonner";
+import { useConfirmStore } from "@/hooks/confirm-store";
 
 export default function CounselorAppointmentTile({
   appointment,
@@ -18,6 +22,32 @@ export default function CounselorAppointmentTile({
 }) {
   const [openAppointment, setOpenAppointment] = useState(false);
   const [openReschedule, setOpenReschedule] = useState(false);
+  const queryClient = useQueryClient();
+  const { confirm, stopLoading } = useConfirmStore();
+
+  const updateMutation = useMutation({
+    mutationFn: updateAppointment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["counselor-appointments"] });
+      stopLoading();
+      toast.success("Appointment updated successfully");
+    },
+    onError: (error) => {
+      stopLoading();
+      toast.error("Failed to update appointment");
+      console.error(error);
+    },
+  });
+
+  const handleAccept = async () => {
+    if (!appointment?.id) return;
+    const confirmed = await confirm(
+      "Accept Appointment",
+      "Are you sure you want to accept this appointment?",
+    );
+    if (!confirmed) return;
+    updateMutation.mutate({ id: appointment.id, status: "approved" });
+  };
 
   if (isLoading)
     return (
@@ -105,6 +135,15 @@ export default function CounselorAppointmentTile({
           </div>
         </div>
         <div className="flex justify-end gap-4">
+          {appointment.status === "pending" && (
+            <Button
+              variant="outline"
+              onClick={handleAccept}
+              disabled={updateMutation.isPending}
+            >
+              Accept
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={() => {

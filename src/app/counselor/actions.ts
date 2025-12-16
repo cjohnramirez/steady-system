@@ -165,17 +165,53 @@ export async function updateCounselorAvailability(
   if (error) throw new Error("Error updating counselor availability: ", error);
 }
 
-export async function updateAppointment(
-  values: TablesUpdate<"appointment">
-) {
+export async function updateAppointment(values: TablesUpdate<"appointment">) {
+  const supabase = createClient();
 
-  const supabase = createClient()
-
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("appointment")
     .update(values)
     .eq("id", values.id)
-    .select("*").single();
+    .select("*, student:student_id(user_id, first_name, last_name), counselor:counselor_id(first_name, last_name)")
+    .single();
 
-  if (error) throw new Error("Error updating appointment: ", error);
+  if (error) throw new Error("Error updating appointment: " + error.message);
+
+  // Send notification to student when appointment is approved
+  if (values.status === "approved" && data?.student?.user_id) {
+    const { sendNotificationToUser } = await import("@/app/actions/notifications");
+    const counselorName = `${data.counselor?.first_name || ""} ${data.counselor?.last_name || ""}`.trim();
+    const scheduledDate = data.scheduled_at
+      ? new Date(data.scheduled_at).toLocaleString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })
+      : "";
+
+    await sendNotificationToUser(data.student.user_id, {
+      title: "Appointment Approved",
+      message: `Your appointment with ${counselorName} on ${scheduledDate} has been approved.`,
+      type: "appointment",
+      link: "/student",
+    });
+  }
+
+  // Send notification to student when appointment is rejected
+  if (values.status === "rejected" && data?.student?.user_id) {
+    const { sendNotificationToUser } = await import("@/app/actions/notifications");
+    const counselorName = `${data.counselor?.first_name || ""} ${data.counselor?.last_name || ""}`.trim();
+
+    await sendNotificationToUser(data.student.user_id, {
+      title: "Appointment Rejected",
+      message: `Your appointment with ${counselorName} has been rejected. Please book a new appointment.`,
+      type: "appointment",
+      link: "/student/appointment",
+    });
+  }
+
+  return data;
 }
