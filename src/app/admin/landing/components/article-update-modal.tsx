@@ -71,7 +71,6 @@ export default function ArticleUpdateModal({
       onChange: articleUpdateFormSchema,
     },
     onSubmitInvalid: ({formApi}) => {
-      console.log(formApi.state.values)
     },
     onSubmit: async ({ value }) => {
       let finalValues = { ...value };
@@ -114,8 +113,6 @@ export default function ArticleUpdateModal({
 
   if (isLoading) return null;
 
-  console.log("Image is fetched: ", article?.article_image)
-  console.log(article)
 
   return (
     <Dialog 

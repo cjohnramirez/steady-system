@@ -39,7 +39,6 @@ export default function ImageUpload({
     multiple: false,
   });
 
-  console.log("Image is loaded to component: ", initialURL);
 
   return (
     <div className="row-span-3 flex aspect-square flex-col gap-4">

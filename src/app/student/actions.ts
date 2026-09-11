@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/client";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { DB } from "@/lib/db/types";
 import { Tables } from "@/types/supabase";
 
 export async function deleteStudentAppointment(
@@ -84,7 +84,7 @@ export async function fetchStudentAppointment(
   pageSize: number,
   studentID: string,
   search: string,
-  supabase: SupabaseClient,
+  supabase: DB,
 ) {
   const from = page * pageSize;
   const to = from + pageSize - 1;

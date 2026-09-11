@@ -110,7 +110,7 @@ export default function RescheduleModal({
           counselorData={counselorProfile ?? null}
           isLoading={isCounselorProfileLoading}
           isRescheduleModal={true}
-          appointmentData={counselorAppointment}
+          appointmentData={counselorAppointment ?? undefined}
         />
         <DialogFooter>
           <div className="flex gap-2">

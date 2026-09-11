@@ -73,7 +73,6 @@ export default function AssignDepartmentModal({
     },
   });
 
-  console.log(counselorId)
 
   return (
     <Dialog

@@ -4,7 +4,10 @@ import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-export const studentColumn: ColumnDef<Tables<"student">>[] = [
+// The table is fed from student_with_details, not the base table. Typing it as
+// Tables<"student"> promised columns the view does not carry, such as avatar and
+// last_active_at, and hid the ones it does, such as college_name.
+export const studentColumn: ColumnDef<Tables<"student_with_details">>[] = [
   {
     accessorKey: "university_id",
     header: ({ column }) => {

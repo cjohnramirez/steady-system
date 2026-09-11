@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceClient } from "@/utils/supabase/service";
 import z from "zod";
 import { studentInsertFormSchema } from "./schema";
+import { DbError } from "@/lib/db/error";
 
 export async function fetchDepartment(college: string) {
   const supabase = await createClient();
@@ -14,7 +15,7 @@ export async function fetchDepartment(college: string) {
       .select(`*`)
       .eq("college_id", college);
 
-    if (error) throw new Error("Error fetching department: ", error);
+    if (error) throw new DbError("Error fetching department", error);
     return data || [];
   }
   return [];
@@ -25,7 +26,7 @@ export async function fetchCollege() {
 
   const { data, error } = await supabase.from("college").select(`*`);
 
-  if (error) throw new Error("Error fetching college: ", error);
+  if (error) throw new DbError("Error fetching college", error);
   return data || [];
 }
 

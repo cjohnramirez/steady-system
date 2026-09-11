@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Tables } from "@/types/supabase";
 import { z } from "zod";
 import { adminProfileFormSchema, resetPasswordFormSchema } from "./schema";
+import { DbError } from "@/lib/db/error";
 
 export async function fetchAdminProfile(): Promise<Tables<"admin"> | null> {
   const supabase = await createClient();
@@ -18,7 +19,7 @@ export async function fetchAdminProfile(): Promise<Tables<"admin"> | null> {
     .eq("user_id", user.user.id)
     .single();
 
-  if (error) throw new Error("Error fetching admin profile: ", error);
+  if (error) throw new DbError("Error fetching admin profile", error);
   return data ?? null;
 }
 
@@ -36,7 +37,7 @@ export async function updateAdminProfile(
     .select()
     .single();
 
-  if (error) throw new Error("Error updating admin profile: ", error);
+  if (error) throw new DbError("Error updating admin profile", error);
   return data;
 }
 
@@ -52,7 +53,12 @@ export async function updateAdminPassword(
     password: values.password,
   });
 
-  if (passwordError) throw new Error("Error updating admin password: ", passwordError);
+  // This one comes from Supabase Auth rather than PostgREST, so it is not a DbError.
+  if (passwordError) {
+    throw new Error(`Could not update the password: ${passwordError.message}`, {
+      cause: passwordError,
+    });
+  }
 
   const { data } = await supabase
     .from("admin")

@@ -78,8 +78,6 @@ export default function StudentProfileModal({
       gender: student?.gender || "",
     },
     onSubmitInvalid: ({formApi}) => {
-      console.log(formApi.state.values);
-      console.log(formApi.state.errors);
     },
     validators: {
       onChange: studentUpdateFormSchema

@@ -42,7 +42,6 @@ export default function AccountsPage() {
       fetchStudents(supabase, {
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
-        status: activeTab,
         search: search,
       }),
   });
@@ -59,7 +58,6 @@ export default function AccountsPage() {
       fetchCounselors(supabase, {
         page: pagination.pageIndex,
         pageSize: pagination.pageSize,
-        status: activeTab,
         search: search,
       }),
   });
@@ -90,6 +88,30 @@ export default function AccountsPage() {
   };
 
   const active = tabs[activeTab];
+
+  // Everything the table needs that does not depend on which tab is showing.
+  const sharedTableProps = {
+    isLoading: active.isLoading,
+    rowUrl: active.rowUrl,
+    rowCount: active.count,
+    pagination,
+    onPaginationChange: setPagination,
+    onSearchChange: (val: string) => {
+      setSearch(val);
+      setPagination((p) => ({ ...p, pageIndex: 0 }));
+    },
+    toolbarExtra: (
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabName)}>
+        <TabsList>
+          {Object.values(tabs).map((tab) => (
+            <TabsTrigger key={tab.name} value={tab.name}>
+              {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+    ),
+  };
 
   return (
     <>
@@ -133,33 +155,25 @@ export default function AccountsPage() {
           )}
         </div>
       </div>
-      <DataTable
-        isLoading={active.isLoading}
-        columns={active.columns}
-        data={active.data}
-        rowUrl={active.rowUrl}
-        rowCount={active.count}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
-        toolbarExtra={
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => setActiveTab(v as TabName)}
-          >
-            <TabsList>
-              {Object.values(tabs).map((tab) => (
-                <TabsTrigger key={tab.name} value={tab.name}>
-                  {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        }
-      />
+      {/*
+        The two tabs are rendered as separate calls rather than one call reading
+        `active.columns` and `active.data`. Passing them separately from a union
+        loses the link between them, so nothing would stop counselor columns being
+        handed student rows.
+      */}
+      {activeTab === "students" ? (
+        <DataTable
+          {...sharedTableProps}
+          columns={studentColumn}
+          data={studentsData}
+        />
+      ) : (
+        <DataTable
+          {...sharedTableProps}
+          columns={counselorColumn}
+          data={counselorsData}
+        />
+      )}
     </>
   );
 }

@@ -60,8 +60,6 @@ export default function ArticleAddModal({
       article_image: "",
     },
     onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.errors);
-      console.log(formApi.state.values);
     },
     validators: {
       onChange: articleInsertFormSchema,

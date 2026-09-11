@@ -4,6 +4,7 @@ import { Tables } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/server";
 import z from "zod";
 import { organizationInfoFormSchema } from "./schema";
+import { DbError } from "@/lib/db/error";
 
 export async function fetchOrganizationInfo(): Promise<Tables<"organization"> | null> {
   const supabase = await createClient();
@@ -35,7 +36,7 @@ export async function updateOrganizationInfo(
     .update(values)
     .eq("id", orgInfo?.id ?? "");
 
-  if (error) throw new Error("Error updating organization data: ", error);
+  if (error) throw new DbError("Error updating organization data", error);
   return data?.[0] ?? null;
 }
 
@@ -46,7 +47,7 @@ export async function fetchOrganizationContact(): Promise<
 
   const { data, error } = await supabase.from("organization_contact").select("*");
 
-   if (error) throw new Error("Error fetching organization data: ", error);
+   if (error) throw new DbError("Error fetching organization data", error);
 
   return data ?? null;
 }

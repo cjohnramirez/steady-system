@@ -9,8 +9,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fetchAppointments } from "./actions";
 import { PaginationState } from "@tanstack/react-table";
 import { Info } from "lucide-react";
+import {
+  APPOINTMENT_STATUSES,
+  type AppointmentStatus,
+} from "@/lib/appointments/status";
 
-type TabName = "all" | "pending" | "approved" | "completed" | "cancelled";
+// Derived from the database enum rather than written out by hand, so a new status
+// cannot be added to the schema and silently go missing from this filter.
+type TabName = AppointmentStatus | "all";
 
 export default function AppointmentPage() {
   const supabase = createClient();
@@ -43,13 +49,7 @@ export default function AppointmentPage() {
   const appointmentData = data?.data || [];
   const totalCount = data?.count || 0;
 
-  const tabsList: TabName[] = [
-    "all",
-    "pending",
-    "approved",
-    "completed",
-    "cancelled",
-  ];
+  const tabsList: TabName[] = ["all", ...APPOINTMENT_STATUSES];
 
   return (
     <div>

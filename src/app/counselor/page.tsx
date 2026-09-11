@@ -6,6 +6,7 @@ import CounselorProfileSection from "./_components/profile-section";
 import MetricSection from "./_components/metric-section";
 import { useQuery } from "@tanstack/react-query";
 import { useUserStore } from "@/hooks/auth-store";
+import type { AppointmentStatus } from "@/lib/appointments/status";
 import { useEffect, useState } from "react";
 import {
   fetchCounselorAppointments,
@@ -25,7 +26,8 @@ export default function CounselorPage() {
 
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 3 });
-  const [status, setStatus] = useState("approved");
+  // Empty string means "no status filter".
+  const [status, setStatus] = useState<AppointmentStatus | "">("approved");
 
   const { data: counts } = useQuery({
     queryKey: ["count-counselor-appointments"],
