@@ -141,13 +141,14 @@ export type Database = {
       appointment: {
         Row: {
           counselor_id: string | null
-          created_at: string | null
+          created_at: string
           id: string
           notes: string
           reason: string
           scheduled_at: string
-          status: string
+          status: Database["public"]["Enums"]["appointment_status"]
           student_id: string | null
+          updated_at: string
         }
         Insert: {
           counselor_id?: string | null
@@ -156,8 +157,9 @@ export type Database = {
           notes?: string
           reason?: string
           scheduled_at?: string
-          status?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
           student_id?: string | null
+          updated_at?: string
         }
         Update: {
           counselor_id?: string | null
@@ -166,8 +168,9 @@ export type Database = {
           notes?: string
           reason?: string
           scheduled_at?: string
-          status?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
           student_id?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -707,7 +710,7 @@ export type Database = {
           notes: string | null
           reason: string | null
           scheduled_at: string | null
-          status: string | null
+          status: Database["public"]["Enums"]["appointment_status"] | null
           student_email: string | null
           student_id: string | null
           student_university_id: number | null
@@ -802,10 +805,31 @@ export type Database = {
         }
         Returns: boolean
       }
+      app_timezone: { Args: never; Returns: string }
+      current_app_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      current_counselor_department_ids: { Args: never; Returns: string[] }
+      current_counselor_id: { Args: never; Returns: string }
+      current_student_id: { Args: never; Returns: string }
+      get_available_slots: {
+        Args: { p_counselor_id: string; p_day: string }
+        Returns: string[]
+      }
+      is_admin: { Args: never; Returns: boolean }
+      register_student: { Args: { payload: Json }; Returns: string }
+      slot_duration: { Args: never; Returns: unknown }
       increment_daily_login: { Args: never; Returns: undefined }
       increment_daily_visitor: { Args: never; Returns: undefined }
     }
     Enums: {
+      appointment_status:
+        | "pending"
+        | "approved"
+        | "completed"
+        | "cancelled"
+        | "rejected"
       app_permission:
         | "admin.select"
         | "admin.insert"
@@ -1045,6 +1069,13 @@ export const Constants = {
         "organization.update",
       ],
       app_role: ["admin", "counselor", "student"],
+      appointment_status: [
+        "pending",
+        "approved",
+        "completed",
+        "cancelled",
+        "rejected",
+      ],
     },
   },
 } as const

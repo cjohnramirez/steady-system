@@ -1,7 +1,14 @@
 import { ReactNode } from "react";
 import NavigationBar from "./_components/navigation";
+import { guardPage } from "@/lib/auth/session";
 
-export default function StudentLayout({ children }: { children: ReactNode }) {
+export default async function StudentLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  await guardPage("student");
+
   return (
     <>
       <NavigationBar />

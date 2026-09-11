@@ -1,51 +1,73 @@
-"use server"
-import { TablesInsert } from "@/types/supabase";
-import { createClient } from "@/utils/supabase/server";
+"use server";
+
 import { createServiceClient } from "@/utils/supabase/service";
-import { error } from "console";
+import { requireRole } from "@/lib/auth/session";
+import { counselorInsertFormSchema } from "./@modal/schema";
+import type z from "zod";
 
-export default async function insertCounselor(
-  values: TablesInsert<"counselor"> & { password: string },
-) {
-  const supabase = await createClient();
-  const supabaseAdmin = await createServiceClient();
+type CounselorInsert = z.infer<typeof counselorInsertFormSchema>;
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: values.email,
-    password: values.password,
-  });
+/**
+ * Creates a counselor account: an auth user, a role assignment, and a profile row.
+ *
+ * Two things this function used to get wrong, both worth keeping in mind before
+ * editing it.
+ *
+ * It ran with the service-role key and checked nothing, while living in a
+ * "use server" module. That made it a public endpoint that granted the caller the
+ * counselor role, so the `requireRole` call below is load bearing rather than
+ * decorative.
+ *
+ * It also created the auth user with `signUp` on the cookie-bound server client.
+ * That issues a session for the new account and writes it over the caller's own
+ * cookies, so an admin who added a counselor was silently signed out and signed
+ * back in as the person they had just created. `auth.admin.createUser` touches no
+ * cookies, which is why it is used here.
+ */
+export default async function insertCounselor(values: CounselorInsert) {
+  await requireRole("admin");
 
-  if (signUpError) {
-    throw new Error(`Sign Up Error: ${signUpError.message}`)
+  // The client already validated with this schema, but a server action is reachable
+  // without going through the form at all.
+  const input = counselorInsertFormSchema.parse(values);
+  const { password, ...profile } = input;
+
+  const supabaseAdmin = createServiceClient();
+
+  const { data: created, error: createError } =
+    await supabaseAdmin.auth.admin.createUser({
+      email: profile.email,
+      password,
+      email_confirm: true,
+    });
+
+  if (createError || !created.user) {
+    throw new Error(
+      `Could not create the counselor account: ${createError?.message ?? "unknown error"}`,
+    );
   }
 
-  if (!signUpData.user?.id) {
-    throw new Error("User ID not found")
-  }
+  const userId = created.user.id;
 
-  const userRole: { user_id: string; role: "student" | "admin" | "counselor" } =
-    {
-      user_id: signUpData.user?.id as string,
-      role: "counselor",
-    };
-
-  const { error: updateRoleError } = await supabaseAdmin
+  // From here on, any failure leaves an auth user with no profile, so each step
+  // cleans up after itself rather than leaving an account nobody can use.
+  const { error: roleError } = await supabaseAdmin
     .from("user_roles")
-    .insert([userRole]);
+    .insert({ user_id: userId, role: "counselor" });
 
-  if (updateRoleError) {
-    throw new Error(`Failed to update user role: ${updateRoleError.message}`)
+  if (roleError) {
+    await supabaseAdmin.auth.admin.deleteUser(userId);
+    throw new Error(`Could not assign the counselor role: ${roleError.message}`);
   }
 
-  const { password, ...rest } = values
-
-  const { error: updateCounselorError } = await supabaseAdmin
+  const { error: profileError } = await supabaseAdmin
     .from("counselor")
-    .insert([{ ...rest, user_id: signUpData.user.id }]);
+    .insert({ ...profile, user_id: userId });
 
-  if (updateCounselorError) {
-    throw new Error(`Failed to insert counselor: ${updateCounselorError.message}`)
+  if (profileError) {
+    await supabaseAdmin.auth.admin.deleteUser(userId);
+    throw new Error(`Could not create the counselor profile: ${profileError.message}`);
   }
 
-  return { success: "Sign Up successful" };
-} 
+  return { success: "Counselor account created." };
+}

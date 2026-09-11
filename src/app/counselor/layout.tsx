@@ -1,10 +1,13 @@
 import NavigationBar from "@/components/navigation";
+import { guardPage } from "@/lib/auth/session";
 
-export default function CounselorLayout({
+export default async function CounselorLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await guardPage("counselor");
+
   return (
     <>
       <NavigationBar navBarObj={[]} />
