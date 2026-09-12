@@ -19,7 +19,7 @@ const settingSectionObj: SettingSection[] = [
   {
     name: "Change Password",
     section: <ChangePassword />,
-  }
+  },
 ];
 
 export default function AccountSettingsPage() {

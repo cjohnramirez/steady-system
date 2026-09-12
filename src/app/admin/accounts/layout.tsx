@@ -1,14 +1,14 @@
 export default function AccountsLayout({
   children,
-  modal, 
+  modal,
 }: {
   children: React.ReactNode;
   modal?: React.ReactNode;
 }) {
   return (
     <>
-      {modal} 
-      <div>{children}</div> 
+      {modal}
+      <div>{children}</div>
     </>
   );
 }

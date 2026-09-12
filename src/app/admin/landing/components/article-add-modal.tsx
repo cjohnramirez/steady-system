@@ -20,8 +20,8 @@ import { articleInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
-import { uploadToCloudinary } from "@/app/actions";
 import ImageUpload from "@/components/image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -33,8 +33,7 @@ export default function ArticleAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const image = useImageUpload("articles");
 
   const updateMutation = useMutation({
     mutationFn: insertArticle,
@@ -59,33 +58,21 @@ export default function ArticleAddModal({
       link: "",
       article_image: "",
     },
-    onSubmitInvalid: ({ formApi }) => {
-      console.log(formApi.state.errors);
-      console.log(formApi.state.values);
-    },
+    onSubmitInvalid: ({ formApi }) => {},
     validators: {
       onChange: articleInsertFormSchema,
     },
     onSubmit: async ({ value }) => {
-      let finalValues = { ...value };
-
-      if (file) {
-        setIsUploading(true);
-        try {
-          const result = await uploadToCloudinary(file, "articles");
-
-          if (result && result.optimizedUrl) {
-            finalValues.article_image = result.optimizedUrl;
-          }
-        } catch (error) {
-          toast.error("Failed to upload article image");
-          setIsUploading(false);
-          return;
-        }
+      try {
+        const imageUrl = await image.resolveImageUrl(value.article_image);
+        updateMutation.mutate({ ...value, article_image: imageUrl });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload the image.",
+        );
       }
-
-      setIsUploading(false);
-      updateMutation.mutate(finalValues);
     },
   });
 
@@ -100,7 +87,7 @@ export default function ArticleAddModal({
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={(e) => {
-          if (isUploading) e.preventDefault();
+          if (image.isBusy) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -108,7 +95,7 @@ export default function ArticleAddModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="add-article-form"
+          id="article-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -117,7 +104,7 @@ export default function ArticleAddModal({
           <div className="row-span-3">
             <ImageUpload
               initialURL={form.state.values.article_image}
-              setFile={setFile}
+              setFile={image.setFile}
             />
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">
@@ -184,10 +171,10 @@ export default function ArticleAddModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || image.isBusy}
             form="add-article-form"
           >
-            {updateMutation.isPending || (isUploading && <Spinner />)}
+            {updateMutation.isPending || (image.isBusy && <Spinner />)}
             <p>Update</p>
           </Button>
           <DialogClose asChild>
@@ -196,7 +183,7 @@ export default function ArticleAddModal({
               onClick={() => {
                 setOpen(false);
               }}
-              disabled={isUploading}
+              disabled={image.isBusy}
             >
               Cancel
             </Button>

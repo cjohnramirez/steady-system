@@ -29,6 +29,7 @@ import { FormInputField } from "@/components/form-input-field";
 import { useMutation } from "@tanstack/react-query";
 import { LoginFormSchema } from "../schema";
 import { useUserStore } from "@/hooks/auth-store";
+import { ROLE_HOME } from "@/lib/auth/roles";
 
 export default function LoginForm({ role }: { role: roles }) {
   const router = useRouter();
@@ -42,14 +43,14 @@ export default function LoginForm({ role }: { role: roles }) {
       setIsLoginLoading(false);
       toast.success("Login successful");
 
-      useUserStore.getState().setUserName(res.data?.userName ?? "");
-      useUserStore.getState().setUserRole(role ?? "");
-      useUserStore
-        .getState()
-        .setEmotionalStatus(res.data?.emotionalStatus ?? "");
-      useUserStore.getState().setId(res.data?.id ?? "");
+      // The role is taken from the server's answer, not from the tab that was
+      // open, so this cache can never disagree with the session behind it.
+      useUserStore.getState().setUserName(res.userName);
+      useUserStore.getState().setUserRole(res.role);
+      useUserStore.getState().setEmotionalStatus(res.emotionalStatus ?? "");
+      useUserStore.getState().setId(res.id);
 
-      router.push("/");
+      router.push(ROLE_HOME[res.role]);
     },
     onError: (err) => {
       setIsLoginLoading(false);

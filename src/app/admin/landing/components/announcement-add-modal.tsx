@@ -20,8 +20,8 @@ import { announcementInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import { FormDateTimeField } from "@/components/form-date-time-field";
 import { useState } from "react";
-import { uploadToCloudinary } from "@/app/actions";
 import ImageUpload from "@/components/image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -33,8 +33,7 @@ export default function AnnouncementAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const image = useImageUpload("announcements");
 
   const updateMutation = useMutation({
     mutationFn: insertAnnouncement,
@@ -62,25 +61,16 @@ export default function AnnouncementAddModal({
       onChange: announcementInsertFormSchema,
     },
     onSubmit: async ({ value }) => {
-      let finalValues = { ...value };
-
-      if (file) {
-        setIsUploading(true);
-        try {
-          const result = await uploadToCloudinary(file, "announcements");
-
-          if (result && result.optimizedUrl) {
-            finalValues.announcement_image = result.optimizedUrl;
-          }
-        } catch (error) {
-          toast.error("Failed to upload announcement image");
-          setIsUploading(false);
-          return;
-        }
+      try {
+        const imageUrl = await image.resolveImageUrl(value.announcement_image);
+        updateMutation.mutate({ ...value, announcement_image: imageUrl });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload the image.",
+        );
       }
-
-      setIsUploading(false);
-      updateMutation.mutate(finalValues);
     },
   });
 
@@ -95,7 +85,7 @@ export default function AnnouncementAddModal({
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={(e) => {
-          if (isUploading) e.preventDefault();
+          if (image.isBusy) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -103,7 +93,7 @@ export default function AnnouncementAddModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="add-announcement-form"
+          id="announcement-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -112,7 +102,7 @@ export default function AnnouncementAddModal({
           <div className="row-span-3">
             <ImageUpload
               initialURL={form.state.values.announcement_image}
-              setFile={setFile}
+              setFile={image.setFile}
             />
           </div>
           <div className="col-span-2 flex gap-2">
@@ -162,10 +152,10 @@ export default function AnnouncementAddModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || image.isBusy}
             form="add-announcement-form"
           >
-            {updateMutation.isPending || (isUploading && <Spinner />)}
+            {updateMutation.isPending || (image.isBusy && <Spinner />)}
             <p>Update</p>
           </Button>
           <DialogClose asChild>
@@ -174,7 +164,7 @@ export default function AnnouncementAddModal({
               onClick={() => {
                 setOpen(false);
               }}
-              disabled={isUploading}
+              disabled={image.isBusy}
             >
               Cancel
             </Button>

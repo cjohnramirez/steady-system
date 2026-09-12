@@ -57,7 +57,7 @@ export const teamMembers: TeamMember[] = [
 
 export default function MeetTheDevelopers() {
   return (
-    <main className="w-full bg-white rounded-4xl border">
+    <main className="w-full rounded-4xl border bg-white">
       <section className="flex items-center justify-between border-b">
         <div className="space-y-2 p-10">
           <p className="text-6xl">Meet the developers</p>
@@ -81,8 +81,11 @@ export default function MeetTheDevelopers() {
                 <p className="font-medium">{member.name}</p>
                 <p>{member.role}</p>
               </div>
-              <a className="border flex rounded-2xl items-center gap-4 px-4 py-2" href={`mailto:${member.email}`}>
-                <Mail strokeWidth={1.25}/>
+              <a
+                className="flex items-center gap-4 rounded-2xl border px-4 py-2"
+                href={`mailto:${member.email}`}
+              >
+                <Mail strokeWidth={1.25} />
                 <p>{member.email}</p>
               </a>
             </div>

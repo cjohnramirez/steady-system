@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
@@ -6,27 +8,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { startTransition, useEffect, useState } from "react";
+import { useState } from "react";
 import { CalendarCheck, Clock, Info } from "lucide-react";
-import { dateToString, generateTimeSlots, toAMPM } from "@/lib/format";
+import { useQuery } from "@tanstack/react-query";
+import { dateToString, formatSlotTime, toAppDateString } from "@/lib/format";
 import { Tables } from "@/types/supabase";
+import { createClient } from "@/utils/supabase/client";
+import { queryKeys } from "@/lib/query-keys";
+import { Spinner } from "@/components/ui/spinner";
 
 function getCalendarDisabledDays(
   counselorData: Tables<"counselor_with_details"> | null,
 ) {
-  if (!counselorData) return;
+  if (!counselorData) return undefined;
 
   return (date: Date): boolean => {
-    if (date < new Date(new Date().setHours(0, 0, 0, 0))) {
-      return true;
-    }
-    const dayIndex = date.getDay();
-    const isAvailable =
-      counselorData && counselorData.day_of_week
-        ? counselorData.day_of_week[dayIndex]
-        : [];
-    const isDisabled = !isAvailable;
-    return isDisabled;
+    if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+
+    const days = counselorData.day_of_week;
+    if (!days || days.length < 7) return true;
+
+    return !days[date.getDay()];
   };
 }
 
@@ -45,50 +47,64 @@ export default function DateTimeSection({
   isRescheduleModal?: boolean;
   appointmentData?: Tables<"appointment_with_details">;
 }) {
-  const [selectedTime, setSelectedTime] = useState<string>("");
+  const supabase = createClient();
+  const [selectedSlot, setSelectedSlot] = useState<string>(
+    appointmentData?.scheduled_at ?? "",
+  );
 
-  useEffect(() => {
-    if (!appointmentData?.scheduled_at) return;
-    const scheduledDate = new Date(appointmentData.scheduled_at!);
-    
-    startTransition(() => {
-      setDate(scheduledDate);
+  const counselorId = counselorData?.id ?? "";
+  const day = date ? toAppDateString(date) : "";
 
-      const hours = String(scheduledDate.getHours()).padStart(2, "0");
-      const minutes = String(scheduledDate.getMinutes()).padStart(2, "0");
-      const timeString = toAMPM(`${hours}:${minutes}:00`);
+  /**
+   * Bookable instants come from the database rather than being generated here.
+   *
+   * This component used to build every half hour between the counselor's start
+   * and end time and offer all of them, with no idea which were already taken.
+   * Two students could pick the same minute with the same counselor and both
+   * bookings were accepted.
+   */
+  const { data: slots = [], isLoading: isSlotsLoading } = useQuery({
+    queryKey: queryKeys.availableSlots(counselorId, day),
+    enabled: Boolean(counselorId && day),
+    queryFn: async (): Promise<string[]> => {
+      const { data, error } = await supabase.rpc("get_available_slots", {
+        p_counselor_id: counselorId,
+        p_day: day,
+      });
 
-      setSelectedTime(timeString);
-    });
+      if (error) throw new Error(error.message);
+      // Each row is one bookable instant, as a timestamptz string.
+      return (data ?? []) as string[];
+    },
+  });
 
-  }, [appointmentData, setDate]);
+  // The slot the appointment being rescheduled already holds is not "available"
+  // any more, so it is added back or the current time vanishes from the list.
+  const options =
+    appointmentData?.scheduled_at &&
+    !slots.includes(appointmentData.scheduled_at)
+      ? [appointmentData.scheduled_at, ...slots].sort()
+      : slots;
 
-  const timeSlots = counselorData
-    ? generateTimeSlots(
-        counselorData.start_time ?? "",
-        counselorData.end_time ?? "",
-      )
-    : [];
-    
-    const handleTimeSelect = (time: string) => {
-      setSelectedTime(time);
-      if (!date) return;
+  const handleTimeSelect = (iso: string) => {
+    setSelectedSlot(iso);
+    setDate(new Date(iso));
+  };
 
-      const match = time.match(/(\d+):(\d+)\s*(AM|PM)/i);
-      if (!match) return;
+  const handleDaySelect = (newDate: Date | undefined) => {
+    setSelectedSlot("");
+    setDate(newDate);
+  };
 
-      const [, hour, minute, period] = match;
-      let h = parseInt(hour, 10);
-      const m = parseInt(minute, 10);
+  const busy = isLoading || isSlotsLoading;
 
-      if (period.toUpperCase() === "PM" && h !== 12) h += 12;
-      if (period.toUpperCase() === "AM" && h === 12) h = 0;
-
-      const newDate = new Date(date);
-      newDate.setHours(h, m, 0, 0);
-
-      setDate(newDate);
-    };
+  const placeholder = !date
+    ? "Pick a date first"
+    : isSlotsLoading
+      ? "Checking availability"
+      : options.length === 0
+        ? "No times left on this day"
+        : "Select a time slot";
 
   return (
     <div
@@ -101,9 +117,9 @@ export default function DateTimeSection({
       <div className="mt-5 flex w-full gap-4">
         <Calendar
           mode="single"
-          defaultMonth={date} // This ensures the calendar opens to the correct month
+          defaultMonth={date}
           selected={date}
-          onSelect={setDate}
+          onSelect={handleDaySelect}
           disabled={getCalendarDisabledDays(counselorData) || isLoading}
           className="w-1/2 rounded-lg border"
         />
@@ -127,22 +143,23 @@ export default function DateTimeSection({
               <div className="flex-1">
                 <p className="mb-2 font-medium">Time</p>
                 <Select
-                  value={selectedTime}
+                  value={selectedSlot}
                   onValueChange={handleTimeSelect}
-                  disabled={!counselorData || timeSlots.length === 0}
+                  disabled={busy || options.length === 0}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a time slot" />
+                    <SelectValue placeholder={placeholder} />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeSlots.map((slot) => (
+                    {options.map((slot) => (
                       <SelectItem key={slot} value={slot}>
-                        {slot}
+                        {formatSlotTime(slot)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+              {isSlotsLoading && <Spinner />}
             </div>
           </div>
           <div className="flex gap-4 space-y-4 rounded-xl p-6">
@@ -156,9 +173,7 @@ export default function DateTimeSection({
                   You can change this anytime, and the student will be reminded
                 </p>
               ) : (
-                <p>
-                  Availability depends on the counselor and is subject to change
-                </p>
+                <p>Only times the counselor still has free are listed here</p>
               )}
             </div>
           </div>

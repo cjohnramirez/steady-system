@@ -142,9 +142,7 @@ export default function PrivacyPolicy() {
             <Mail strokeWidth={1.25} />
             <p>codebridge.llc@gmail.com</p>
           </a>
-          <div
-            className="flex w-fit items-center gap-4 rounded-3xl border px-4 py-2"
-          >
+          <div className="flex w-fit items-center gap-4 rounded-3xl border px-4 py-2">
             <Clock2 strokeWidth={1.25} />
             <p>Last Updated on November 27, 2025</p>
           </div>

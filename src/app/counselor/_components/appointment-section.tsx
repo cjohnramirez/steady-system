@@ -18,14 +18,12 @@ import CounselorAppointmentTile from "./appointment-tile";
 import { PaginationState } from "@tanstack/react-table";
 import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { strToTitleCase } from "@/lib/format";
-
-const appointmentStatus = [
-  { label: "pending", color: "bg-yellow-300" },
-  { label: "cancelled", color: "bg-red-300" },
-  { label: "approved", color: "bg-green-300" },
-  { label: "completed", color: "bg-blue-300" },
-];
+import {
+  APPOINTMENT_STATUSES,
+  appointmentStatusDot,
+  appointmentStatusLabel,
+  type AppointmentStatus,
+} from "@/lib/appointments/status";
 
 export default function CounselorAppointmentSection({
   status,
@@ -37,8 +35,8 @@ export default function CounselorAppointmentSection({
   setSearch,
   isLoading,
 }: {
-  status: string;
-  setStatus: (status: string) => void;
+  status: AppointmentStatus | "";
+  setStatus: (status: AppointmentStatus) => void;
   appointments: Tables<"appointment_with_details">[];
   pagination: PaginationState;
   setPagination: (paginationProps: PaginationState) => void;
@@ -54,22 +52,18 @@ export default function CounselorAppointmentSection({
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
               <div
-                className={`h-2 w-2 rounded-full ${
-                  appointmentStatus.find((s) => s.label === status)?.color ??
-                  "bg-gray-300"
-                }`}
+                className={`h-2 w-2 rounded-full ${appointmentStatusDot(status)}`}
               />
-              <p>{strToTitleCase(status)}</p>
+              <p>{appointmentStatusLabel(status)}</p>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {appointmentStatus.map((status) => (
-              <DropdownMenuItem
-                key={status.label}
-                onClick={() => setStatus(status.label)}
-              >
-                <div className={`h-2 w-2 rounded-full ${status.color}`} />
-                <p>{strToTitleCase(status.label)}</p>
+            {APPOINTMENT_STATUSES.map((option) => (
+              <DropdownMenuItem key={option} onClick={() => setStatus(option)}>
+                <div
+                  className={`h-2 w-2 rounded-full ${appointmentStatusDot(option)}`}
+                />
+                <p>{appointmentStatusLabel(option)}</p>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -100,8 +94,8 @@ export default function CounselorAppointmentSection({
             />
           ))
         ) : (
-          <div className="flex h-full items-center justify-center rounded-2xl border gap-4">
-            <CircleOff strokeWidth={1.25}/>
+          <div className="flex h-full items-center justify-center gap-4 rounded-2xl border">
+            <CircleOff strokeWidth={1.25} />
             <p>No appointments found</p>
           </div>
         )}

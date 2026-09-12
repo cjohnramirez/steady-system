@@ -1,93 +1,86 @@
 "use server";
 
-import { createServiceClient } from "@/utils/supabase/service";
+import { createClient } from "@/utils/supabase/server";
+import { requireRole } from "@/lib/auth/session";
+
+/**
+ * Dashboard metrics.
+ *
+ * These used to run on the service-role key with no check on the caller, which made
+ * student counts and appointment volume readable by anyone who invoked the action
+ * directly. They now run as the signed-in admin, so row-level security applies as a
+ * second line of defence behind the `requireRole` call.
+ */
+
+function isoDate(offsetDays = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
 
 export async function fetchVisitorAnalytics(daysFromNow: number) {
-  const supabaseAdmin = await createServiceClient();
-  const now = new Date();
-  const past = new Date();
-  past.setDate(now.getDate() - daysFromNow);
+  await requireRole("admin");
+  const supabase = await createClient();
 
-  const fromDate = past.toISOString().slice(0, 10);
-  const toDate = now.toISOString().slice(0, 10);
-
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("analytics_daily_visitor")
     .select("date, number_of_visitors")
-    .gte("date", fromDate)
-    .lte("date", toDate)
+    .gte("date", isoDate(-daysFromNow))
+    .lte("date", isoDate())
     .order("date", { ascending: true });
 
   if (error) {
-    throw new Error("Failed to retrieve visitor analytics data:", error);
+    throw new Error(`Failed to retrieve visitor analytics: ${error.message}`);
   }
+
   return data;
 }
 
 export async function fetchAppointmentCountAnalytics() {
-  const supabaseAdmin = await createServiceClient();
+  await requireRole("admin");
+  const supabase = await createClient();
 
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-
-  const toDate = today.toISOString().slice(0, 10);
-  const fromDate = yesterday.toISOString().slice(0, 10);
-
-  const { count, error } = await supabaseAdmin
+  const { count, error } = await supabase
     .from("appointment")
     .select("*", { count: "exact", head: true })
-    .lte("created_at", toDate)
-    .gte("created_at", fromDate);
+    .gte("created_at", isoDate(-1))
+    .lte("created_at", isoDate());
 
   if (error) {
-    throw new Error(
-      "Failed to retrieve appointment count analytics data :",
-      error,
-    );
+    throw new Error(`Failed to retrieve appointment count: ${error.message}`);
   }
 
   return count ?? 0;
 }
 
 export async function fetchStudentRegisterCountAnalytics() {
-  const supabaseAdmin = await createServiceClient();
+  await requireRole("admin");
+  const supabase = await createClient();
 
-  const { count, error } = await supabaseAdmin
+  const { count, error } = await supabase
     .from("student")
     .select("*", { count: "exact", head: true });
 
   if (error) {
-    throw new Error(
-      "Failed to retrieve student register count analytics data :",
-      error,
-    );
+    throw new Error(`Failed to retrieve student count: ${error.message}`);
   }
 
   return count ?? 0;
 }
 
 export async function fetchVisitorCountAnalytics() {
-  const supabaseAdmin = await createServiceClient();
+  await requireRole("admin");
+  const supabase = await createClient();
 
-  const today = new Date();
-  const monthAgo = new Date();
-  monthAgo.setDate(today.getDate() - 30);
-
-  const fromDate = monthAgo.toISOString().slice(0, 10);
-  const toDate = today.toISOString().slice(0, 10);
-
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("analytics_daily_visitor")
-    .select("*")
-    .gte("date", fromDate)
-    .lte("date", toDate);
-
-  const count = data?.reduce((acc, curr) => acc + curr.number_of_visitors, 0);
+    .select("number_of_visitors")
+    .gte("date", isoDate(-30))
+    .lte("date", isoDate());
 
   if (error) {
-    throw new Error("Failed to retrieve visitor count analytics data :", error);
+    throw new Error(`Failed to retrieve visitor count: ${error.message}`);
   }
 
-  return count ?? 0;
+  return (data ?? []).reduce((total, row) => total + row.number_of_visitors, 0);
 }

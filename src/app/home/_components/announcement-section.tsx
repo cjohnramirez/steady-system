@@ -62,12 +62,25 @@ export default function AnnouncementSection() {
                 size={40}
                 strokeWidth={1.25}
               />
-                <div>
+              <div>
                 <p className="font-medium">
-                  {announcements[0]?.title || "USTP CDO announces wellness week for students to relax post-midterm"}
+                  {announcements[0]?.title ||
+                    "USTP CDO announces wellness week for students to relax post-midterm"}
                 </p>
-                <p>{announcements[0]?.start_date ? new Date(announcements[0].start_date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }) : "November 6, 2025"}</p>
-                </div>
+                <p>
+                  {announcements[0]?.start_date
+                    ? new Date(announcements[0].start_date).toLocaleDateString(
+                        "en-US",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        },
+                      )
+                    : "November 6, 2025"}
+                </p>
+              </div>
             </Link>
           </div>
         </div>
@@ -83,8 +96,14 @@ export default function AnnouncementSection() {
               strokeWidth={1.25}
             />
             <div>
-              <p className="font-medium">{announcements[1]?.title || "World Mental Health Day"}</p>
-              <p>{announcements[1]?.start_date ? new Date(announcements[1].start_date).toLocaleDateString() : "October 10"}</p>
+              <p className="font-medium">
+                {announcements[1]?.title || "World Mental Health Day"}
+              </p>
+              <p>
+                {announcements[1]?.start_date
+                  ? new Date(announcements[1].start_date).toLocaleDateString()
+                  : "October 10"}
+              </p>
             </div>
           </Link>
         </div>
@@ -137,8 +156,14 @@ export default function AnnouncementSection() {
                 strokeWidth={1.25}
               />
               <div>
-                <p className="font-medium">{announcements[2]?.title || "LGBTQ+ Parade"}</p>
-                <p>{announcements[2]?.start_date ? new Date(announcements[2].start_date).toLocaleDateString() : "June 21, Monday"}</p>
+                <p className="font-medium">
+                  {announcements[2]?.title || "LGBTQ+ Parade"}
+                </p>
+                <p>
+                  {announcements[2]?.start_date
+                    ? new Date(announcements[2].start_date).toLocaleDateString()
+                    : "June 21, Monday"}
+                </p>
               </div>
             </Link>
           </div>

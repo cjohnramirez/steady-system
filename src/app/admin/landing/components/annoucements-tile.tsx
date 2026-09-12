@@ -55,7 +55,7 @@ export default function AnnouncementTile({
               src={announcementTile.announcement_image}
               alt={`${announcementTile.title}-image`}
               fill
-              className="rounded-2xl object-cover border"
+              className="rounded-2xl border object-cover"
               sizes="100vw"
             />
           ) : (
@@ -63,7 +63,7 @@ export default function AnnouncementTile({
               src="/placeholder.png"
               alt="placeholder"
               fill
-              className="rounded-2xl object-cover border"
+              className="rounded-2xl border object-cover"
               sizes="100vw"
             />
           )}

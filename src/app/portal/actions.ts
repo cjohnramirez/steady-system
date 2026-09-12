@@ -1,6 +1,6 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { DB } from "@/lib/db/types";
 
-export async function fetchLatestAnnouncement(supabase: SupabaseClient) {
+export async function fetchLatestAnnouncement(supabase: DB) {
   const { data, error } = await supabase
     .from("announcement")
     .select("*")
@@ -12,7 +12,7 @@ export async function fetchLatestAnnouncement(supabase: SupabaseClient) {
   return data || null;
 }
 
-export async function fetchLatestArticle(supabase: SupabaseClient) {
+export async function fetchLatestArticle(supabase: DB) {
   const { data, error } = await supabase
     .from("article")
     .select("*")
@@ -25,7 +25,7 @@ export async function fetchLatestArticle(supabase: SupabaseClient) {
 }
 
 export async function fetchAnnouncementsByDate(
-  supabase: SupabaseClient,
+  supabase: DB,
   page: number,
   pageSize: number,
   search: string,
@@ -64,7 +64,7 @@ export async function fetchAnnouncementsByDate(
 }
 
 export async function fetchArticlesByEmotion(
-  supabase: SupabaseClient,
+  supabase: DB,
   page: number,
   pageSize: number,
   search: string,
@@ -100,13 +100,19 @@ export async function fetchArticlesByEmotion(
 
   // If emotionalStatus filter returned empty, return all results
   if (emotionalStatus !== "" && (!data || data.length === 0)) {
-    let fallbackQuery = supabase.from("article").select("*", { count: "exact" });
+    let fallbackQuery = supabase
+      .from("article")
+      .select("*", { count: "exact" });
 
     if (search) {
       fallbackQuery = fallbackQuery.ilike("title", `%${search}%`);
     }
 
-    const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery
+    const {
+      data: fallbackData,
+      error: fallbackError,
+      count: fallbackCount,
+    } = await fallbackQuery
       .order("title", { ascending: false })
       .range(from, to);
 
@@ -125,7 +131,7 @@ export async function fetchArticlesByEmotion(
 }
 
 export async function fetchPlaylistByEmotion(
-  supabase: SupabaseClient,
+  supabase: DB,
   page: number,
   pageSize: number,
   search: string,
@@ -173,7 +179,11 @@ export async function fetchPlaylistByEmotion(
       fallbackQuery = fallbackQuery.ilike("title", `%${search}%`);
     }
 
-    const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery
+    const {
+      data: fallbackData,
+      error: fallbackError,
+      count: fallbackCount,
+    } = await fallbackQuery
       .order("title", { ascending: false })
       .range(from, to);
 

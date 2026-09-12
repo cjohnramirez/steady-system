@@ -1,8 +1,5 @@
-
 import { studentInsertFormSchema } from "@/app/auth/signup/schema";
 import { z } from "zod";
-
-
 
 export const adminProfileFormSchema = z.object({
   email: z.email("Please enter a valid email address"),

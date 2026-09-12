@@ -1,4 +1,3 @@
-
 import { studentInsertFormSchema } from "@/app/auth/signup/schema";
 import z from "zod";
 
@@ -18,6 +17,8 @@ export const counselorUpdateFormSchema = z.object({
   id: z.uuid(),
 });
 
-export const counselorInsertFormSchema = counselorUpdateFormSchema.extend({
-  password: studentInsertFormSchema.shape.password,
-}).omit({ id: true });
+export const counselorInsertFormSchema = counselorUpdateFormSchema
+  .extend({
+    password: studentInsertFormSchema.shape.password,
+  })
+  .omit({ id: true });

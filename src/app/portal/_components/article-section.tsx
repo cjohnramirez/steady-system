@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";import { PaginationState } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
+import { PaginationState } from "@tanstack/react-table";
 import { useState } from "react";
 import { fetchArticlesByEmotion } from "../actions";
 import { createClient } from "@/utils/supabase/client";
@@ -24,7 +25,13 @@ export default function ArticleSection() {
   const userEmotionalStatus = useUserStore().emotionalStatus;
 
   const { data: articles, isLoading } = useQuery({
-    queryKey: ["articles", pagination.pageIndex, pagination.pageSize, search, userEmotionalStatus],
+    queryKey: [
+      "articles",
+      pagination.pageIndex,
+      pagination.pageSize,
+      search,
+      userEmotionalStatus,
+    ],
     queryFn: () =>
       fetchArticlesByEmotion(
         supabase,
@@ -39,7 +46,7 @@ export default function ArticleSection() {
   const count = articles?.count;
 
   return (
-    <section className="flex flex-col gap-4 h-fit" id="articles">
+    <section className="flex h-fit flex-col gap-4" id="articles">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-medium">Articles</p>

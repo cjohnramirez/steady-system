@@ -20,9 +20,8 @@ import { playlistUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useState } from "react";
-import { deleteFromCloudinary, uploadToCloudinary } from "@/app/actions";
-import { extractPublicId } from "@/lib/format";
 import ImageUpload from "@/components/image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -36,9 +35,7 @@ export default function PlaylistUpdateModal({
   id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
+  const image = useImageUpload("playlists");
 
   const { data: playlist, isLoading } = useQuery({
     queryKey: ["playlist", id],
@@ -48,14 +45,14 @@ export default function PlaylistUpdateModal({
   const updateMutation = useMutation({
     mutationFn: updatePlaylist,
     onSuccess: async () => {
-      toast.success("Playlist added successfully!");
+      toast.success("Playlist updated successfully!");
       setOpen(false);
 
       queryClient.invalidateQueries({ queryKey: ["playlist", id] });
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
     },
     onError: (err: Error) => {
-      toast.error(err.message || "Failed to add playlist");
+      toast.error(err.message || "Failed to update playlist");
     },
   });
 
@@ -72,41 +69,16 @@ export default function PlaylistUpdateModal({
       onChange: playlistUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
-      let finalValues = { ...value };
-      const playlistImage = form.state.values.image;
-
-      if (file) {
-        setIsUploading(true);
-        try {
-          const result = await uploadToCloudinary(file, "playlists");
-
-          if (result && result.optimizedUrl) {
-            finalValues.image = result.optimizedUrl;
-          }
-        } catch (error) {
-          toast.error("Failed to upload playlist image");
-          setIsUploading(false);
-          return;
-        }
+      try {
+        const imageUrl = await image.resolveImageUrl(value.image);
+        updateMutation.mutate({ ...value, image: imageUrl });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload the image.",
+        );
       }
-
-      if (isDeleted) {
-        setIsUploading(true);
-        try {
-          const publicId = extractPublicId(playlistImage);
-          if (publicId) {
-            await deleteFromCloudinary(publicId);
-          }
-        } catch (error) {
-          toast.error("Failed to delete playlist image");
-          setIsUploading(false);
-          return;
-        } finally {
-          finalValues.image = "";
-        }
-      }
-      setIsUploading(false);
-      updateMutation.mutate(finalValues);
     },
   });
 
@@ -117,7 +89,7 @@ export default function PlaylistUpdateModal({
       open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
-          setFile(null);
+          image.reset();
         }
         setOpen(isOpen);
       }}
@@ -126,7 +98,7 @@ export default function PlaylistUpdateModal({
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={(e) => {
-          if (isUploading) e.preventDefault();
+          if (image.isBusy) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -134,7 +106,7 @@ export default function PlaylistUpdateModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-playlist-form"
+          id="playlist-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -143,8 +115,8 @@ export default function PlaylistUpdateModal({
           <div className="row-span-3">
             <ImageUpload
               initialURL={playlist?.image ?? ""}
-              setFile={setFile}
-              setIsDeleted={() => setIsDeleted(true)}
+              setFile={image.setFile}
+              setIsDeleted={image.setIsRemoved}
             />
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">
@@ -193,10 +165,10 @@ export default function PlaylistUpdateModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || image.isBusy}
             form="update-playlist-form"
           >
-            {updateMutation.isPending || (isUploading && <Spinner />)}
+            {updateMutation.isPending || (image.isBusy && <Spinner />)}
             <p>Update</p>
           </Button>
           <DialogClose asChild>

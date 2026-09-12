@@ -32,7 +32,7 @@ interface FieldLike<TValue = string> {
 
 interface FormPasswordFieldProps<TValue = string> {
   field: FieldLike<TValue>;
-  showPassword: boolean,
+  showPassword: boolean;
   setShowPassword: (value: React.SetStateAction<boolean>) => void;
 }
 
@@ -76,7 +76,8 @@ export default function FormPasswordField({
         />
       ) : (
         <FieldDescription>
-          Must include uppercase, lowercase, number, special character, and 8-255 characters
+          Must include uppercase, lowercase, number, special character, and
+          8-255 characters
         </FieldDescription>
       )}
     </Field>

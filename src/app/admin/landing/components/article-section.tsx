@@ -64,10 +64,7 @@ export default function ArticleSection() {
                 }
               />
             </InputGroup>
-            <Button
-              onClick={() => setOpenArticleAdd(true)}
-              variant="outline"
-            >
+            <Button onClick={() => setOpenArticleAdd(true)} variant="outline">
               <Plus /> Add Article
             </Button>
           </div>

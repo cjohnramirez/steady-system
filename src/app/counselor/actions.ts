@@ -1,15 +1,17 @@
 // fetch number of appointments, approved and pending and fetch appointments of counselor
 
 import { Tables, TablesUpdate } from "@/types/supabase";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { DB } from "@/lib/db/types";
+import type { AppointmentStatus } from "@/lib/appointments/status";
 import { counselorUpdateFormSchema } from "./schema";
 import { createClient } from "@/utils/supabase/client";
 import z from "zod";
+import { DbError } from "@/lib/db/error";
 
 export async function fetchCounselorAppointment(
-  supabase: SupabaseClient,
+  supabase: DB,
   id: string,
-): Promise<Tables<"appointment_with_details">> {
+): Promise<Tables<"appointment_with_details"> | null> {
   const { data, error } = await supabase
     .from("appointment_with_details")
     .select("*")
@@ -26,8 +28,8 @@ export async function fetchCounselorAppointments(
   pageSize: number,
   id: string,
   search: string,
-  supabase: SupabaseClient,
-  status: string,
+  supabase: DB,
+  status: AppointmentStatus | "",
 ): Promise<{
   data: Tables<"appointment_with_details">[];
   count: number;
@@ -61,7 +63,7 @@ export async function fetchCounselorAppointments(
 }
 
 export async function countCounselorAppointments(
-  supabase: SupabaseClient,
+  supabase: DB,
   counselorID: string,
 ) {
   const { count: totalCount, error: totalError } = await supabase
@@ -96,14 +98,15 @@ export async function countCounselorAppointments(
 
 // fetch profile of counselor
 export async function fetchCounselorProfile(
-  supabase: SupabaseClient,
+  supabase: DB,
   id: string,
 ): Promise<Tables<"counselor_with_details">> {
   const { data: counselorProfileData, error: counselorProfileError } =
     await supabase
       .from("counselor_with_details")
       .select("*")
-      .eq("id", id).limit(1)
+      .eq("id", id)
+      .limit(1)
       .maybeSingle();
 
   if (counselorProfileError) throw counselorProfileError;
@@ -116,7 +119,7 @@ export async function fetchCounselorProfile(
 }
 
 export async function fetchCounselorDeparments(
-  supabase: SupabaseClient,
+  supabase: DB,
   counselorID: string,
 ): Promise<Tables<"department">[]> {
   const { data: counselorDeparmentData, error: counselorDepartmentError } =
@@ -137,45 +140,44 @@ export async function fetchCounselorDeparments(
 export async function updateCounselorProfile(
   values: z.infer<typeof counselorUpdateFormSchema>,
 ) {
-  const supabase = createClient()
+  const supabase = createClient();
 
-  const { id, ...rest} = values
+  const { id, ...rest } = values;
 
   const { error } = await supabase
     .from("counselor")
     .update(rest)
     .eq("id", id)
-    .select("*").single();
+    .select("*")
+    .single();
 
-  if (error) throw new Error("Error updating counselor profile: ", error);
+  if (error) throw new DbError("Error updating counselor profile", error);
 }
 
 export async function updateCounselorAvailability(
-  values: TablesUpdate<"counselor">
+  values: TablesUpdate<"counselor">,
 ) {
-
-  const supabase = createClient()
+  const supabase = createClient();
 
   const { error } = await supabase
     .from("counselor")
     .update(values)
     .eq("id", values.id)
-    .select("*").single();
+    .select("*")
+    .single();
 
-  if (error) throw new Error("Error updating counselor availability: ", error);
+  if (error) throw new DbError("Error updating counselor availability", error);
 }
 
-export async function updateAppointment(
-  values: TablesUpdate<"appointment">
-) {
-
-  const supabase = createClient()
+export async function updateAppointment(values: TablesUpdate<"appointment">) {
+  const supabase = createClient();
 
   const { error } = await supabase
     .from("appointment")
     .update(values)
     .eq("id", values.id)
-    .select("*").single();
+    .select("*")
+    .single();
 
-  if (error) throw new Error("Error updating appointment: ", error);
+  if (error) throw new DbError("Error updating appointment", error);
 }

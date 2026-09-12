@@ -1,5 +1,5 @@
 module.exports = {
   images: {
-    remotePatterns: [new URL('https://i.scdn.co/**')],
+    remotePatterns: [new URL("https://i.scdn.co/**")],
   },
-}
+};

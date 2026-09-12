@@ -35,7 +35,10 @@ interface FormDateTimeField<TValue = string> {
   description: string;
 }
 
-export function FormDateTimeField({ field, description }: FormDateTimeField<string>) {
+export function FormDateTimeField({
+  field,
+  description,
+}: FormDateTimeField<string>) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
   const value = field.state.value
     ? new Date(field.state.value as string)

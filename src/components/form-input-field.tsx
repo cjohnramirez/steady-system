@@ -46,7 +46,7 @@ export function FormInputField<TValue = string>({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     field.handleChange(
-      type === "number" ? (Number(value) as TValue) : (value as TValue)
+      type === "number" ? (Number(value) as TValue) : (value as TValue),
     );
   };
 

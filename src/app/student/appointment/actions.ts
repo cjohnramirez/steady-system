@@ -1,8 +1,8 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { DB } from "@/lib/db/types";
 import { Tables } from "@/types/supabase";
 
 export async function insertAppointment(
-  supabase: SupabaseClient,
+  supabase: DB,
   userId: string,
   payload: {
     counselor_id: string;
@@ -34,21 +34,32 @@ export async function insertAppointment(
 
 export async function fetchAppointmentCounselor(
   studentId: string,
-  supabase: SupabaseClient,
+  supabase: DB,
 ): Promise<Tables<"counselor_with_details">[]> {
   const { data: student, error: studentError } = await supabase
     .from("student_with_details")
-    .select("*")
-    .eq("id", studentId);
+    .select("department_id")
+    .eq("id", studentId)
+    .maybeSingle();
 
-  if (studentError) throw new Error(String(studentError));
+  if (studentError) {
+    throw new Error(`Could not load your profile: ${studentError.message}`);
+  }
+
+  // Indexing straight into the array used to throw here when the query came back
+  // empty, which is what a student with no readable profile row sees.
+  if (!student?.department_id) {
+    return [];
+  }
 
   const { data: counselor, error: counselorError } = await supabase
     .from("counselor_with_details")
     .select("*")
-    .eq("department_id", student[0].department_id);
+    .eq("department_id", student.department_id);
 
-  if (counselorError) throw new Error(String(counselorError));
+  if (counselorError) {
+    throw new Error(`Could not load counselors: ${counselorError.message}`);
+  }
 
-  return counselor;
+  return counselor ?? [];
 }

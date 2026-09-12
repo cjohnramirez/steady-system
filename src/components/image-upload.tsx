@@ -39,8 +39,6 @@ export default function ImageUpload({
     multiple: false,
   });
 
-  console.log("Image is loaded to component: ", initialURL);
-
   return (
     <div className="row-span-3 flex aspect-square flex-col gap-4">
       <Label>Image</Label>
@@ -90,7 +88,9 @@ export default function ImageUpload({
             <Upload strokeWidth={1.25} />
             <p>Click or drag to upload image</p>
             <p className="text-xs text-gray-500">
-              {isDragActive ? "Drop the file here" : "PNG, JPG, GIF up to 70MB"}
+              {isDragActive
+                ? "Drop the file here"
+                : "PNG, JPG, WebP or GIF, up to 5 MB"}
             </p>
           </div>
         )}

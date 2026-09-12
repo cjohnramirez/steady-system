@@ -18,9 +18,8 @@ import { fetchArticle, updateArticle } from "../actions";
 import { articleUpdateFormSchema } from "../schema";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import ImageUpload from "@/components/image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 import { useState } from "react";
-import { deleteFromCloudinary, uploadToCloudinary } from "@/app/actions";
-import { extractPublicId } from "@/lib/format";
 
 interface ArticleModalProps {
   open: boolean;
@@ -34,9 +33,8 @@ export default function ArticleUpdateModal({
   id,
 }: ArticleModalProps) {
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false)
+  const image = useImageUpload("articles");
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const { data: article, isLoading } = useQuery({
     queryKey: ["article", id],
@@ -70,59 +68,29 @@ export default function ArticleUpdateModal({
     validators: {
       onChange: articleUpdateFormSchema,
     },
-    onSubmitInvalid: ({formApi}) => {
-      console.log(formApi.state.values)
-    },
+    onSubmitInvalid: ({ formApi }) => {},
     onSubmit: async ({ value }) => {
-      let finalValues = { ...value };
-      const articleImage = form.state.values.article_image;
-
-      if (file) {
-        setIsUploading(true);
-        try {
-          const result = await uploadToCloudinary(file, "articles");
-
-          if (result && result.optimizedUrl) {
-            finalValues.article_image = result.optimizedUrl;
-          }
-        } catch (error) {
-          toast.error("Failed to upload article image");
-          setIsUploading(false);
-          return;
-        }
+      try {
+        const imageUrl = await image.resolveImageUrl(value.article_image);
+        updateMutation.mutate({ ...value, article_image: imageUrl });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload the image.",
+        );
       }
-
-      if (isDeleted) {
-        setIsUploading(true);
-        try {
-          const publicId = extractPublicId(articleImage);
-          if (publicId) {
-            await deleteFromCloudinary(publicId);
-          }
-        } catch (error) {
-          toast.error("Failed to delete article image");
-          setIsUploading(false);
-          return;
-        } finally {
-          finalValues.article_image = "";
-        }
-      }
-      setIsUploading(false);
-      updateMutation.mutate(finalValues);
     },
   });
 
   if (isLoading) return null;
 
-  console.log("Image is fetched: ", article?.article_image)
-  console.log(article)
-
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
-          setFile(null);
+          image.reset();
         }
         setOpen(isOpen);
       }}
@@ -131,7 +99,7 @@ export default function ArticleUpdateModal({
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={(e) => {
-          if (isUploading) e.preventDefault();
+          if (image.isBusy) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -139,7 +107,7 @@ export default function ArticleUpdateModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-article-form"
+          id="article-form"
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -149,8 +117,8 @@ export default function ArticleUpdateModal({
           <div className="row-span-3">
             <ImageUpload
               initialURL={article?.article_image ?? ""}
-              setFile={setFile}
-              setIsDeleted={() => setIsDeleted(true)}
+              setFile={image.setFile}
+              setIsDeleted={image.setIsRemoved}
             />
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">
@@ -217,14 +185,16 @@ export default function ArticleUpdateModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending || isUploading}
+            disabled={updateMutation.isPending || image.isBusy}
             form="update-article-form"
           >
-            {updateMutation.isPending || isUploading && <Spinner />}
+            {updateMutation.isPending || (image.isBusy && <Spinner />)}
             <p>Update</p>
           </Button>
           <DialogClose asChild>
-            <Button variant="outline" disabled={isUploading}>Cancel</Button>
+            <Button variant="outline" disabled={image.isBusy}>
+              Cancel
+            </Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

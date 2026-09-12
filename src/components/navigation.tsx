@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/hooks/auth-store";
-import { useEffect, useState } from "react";
-import { Session } from "@supabase/supabase-js";
+import { useHydrated } from "@/hooks/use-hydrated";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,49 +12,43 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronsUpDown } from "lucide-react";
-import { NavBar } from "../app/home/_lib/nav-data";
-import { useConfirmStore } from "@/hooks/confirm-store";
-import { createClient } from "@/utils/supabase/client";
+import { NavBar } from "@/app/home/_lib/nav-data";
+import { useSignOut } from "@/hooks/use-sign-out";
+import { ROLE_HOME, ROLE_LOGIN } from "@/lib/auth/roles";
 
-export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
-  const { confirm, startLoading, stopLoading } = useConfirmStore();
+const ROLE_CTA: Record<string, string> = {
+  admin: "Go to Admin Dashboard",
+  counselor: "Go to Counselor Dashboard",
+  student: "Go to Profile",
+};
 
+/**
+ * The navigation bar for the public site, the student area and the counselor area.
+ *
+ * The student area used to ship a near-identical copy of this file. The only real
+ * difference was how it decided whether someone was signed in, and the two
+ * disagreed: this one watched Supabase auth state while the student copy checked
+ * whether a name happened to be in localStorage. The admin area keeps its own bar
+ * because it carries a second row of section tabs.
+ */
+export default function NavigationBar({
+  navBarObj = [],
+}: {
+  navBarObj?: NavBar[];
+}) {
   const router = useRouter();
-  const [session, setSession] = useState<Session | null>(null);
-  const supabase = createClient();
+  const signOut = useSignOut();
 
   const userName = useUserStore((state) => state.userName);
   const userRole = useUserStore((state) => state.userRole);
 
-  useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-    });
+  // The store is restored from localStorage, so the first client render has to
+  // match the server's empty one or React reports a hydration mismatch.
+  const hydrated = useHydrated();
 
-    return () => {
-      data?.subscription?.unsubscribe();
-    };
-  }, [supabase]);
-
-  const handleChange = async () => {
-    const ok = await confirm(
-      "Log out?",
-      "Are you sure you want to log out? This will end your current session.",
-    );
-
-    if (!ok) return;
-    startLoading();
-
-    useUserStore.getState().setUserName("");
-    useUserStore.getState().setUserRole("");
-
-    const { error } = await supabase.auth.signOut();
-    if (error) throw new Error(error.message);
-
-    stopLoading();
-    router.push("/home");
-  };
+  const signedIn = hydrated && userRole !== "";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white p-6">
@@ -67,7 +60,8 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
           <Image src="/icon.png" alt="logo" width={40} height={40} />
           <p>Guidance and Counseling Services</p>
         </section>
-        {navBarObj.length !== 0 && (
+
+        {navBarObj.length > 0 && (
           <section className="flex items-center gap-10">
             {navBarObj.map((navBar) => (
               <a href={navBar.link} key={navBar.title}>
@@ -78,47 +72,40 @@ export default function NavigationBar({ navBarObj }: { navBarObj: NavBar[] }) {
         )}
 
         <section className="flex space-x-4">
-          {session ? (
+          {!hydrated ? (
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          ) : signedIn ? (
             <>
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger className="flex items-center gap-4">
                   <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
                   <p>{userName || "User"}</p>
-                  {userRole && <Badge variant="secondary">{userRole}</Badge>}
+                  <Badge variant="secondary">{userRole}</Badge>
                   <ChevronsUpDown size={20} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem
                     onClick={async (e) => {
                       e.preventDefault();
-                      await handleChange();
+                      await signOut();
                     }}
                   >
                     Log Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              {userRole === "admin" && (
-                <Button onClick={() => router.replace("/admin/dashboard")}>
-                  Go to Admin Dashboard
-                </Button>
-              )}
-              {userRole === "student" && (
-                <Button onClick={() => router.replace("/student")}>
-                  Go to Profile
-                </Button>
-              )}
-              {userRole === "counselor" && (
-                <Button onClick={() => router.replace("/counselor")}>
-                  Go to Counselor Dashboard
-                </Button>
-              )}
+              <Button onClick={() => router.replace(ROLE_HOME[userRole])}>
+                {ROLE_CTA[userRole]}
+              </Button>
             </>
           ) : (
             <>
               <Button
                 variant="outline"
-                onClick={() => router.replace("/auth/login/student")}
+                onClick={() => router.replace(ROLE_LOGIN.student)}
               >
                 Login
               </Button>

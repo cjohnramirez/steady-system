@@ -35,7 +35,7 @@ export default function ArticleTile({
           <Skeleton className="h-full w-full rounded-2xl" />
         </div>
 
-        <div className="h-fit space-y-2 rounded-xl border border-gray-200 flex flex-col justify-start">
+        <div className="flex h-fit flex-col justify-start space-y-2 rounded-xl border border-gray-200">
           <div className="space-y-2 p-4">
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-full" />
@@ -92,7 +92,7 @@ export default function ArticleTile({
             />
           )}
         </div>
-        <div className="h-fit space-y-2 rounded-xl border border-gray-200 flex flex-col justify-start">
+        <div className="flex h-fit flex-col justify-start space-y-2 rounded-xl border border-gray-200">
           <div className="space-y-2 p-4">
             <p className="font-medium">{articleData.title}</p>
             <p>{articleData.content}</p>

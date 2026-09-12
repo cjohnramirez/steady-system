@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect } from "react";
 
 interface FieldMeta {
   isTouched: boolean;

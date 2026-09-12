@@ -40,7 +40,7 @@ interface FormDropdownInputProps<TValue = string> {
   enableDescription?: boolean;
 }
 
-export const SHS_UUID = "532700f7-bf4d-47a4-835d-d5fd3530f4e6"
+export const SHS_UUID = "532700f7-bf4d-47a4-835d-d5fd3530f4e6";
 
 export default function DepartmentDropdown({
   field,
@@ -56,7 +56,7 @@ export default function DepartmentDropdown({
       queryFn: () => fetchDepartment(college),
     });
 
-  const departmentOrSHS = isSHS ? "Strand" : "Department"
+  const departmentOrSHS = isSHS ? "Strand" : "Department";
 
   return (
     <Field data-invalid={isInvalid}>
@@ -74,9 +74,7 @@ export default function DepartmentDropdown({
               <p>Loading {departmentOrSHS}</p>
             </div>
           ) : (
-            <SelectValue
-              placeholder={`Select ${departmentOrSHS}`}
-            />
+            <SelectValue placeholder={`Select ${departmentOrSHS}`} />
           )}
         </SelectTrigger>
         <SelectContent position="item-aligned">

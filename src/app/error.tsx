@@ -21,10 +21,20 @@ export default function GlobalError({
           Whoaaaa, there seems to be some error with the site! Here is probably
           what happened
         </p>
-        <div className="mt-10 flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="mt-10 flex items-center justify-between gap-6 rounded-2xl border border-gray-200 bg-white p-6">
           <div className="text-left">
-            <p className="font-medium">Error Message</p>
-            <p>{error.message}</p>
+            <p className="font-medium">Something went wrong on our end</p>
+            {/*
+              The raw message is deliberately not shown. It can carry database
+              detail, table names or a row's contents, and this page renders for
+              students. The digest is what support needs to find the real error in
+              the server logs.
+            */}
+            <p>
+              {error.digest
+                ? `Please quote reference ${error.digest} if you report this.`
+                : "Please try again in a moment."}
+            </p>
           </div>
           <Button
             variant="outline"

@@ -53,7 +53,7 @@ export default function ArticleTile({
               src={articleTile.article_image}
               alt={`${articleTile.title}-image`}
               fill
-              className="rounded-2xl object-cover border"
+              className="rounded-2xl border object-cover"
               sizes="100vw"
             />
           ) : (
@@ -61,7 +61,7 @@ export default function ArticleTile({
               src="/placeholder.png"
               alt="placeholder"
               fill
-              className="rounded-2xl object-cover border"
+              className="rounded-2xl border object-cover"
               sizes="100vw"
             />
           )}

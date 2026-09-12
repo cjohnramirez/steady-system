@@ -52,7 +52,7 @@ export default function DashboardPage() {
     queryFn: () => fetchAppointmentCountAnalytics(),
     staleTime: 1000 * 60 * 5,
   });
-  
+
   const visitorCount = useQuery({
     queryKey: ["visitor-count-analytics"],
     queryFn: () => fetchVisitorCountAnalytics(),
@@ -113,12 +113,12 @@ export default function DashboardPage() {
             ? Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="rounded-xl border border-gray-200 bg-white p-6 flex flex-col justify-between"
+                  className="flex flex-col justify-between rounded-xl border border-gray-200 bg-white p-6"
                 >
-                  <Skeleton className="h-6 w-2/3 mb-4" />
-                  <Skeleton className="h-10 w-24 mb-4" />
-                  <Skeleton className="h-5 w-1/2 mb-2" />
-                  <Skeleton className="h-4 w-32 mt-2" />
+                  <Skeleton className="mb-4 h-6 w-2/3" />
+                  <Skeleton className="mb-4 h-10 w-24" />
+                  <Skeleton className="mb-2 h-5 w-1/2" />
+                  <Skeleton className="mt-2 h-4 w-32" />
                 </div>
               ))
             : statsInfo.map((item, i) => (
@@ -141,9 +141,9 @@ export default function DashboardPage() {
           {isChartLoading ? (
             <div>
               <div className="mb-4 flex items-start justify-between">
-                <div className="pb-10 w-1/2">
-                  <Skeleton className="h-6 w-2/3 mb-2" />
-                  <Skeleton className="h-4 w-40 mt-2" />
+                <div className="w-1/2 pb-10">
+                  <Skeleton className="mb-2 h-6 w-2/3" />
+                  <Skeleton className="mt-2 h-4 w-40" />
                 </div>
                 <Skeleton className="h-10 w-56" />
               </div>
@@ -153,7 +153,9 @@ export default function DashboardPage() {
             <>
               <div className="mb-4 flex items-start justify-between">
                 <div className="pb-10">
-                  <h3 className="font-semibold">Total Unique Website Visitors</h3>
+                  <h3 className="font-semibold">
+                    Total Unique Website Visitors
+                  </h3>
                   <p>
                     {`Total for the ${CHART_TABS[activeTab].label.toLowerCase()}`}
                   </p>

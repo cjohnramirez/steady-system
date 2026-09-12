@@ -2,8 +2,8 @@
 
 import { Tables } from "@/types/supabase";
 import { ColumnDef } from "@tanstack/react-table";
-import clsx from "clsx";
 import { ArrowUpDown } from "lucide-react";
+import { AppointmentStatusDot } from "@/components/appointment-status";
 
 export const appointmentColumns: ColumnDef<
   Tables<"appointment_with_details">
@@ -24,11 +24,7 @@ export const appointmentColumns: ColumnDef<
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      return (
-        <p>
-          {originalRow.id}
-        </p>
-      );
+      return <p>{originalRow.id}</p>;
     },
   },
   {
@@ -58,23 +54,7 @@ export const appointmentColumns: ColumnDef<
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") ?? "";
-
-      const statusColor = clsx("h-2 w-2 rounded-full", {
-        "bg-blue-500": status === "approved",
-        "bg-amber-500": status === "pending",
-        "bg-green-500": status === "completed",
-        "bg-red-500": status === "cancelled",
-      });
-
-      return (
-        <div className="flex items-center gap-2">
-          <div className={statusColor}></div>
-          <p>
-            {String(status)[0].toUpperCase() + String(status).slice(1)}
-          </p>
-        </div>
-      );
+      return <AppointmentStatusDot status={row.getValue("status")} />;
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;

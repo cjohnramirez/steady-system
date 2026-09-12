@@ -1,6 +1,6 @@
 import { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 import { createClient } from "@/utils/supabase/client";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { DB } from "@/lib/db/types";
 
 export async function fetchPlaylist(id: string): Promise<Tables<"playlist">> {
   const supabase = createClient();
@@ -44,7 +44,7 @@ export async function fetchAnnouncement(
 }
 
 export async function fetchArticles(
-  supabase: SupabaseClient,
+  supabase: DB,
   page: number,
   pageSize: number,
   search: string = "",
@@ -71,7 +71,7 @@ export async function fetchArticles(
 }
 
 export async function fetchPlaylists(
-  supabase: SupabaseClient,
+  supabase: DB,
   page: number,
   pageSize: number,
   search: string = "",
@@ -100,7 +100,7 @@ export async function fetchPlaylists(
 }
 
 export async function fetchAnnouncements(
-  supabase: SupabaseClient,
+  supabase: DB,
   page: number,
   pageSize: number,
   search: string = "",
@@ -130,7 +130,7 @@ export async function fetchAnnouncements(
 export async function insertAnnouncement(values: TablesInsert<"announcement">) {
   const supabase = createClient();
 
-  const { error } = await supabase.from("announcement").insert(values );
+  const { error } = await supabase.from("announcement").insert(values);
 
   if (error) throw new Error(String(error));
 }

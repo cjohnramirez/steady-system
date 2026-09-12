@@ -4,9 +4,9 @@ export default function RadialProgress({ progress }: { progress: number }) {
   return (
     <div
       x-data="scrollProgress"
-      className="  inline-flex items-center justify-center overflow-hidden rounded-full "
+      className="inline-flex items-center justify-center overflow-hidden rounded-full"
     >
-      <svg className=" w-20 h-20">
+      <svg className="h-20 w-20">
         <circle
           className="text-gray-300"
           strokeWidth={"4"}

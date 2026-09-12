@@ -1,64 +1,48 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { dataTableParams } from "../appointments/actions";
+import { DB } from "@/lib/db/types";
 import { createClient } from "@/utils/supabase/client";
 import { json2csv } from "json-2-csv";
+import { DbError } from "@/lib/db/error";
+import { pageRange, toPage, type PageParams } from "@/lib/db/paginate";
 
-export async function fetchStudents(
-  supabase: SupabaseClient,
-  params: dataTableParams,
-) {
-  const { page, pageSize, search } = params;
+/**
+ * These functions previously shared `dataTableParams` with the appointments
+ * screen, which carries a `status` field. Accounts has no status to filter on, so
+ * the page was passing its tab name ("students" or "counselors") as a status and
+ * both functions were quietly ignoring it. Accounts gets its own parameters.
+ */
 
-  const from = page * pageSize;
-  const to = from + pageSize - 1;
+export async function fetchStudents(supabase: DB, params: PageParams) {
+  const { from, to } = pageRange(params.page, params.pageSize);
 
   let query = supabase
     .from("student_with_details")
     .select("*", { count: "exact" });
 
-  if (search) {
-    query = query.ilike("username", `%${search}%`);
+  if (params.search) {
+    query = query.ilike("username", `%${params.search}%`);
   }
 
-  const { data, error, count } = await query
-    .range(from, to)
-    .order("id", { ascending: false });
-
-  if (error) throw error;
-
-  return {
-    data: data || [],
-    count: count || 0,
-  };
+  return toPage(
+    query.range(from, to).order("id", { ascending: false }),
+    "Could not load students",
+  );
 }
 
-export async function fetchCounselors(
-  supabase: SupabaseClient,
-  params: dataTableParams,
-) {
-  const { page, pageSize, search } = params;
-
-  const from = page * pageSize;
-  const to = from + pageSize - 1;
+export async function fetchCounselors(supabase: DB, params: PageParams) {
+  const { from, to } = pageRange(params.page, params.pageSize);
 
   let query = supabase
-    .from("counselor")
+    .from("counselor_with_details")
     .select("*", { count: "exact" });
 
-  if (search) {
-    query = query.ilike("username", `%${search}%`);
+  if (params.search) {
+    query = query.ilike("username", `%${params.search}%`);
   }
 
-  const { data, error, count } = await query
-    .range(from, to)
-    .order("id", { ascending: false });
-
-  if (error) throw error;
-
-  return {
-    data: data || [],
-    count: count || 0,
-  };
+  return toPage(
+    query.range(from, to).order("id", { ascending: false }),
+    "Could not load counselors",
+  );
 }
 
 export async function fetchCounselorDepartment(counselorID: string) {
@@ -66,32 +50,31 @@ export async function fetchCounselorDepartment(counselorID: string) {
 
   const { data, error } = await supabase
     .from("department")
-    .select(`*`)
+    .select("*")
     .eq("counselor_id", counselorID);
 
-  if (error) throw new Error("Error fetching counselor departments: ", error);
-  return data || [];
+  if (error) throw new DbError("Could not load counselor departments", error);
+
+  return data ?? [];
 }
 
-export async function fetchAccountCounts(supabase: SupabaseClient) {
-  const { count: studentCount, error: studentError } = await supabase
-    .from("student")
-    .select("*", { count: "exact", head: true });
+export async function fetchAccountCounts(supabase: DB) {
+  const [students, counselors] = await Promise.all([
+    supabase.from("student").select("*", { count: "exact", head: true }),
+    supabase.from("counselor").select("*", { count: "exact", head: true }),
+  ]);
 
-  if (studentError) throw studentError;
+  if (students.error) {
+    throw new DbError("Could not count students", students.error);
+  }
+  if (counselors.error) {
+    throw new DbError("Could not count counselors", counselors.error);
+  }
 
-  const { count: counselorCount, error: counselorError } = await supabase
-    .from("counselor")
-    .select("*", { count: "exact", head: true });
-
-  if (counselorError) throw counselorError;
-
-  const counts = {
-    students: studentCount || 0,
-    counselors: counselorCount || 0,
+  return {
+    students: students.count ?? 0,
+    counselors: counselors.count ?? 0,
   };
-
-  return counts;
 }
 
 export async function assignDepartment(
@@ -99,44 +82,39 @@ export async function assignDepartment(
   departments: Array<{ department_id: string }>,
 ) {
   const supabase = createClient();
-  const departmentIds = departments.map(d => d.department_id);
+  const departmentIds = departments.map((d) => d.department_id);
 
-  console.log("Assigning departments:", { counselorID, departmentIds });
+  if (departmentIds.length === 0) {
+    throw new Error("Select at least one department.");
+  }
 
-  // First, verify the departments exist
-  const { data: existingDepts, error: checkError } = await supabase
+  const { data: existing, error: checkError } = await supabase
     .from("department")
-    .select("id, counselor_id")
+    .select("id")
     .in("id", departmentIds);
 
-  console.log("Department check:", { existingDepts, checkError });
-
   if (checkError) {
-    throw new Error("Error checking departments: " + checkError.message);
+    throw new DbError("Could not check the selected departments", checkError);
   }
 
-  if (!existingDepts || existingDepts.length === 0) {
-    throw new Error("No departments found with the provided IDs");
+  if (!existing || existing.length !== departmentIds.length) {
+    throw new Error(
+      "One or more of the selected departments no longer exists.",
+    );
   }
 
-  console.log("Departments exist:", existingDepts);
-
-  // Now update them
   const { data, error } = await supabase
     .from("department")
     .update({ counselor_id: counselorID })
     .in("id", departmentIds)
     .select();
 
-  console.log("Update response:", { data, error });
+  if (error) throw new DbError("Could not assign the department", error);
 
-  if (error) {
-    console.error("Full error details:", error);
-    throw new Error("Error assigning department: " + error.message);
-  }
-
+  // An empty result here means row-level security filtered the update out rather
+  // than the rows being missing, since their existence was just confirmed.
   if (!data || data.length === 0) {
-    console.warn("Update executed but returned no data. Check if departments were actually updated");
+    throw new Error("You do not have permission to assign these departments.");
   }
 
   return data;
@@ -146,7 +124,7 @@ export type AccountType = "students" | "counselors";
 export type FileType = "csv" | "json";
 
 export async function exportAccounts(
-  supabase: SupabaseClient,
+  supabase: DB,
   accountType: AccountType,
   fileType: FileType,
   amountOfData?: number,
@@ -162,16 +140,17 @@ export async function exportAccounts(
     query = query.range(0, amountOfData);
   }
 
-  const { data } = await query;
+  const { data, error } = await query;
 
-  if (!data) {
-    return;
+  if (error) throw new DbError("Could not export accounts", error);
+  if (!data || data.length === 0) {
+    throw new Error("There is nothing to export.");
   }
 
-  const csv = json2csv(data);
-
+  const body =
+    fileType === "csv" ? json2csv(data) : JSON.stringify(data, null, 2);
   const url = URL.createObjectURL(
-    new Blob([fileType === "csv" ? csv : JSON.stringify(data, null, 2)], {
+    new Blob([body], {
       type: fileType === "csv" ? "text/csv" : "application/json",
     }),
   );
@@ -180,4 +159,7 @@ export async function exportAccounts(
   a.href = url;
   a.download = `export.${fileType}`;
   a.click();
+
+  // Without this the blob is held for the lifetime of the document.
+  URL.revokeObjectURL(url);
 }

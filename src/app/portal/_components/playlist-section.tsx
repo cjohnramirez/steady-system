@@ -24,7 +24,13 @@ export default function PlaylistSection() {
   });
 
   const { data: playlists, isLoading } = useQuery({
-    queryKey: ["playlist", pagination.pageIndex, pagination.pageSize, search, userEmotionalStatus],
+    queryKey: [
+      "playlist",
+      pagination.pageIndex,
+      pagination.pageSize,
+      search,
+      userEmotionalStatus,
+    ],
     queryFn: () =>
       fetchPlaylistByEmotion(
         supabase,

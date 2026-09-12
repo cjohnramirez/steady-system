@@ -7,18 +7,18 @@ This repository follows a two-branch workflow (`main` and `dev`) and uses **GitH
 
 ## 🛠️ Tech Stack
 
-| Category | Technologies |
-|----------|-------------|
-| **Framework** | Next.js 16 (App Router, Turbopack) |
-| **Language** | TypeScript |
-| **UI** | React 19, Tailwind CSS, Radix UI |
-| **State Management** | Zustand, TanStack React Query |
-| **Forms** | TanStack React Form, Zod validation |
-| **Database** | Supabase (PostgreSQL with Row-Level Security) |
-| **Authentication** | Supabase Auth |
-| **Charts** | Recharts |
-| **Package Manager** | pnpm |
-| **Deployment** | Vercel |
+| Category             | Technologies                                  |
+| -------------------- | --------------------------------------------- |
+| **Framework**        | Next.js 16 (App Router, Turbopack)            |
+| **Language**         | TypeScript                                    |
+| **UI**               | React 19, Tailwind CSS, Radix UI              |
+| **State Management** | Zustand, TanStack React Query                 |
+| **Forms**            | TanStack React Form, Zod validation           |
+| **Database**         | Supabase (PostgreSQL with Row-Level Security) |
+| **Authentication**   | Supabase Auth                                 |
+| **Charts**           | Recharts                                      |
+| **Package Manager**  | pnpm                                          |
+| **Deployment**       | Vercel                                        |
 
 ---
 
@@ -26,10 +26,10 @@ This repository follows a two-branch workflow (`main` and `dev`) and uses **GitH
 
 We follow a simple branching strategy to keep the codebase clean and organized:
 
-| Branch | Purpose |
-|--------|---------|
-| `main` | **Production-ready** code. Deploys to **Vercel Production**. |
-| `dev` | **Integration & testing** branch. Deploys to **Vercel Staging**. |
+| Branch | Purpose                                                          |
+| ------ | ---------------------------------------------------------------- |
+| `main` | **Production-ready** code. Deploys to **Vercel Production**.     |
+| `dev`  | **Integration & testing** branch. Deploys to **Vercel Staging**. |
 
 ### 🔧 GitHub Actions CI/CD
 
@@ -43,16 +43,17 @@ We follow a simple branching strategy to keep the codebase clean and organized:
 
 We use **Conventional Commits** for clarity and future automation (changelog generation, CI triggers).
 
-| Type | Usage |
-|------|-------|
-| `feat:` | New feature (e.g., `feat: add appointment booking API`) |
-| `fix:` | Bug fix |
-| `docs:` | Documentation updates |
-| `style:` | UI/style changes (no logic changes) |
-| `chore:` | Config/build/dependency updates |
-| `refactor:` | Code restructuring without changing functionality |
+| Type        | Usage                                                   |
+| ----------- | ------------------------------------------------------- |
+| `feat:`     | New feature (e.g., `feat: add appointment booking API`) |
+| `fix:`      | Bug fix                                                 |
+| `docs:`     | Documentation updates                                   |
+| `style:`    | UI/style changes (no logic changes)                     |
+| `chore:`    | Config/build/dependency updates                         |
+| `refactor:` | Code restructuring without changing functionality       |
 
 ✅ **Example:**
+
 ```bash
 git commit -m "feat: implement login page with form validation"
 ```
@@ -64,47 +65,55 @@ git commit -m "feat: implement login page with form validation"
 Follow these steps to run the project locally:
 
 ### 1️⃣ Clone the Repository
+
 ```bash
 git clone https://github.com/cjohnramirez/GCS-Management-and-Landing-Page-System.git
 cd GCS-Management-and-Landing-Page-System
 ```
 
 ### 2️⃣ Switch to the dev Branch
+
 ```bash
 git checkout dev
 ```
 
 ### 3️⃣ Install Dependencies
+
 Ensure you have **Node.js 20+** and **pnpm** installed.
+
 ```bash
 pnpm install
 ```
 
 ### 4️⃣ Setup Environment Variables
+
 Create a `.env.local` file in the root directory with the following variables:
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### 5️⃣ Run the Development Server
+
 ```bash
 pnpm dev
 ```
+
 Visit [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
 
 ## 📜 Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server with Turbopack |
-| `pnpm build` | Build for production |
-| `pnpm start` | Start production server |
-| `pnpm lint` | Run ESLint |
-| `pnpm format` | Format code with Prettier |
-| `pnpm type-check` | Run TypeScript type checking |
+| Command           | Description                             |
+| ----------------- | --------------------------------------- |
+| `pnpm dev`        | Start development server with Turbopack |
+| `pnpm build`      | Build for production                    |
+| `pnpm start`      | Start production server                 |
+| `pnpm lint`       | Run ESLint                              |
+| `pnpm format`     | Format code with Prettier               |
+| `pnpm type-check` | Run TypeScript type checking            |
 
 ---
 
@@ -132,11 +141,11 @@ src/
 
 ## 👥 User Roles
 
-| Role | Access |
-|------|--------|
-| **Student** | Book appointments, view portal articles, manage profile |
-| **Counselor** | Manage availability, view/complete appointments |
-| **Admin** | Full system access, manage users, appointments, and content |
+| Role          | Access                                                      |
+| ------------- | ----------------------------------------------------------- |
+| **Student**   | Book appointments, view portal articles, manage profile     |
+| **Counselor** | Manage availability, view/complete appointments             |
+| **Admin**     | Full system access, manage users, appointments, and content |
 
 ---
 
@@ -167,13 +176,13 @@ src/
 
 ## 👥 Contributors
 
-| Name | Role | Email |
-|------|------|-------|
-| Gerlie Campion | Technical Writer and Documentation Specialist | campiongerlie18@gmail.com |
-| Francis Adrian Esteban | Quality Assurance (QA) and Tester | francisadrian.esteban@1.ustp.edu.ph |
-| Jhey Gulde | Backend Developer and System Architect | gulde.jhey8@gmail.com |
-| Kathleen Grace Gultiano | UI/UX Designer | gultiano.kathleengrace@gmail.com | 
-| John Carl Ramirez | Project Manager and Full-Stack Developer | johncarl.ramirez.dev@gmail.com |
+| Name                    | Role                                          | Email                               |
+| ----------------------- | --------------------------------------------- | ----------------------------------- |
+| Gerlie Campion          | Technical Writer and Documentation Specialist | campiongerlie18@gmail.com           |
+| Francis Adrian Esteban  | Quality Assurance (QA) and Tester             | francisadrian.esteban@1.ustp.edu.ph |
+| Jhey Gulde              | Backend Developer and System Architect        | gulde.jhey8@gmail.com               |
+| Kathleen Grace Gultiano | UI/UX Designer                                | gultiano.kathleengrace@gmail.com    |
+| John Carl Ramirez       | Project Manager and Full-Stack Developer      | johncarl.ramirez.dev@gmail.com      |
 
 ---
 

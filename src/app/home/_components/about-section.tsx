@@ -69,7 +69,9 @@ export default function AboutSection() {
                 strokeWidth={1.25}
               />
               <div>
-                <p className="font-medium">{articles[0]?.title || "Love Will Always Win"}</p>
+                <p className="font-medium">
+                  {articles[0]?.title || "Love Will Always Win"}
+                </p>
                 <p>{articles[0]?.author_name || "by Alicia Montero"}</p>
               </div>
             </Link>
@@ -108,7 +110,8 @@ export default function AboutSection() {
               />
               <div>
                 <p className="font-medium">
-                  {articles[1]?.title || "GCS offers mental health support in the wake of recent earthquakes"}
+                  {articles[1]?.title ||
+                    "GCS offers mental health support in the wake of recent earthquakes"}
                 </p>
                 <p>{articles[1]?.author_name || "October 16, 2025"}</p>
               </div>
@@ -126,7 +129,9 @@ export default function AboutSection() {
               strokeWidth={1.25}
             />
             <div>
-              <p className="font-medium">{articles[2]?.title || "See Activities"}</p>
+              <p className="font-medium">
+                {articles[2]?.title || "See Activities"}
+              </p>
               <p>{articles[2]?.author_name || "Know what GCS do"}</p>
             </div>
           </Link>

@@ -25,8 +25,6 @@ export default function ProfileSection() {
 
   const [emotionalStatus, setEmotionalStatus] = useState("");
 
-  console.log(studentData)
-
   return (
     <>
       {openProfile && (
@@ -96,7 +94,11 @@ export default function ProfileSection() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setOpenProfile(true)} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={() => setOpenProfile(true)}
+              disabled={isLoading}
+            >
               <User strokeWidth={1.25} />
               <p>Edit Profile</p>
             </Button>
@@ -119,13 +121,13 @@ export default function ProfileSection() {
             {isLoading ? (
               <>
                 {[...Array(8)].map((_, i) => (
-                    <div
+                  <div
                     key={i}
-                    className="flex overflow-hidden rounded-xl border p-4 gap-2"
-                    >
+                    className="flex gap-2 overflow-hidden rounded-xl border p-4"
+                  >
                     <Skeleton className="h-10 w-2/5" />
                     <Skeleton className="h-10 flex-1" />
-                    </div>
+                  </div>
                 ))}
               </>
             ) : (

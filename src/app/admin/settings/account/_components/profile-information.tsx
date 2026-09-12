@@ -37,7 +37,9 @@ export default function AdminProfile() {
       email: profile?.email ?? "",
       username: profile?.username ?? "",
       phone: profile?.phone ?? "",
-      university_id: profile?.university_id ? String(profile.university_id) : "",
+      university_id: profile?.university_id
+        ? String(profile.university_id)
+        : "",
     },
     validators: { onChange: adminProfileFormSchema },
     onSubmit: async ({ value }) => {
