@@ -7,9 +7,14 @@ on:
     branches: [dev]
 
 env:
-  # Next.js 16 requires Node 20.9 or newer. This workflow pinned 18, so preview
-  # checks were running on a version the framework does not support.
-  NODE_VERSION: "20"
+  # This workflow pinned Node 18, which Next.js 16 does not support. 22 matches
+  # what the project is developed against, and 20 is now being deprecated on
+  # GitHub runners.
+  #
+  # pnpm's version is not set here on purpose. pnpm/action-setup reads it from
+  # the `packageManager` field in package.json, so CI and local machines cannot
+  # drift apart.
+  NODE_VERSION: "22"
 
 jobs:
   checks:
