@@ -30,7 +30,9 @@ export default function Footer({ navBarObj }: { navBarObj?: NavBar[] }) {
         <div className="w-1/3 space-y-10">
           <section className="flex items-center gap-4">
             <Image src="/icon.png" alt="logo" width={40} height={40} />
-            <p className="font-medium">{organization?.name || "Guidance and Counseling Services"}</p>
+            <p className="font-medium">
+              {organization?.name || "Guidance and Counseling Services"}
+            </p>
           </section>
           <p>
             We are dedicated to the holistic development of every student
@@ -85,21 +87,32 @@ export default function Footer({ navBarObj }: { navBarObj?: NavBar[] }) {
               {organization?.email && (
                 <div className="flex items-start gap-2">
                   <Mail size={20} strokeWidth={1} />
-                  <a href={`mailto:${organization.email}`} className="text-sm">{organization.email}</a>
+                  <a href={`mailto:${organization.email}`} className="text-sm">
+                    {organization.email}
+                  </a>
                 </div>
               )}
               {organization?.phone && (
                 <div className="flex items-start gap-2">
                   <Phone size={20} strokeWidth={1} />
-                  <a href={`tel:${String(organization.phone).replace(/\D/g, "")}`} className="text-sm">0{organization.phone}</a>
+                  <a
+                    href={`tel:${String(organization.phone).replace(/\D/g, "")}`}
+                    className="text-sm"
+                  >
+                    0{organization.phone}
+                  </a>
                 </div>
               )}
-              {organization?.start_office_hour && organization?.end_office_hour && (
-                <div className="flex items-start gap-2">
-                  <CalendarCheck2 size={20} strokeWidth={1} />
-                  <p className="text-sm">{parseTime(organization.start_office_hour)} - {parseTime(organization.end_office_hour)}</p>
-                </div>
-              )}
+              {organization?.start_office_hour &&
+                organization?.end_office_hour && (
+                  <div className="flex items-start gap-2">
+                    <CalendarCheck2 size={20} strokeWidth={1} />
+                    <p className="text-sm">
+                      {parseTime(organization.start_office_hour)} -{" "}
+                      {parseTime(organization.end_office_hour)}
+                    </p>
+                  </div>
+                )}
             </div>
           </div>
         </div>

@@ -2,11 +2,11 @@ packages:
   - .
   - apps/**
   - packages/**
-  - '!**/test/**'
+  - "!**/test/**"
 
 onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
+  - "@tailwindcss/oxide"
   - core-js
-  - cypress
+  - esbuild
   - sharp
   - unrs-resolver

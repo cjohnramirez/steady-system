@@ -41,9 +41,7 @@ export const studentAppointmentColumns: ColumnDef<
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => (
-      <AppointmentStatusDot status={row.getValue("status")} />
-    ),
+    cell: ({ row }) => <AppointmentStatusDot status={row.getValue("status")} />,
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;
       return filterValue.includes(row.getValue(columnId));

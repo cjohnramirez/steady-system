@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Tables, TablesUpdate } from "@/types/supabase";
 
 export async function fetchContactPerson(id: string) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 }
 
 export async function fetchAvailableDepartments(): Promise<
@@ -22,9 +22,9 @@ export async function fetchAvailableDepartments(): Promise<
   return data || null;
 }
 
-export async function fetchDepartmentsByCollege(collegeId: string): Promise<
-  Tables<"department">[] | null
-> {
+export async function fetchDepartmentsByCollege(
+  collegeId: string,
+): Promise<Tables<"department">[] | null> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -34,11 +34,9 @@ export async function fetchDepartmentsByCollege(collegeId: string): Promise<
     .is("counselor_id", null)
     .order("title", { ascending: true });
 
-  if (error)
-    throw new Error(`Error fetching departments: ${error.message}`);
+  if (error) throw new Error(`Error fetching departments: ${error.message}`);
   return data || null;
 }
-
 
 export async function fetchStudent(
   id: string,
@@ -77,7 +75,8 @@ export async function fetchEmotionalStatus(): Promise<
 
   const { data, error } = await supabase.from("emotional_status").select("*");
 
-  if (error) throw new Error(`Error fetching emotional status: ${error.message}`);
+  if (error)
+    throw new Error(`Error fetching emotional status: ${error.message}`);
   return data || null;
 }
 
@@ -95,7 +94,9 @@ export async function updateStudentEmotionalStatus(
     .single();
 
   if (error)
-    throw new Error(`Error updating student emotional status: ${error.message}`);
+    throw new Error(
+      `Error updating student emotional status: ${error.message}`,
+    );
   return data || null;
 }
 
@@ -109,7 +110,8 @@ export async function updateStudentProfile(values: TablesUpdate<"student">) {
     .select("*")
     .single();
 
-  if (error) throw new Error(`Error updating student profile: ${error.message}`);
+  if (error)
+    throw new Error(`Error updating student profile: ${error.message}`);
 }
 
 export async function updateCounselorProfile(
@@ -124,6 +126,7 @@ export async function updateCounselorProfile(
     .select("*")
     .single();
 
-  if (error) throw new Error(`Error updating counselor profile: ${error.message}`);
+  if (error)
+    throw new Error(`Error updating counselor profile: ${error.message}`);
   return data || null;
 }

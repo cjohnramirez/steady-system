@@ -36,7 +36,12 @@ type UploadResult = {
 };
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
-const ALLOWED_UPLOAD_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_UPLOAD_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
 
 /**
  * Uploads an image and returns both a plain optimized URL and a square cropped one.

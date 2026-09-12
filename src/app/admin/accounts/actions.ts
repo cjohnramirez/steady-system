@@ -98,7 +98,9 @@ export async function assignDepartment(
   }
 
   if (!existing || existing.length !== departmentIds.length) {
-    throw new Error("One or more of the selected departments no longer exists.");
+    throw new Error(
+      "One or more of the selected departments no longer exists.",
+    );
   }
 
   const { data, error } = await supabase
@@ -145,7 +147,8 @@ export async function exportAccounts(
     throw new Error("There is nothing to export.");
   }
 
-  const body = fileType === "csv" ? json2csv(data) : JSON.stringify(data, null, 2);
+  const body =
+    fileType === "csv" ? json2csv(data) : JSON.stringify(data, null, 2);
   const url = URL.createObjectURL(
     new Blob([body], {
       type: fileType === "csv" ? "text/csv" : "application/json",

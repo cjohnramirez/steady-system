@@ -77,13 +77,12 @@ export default function StudentProfileModal({
       age: student?.age || 0,
       gender: student?.gender || "",
     },
-    onSubmitInvalid: ({formApi}) => {
-    },
+    onSubmitInvalid: ({ formApi }) => {},
     validators: {
-      onChange: studentUpdateFormSchema
+      onChange: studentUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
-      const {college, ...rest } = value
+      const { college, ...rest } = value;
       updateMutation.mutate(rest);
     },
   });
@@ -214,7 +213,7 @@ export default function StudentProfileModal({
             <form.Field name="year_level">
               {(field) => (
                 <FormYearLevelField field={field} enableDescription={false} />
-              )}    
+              )}
             </form.Field>
             <form.Field name="university_id">
               {(field) => (

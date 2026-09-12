@@ -33,8 +33,8 @@ export async function fetchCollege() {
 export default async function SignUpFormAction(
   values: z.infer<typeof studentInsertFormSchema>,
 ): Promise<{ error?: string; success?: string }> {
-  const supabase = await createClient(); 
-  const supabaseAdmin = await createServiceClient(); 
+  const supabase = await createClient();
+  const supabaseAdmin = await createServiceClient();
 
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: values.email,
@@ -63,7 +63,7 @@ export default async function SignUpFormAction(
     return { error: `Failed to update user role: ${updateRoleError.message}` };
   }
 
-  const { college, password, contact_person, ...otherValues} = values;
+  const { college, password, contact_person, ...otherValues } = values;
 
   const { data: studentData, error: updateStudentError } = await supabaseAdmin
     .from("student")
@@ -72,7 +72,7 @@ export default async function SignUpFormAction(
       year_level: Number(values.year_level),
       university_id: Number(values.university_id),
       user_id: signUpData.user.id,
-      phone: String(values.phone)
+      phone: String(values.phone),
     })
     .select();
 
@@ -84,10 +84,10 @@ export default async function SignUpFormAction(
     return { error: "Student ID not found" };
   }
 
-  const contactPersonData = contact_person.map(contact => ({
+  const contactPersonData = contact_person.map((contact) => ({
     ...contact,
     student_id: studentData[0].id,
-    phone: Number(contact.phone)
+    phone: Number(contact.phone),
   }));
 
   const { error: insertContactPerson } = await supabaseAdmin
@@ -95,7 +95,9 @@ export default async function SignUpFormAction(
     .insert(contactPersonData);
 
   if (insertContactPerson) {
-    return { error: `Failed to insert contact person: ${insertContactPerson.message}` };
+    return {
+      error: `Failed to insert contact person: ${insertContactPerson.message}`,
+    };
   }
 
   return { success: "Sign Up successful" };

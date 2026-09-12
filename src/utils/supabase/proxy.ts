@@ -107,7 +107,10 @@ async function resolveRole(
 
   if (isRole(claim)) return claim;
 
-  const { data } = await supabase.from("user_roles").select("role").maybeSingle();
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .maybeSingle();
 
   return isRole(data?.role) ? data.role : null;
 }

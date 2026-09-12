@@ -34,9 +34,11 @@ export default function CounselorModal() {
   const updateMutation = useMutation({
     mutationFn: updateCounselorProfile,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["counselor", resolvedId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["counselor", resolvedId],
+      });
       await queryClient.invalidateQueries({ queryKey: ["counselors"] });
-      
+
       toast.success("Counselor profile updated successfully!");
       router.back();
     },
@@ -53,7 +55,7 @@ export default function CounselorModal() {
       university_id: counselor?.university_id ?? 0,
       username: counselor?.username ?? "",
       phone: counselor?.phone ?? "",
-      id: counselor?.id ?? ""
+      id: counselor?.id ?? "",
     },
     validators: {
       onChange: counselorUpdateFormSchema,
@@ -63,7 +65,7 @@ export default function CounselorModal() {
     },
   });
 
-  if (isLoading) return
+  if (isLoading) return;
 
   return (
     <Dialog

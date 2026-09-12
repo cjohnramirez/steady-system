@@ -13,7 +13,7 @@ export default async function ProtectedRootLayout({
   return (
     <>
       <NavigationBar />
-      <div className="p-10 max-w-[1600px] m-auto bg-gray-50">{children}</div>
+      <div className="m-auto max-w-[1600px] bg-gray-50 p-10">{children}</div>
     </>
   );
 }

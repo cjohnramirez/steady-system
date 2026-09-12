@@ -65,7 +65,7 @@ export default function DepartmentModal({ open, setOpen }: StudentModalProps) {
               </div>
             ))
           ) : (
-            <div className="flex items-center justify-center border gap-4 p-4 w-full rounded-2xl col-span-3">
+            <div className="col-span-3 flex w-full items-center justify-center gap-4 rounded-2xl border p-4">
               <CircleOff strokeWidth={1.25} />
               <p>No departments assigned</p>
             </div>

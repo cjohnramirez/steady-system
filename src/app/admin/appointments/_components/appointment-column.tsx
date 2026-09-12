@@ -24,11 +24,7 @@ export const appointmentColumns: ColumnDef<
     cell: ({ row }) => {
       const originalRow = row.original;
 
-      return (
-        <p>
-          {originalRow.id}
-        </p>
-      );
+      return <p>{originalRow.id}</p>;
     },
   },
   {
@@ -58,9 +54,7 @@ export const appointmentColumns: ColumnDef<
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      return (
-        <AppointmentStatusDot status={row.getValue("status")} />
-      );
+      return <AppointmentStatusDot status={row.getValue("status")} />;
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue?.length) return true;

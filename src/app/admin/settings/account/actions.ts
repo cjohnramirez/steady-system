@@ -49,7 +49,7 @@ export async function updateAdminPassword(
   const { data: user } = await supabase.auth.getUser();
   if (!user?.user) return null;
 
-  const { error : passwordError } = await supabase.auth.updateUser({
+  const { error: passwordError } = await supabase.auth.updateUser({
     password: values.password,
   });
 

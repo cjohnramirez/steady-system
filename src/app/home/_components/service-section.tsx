@@ -37,8 +37,8 @@ const servicesObj: Services[] = [
 
 export default function ServiceSection() {
   return (
-    <section className="flex gap-5 mt-20" id="service">
-      <div className="items-left flex h-full w-1/2 flex-col justify-center space-y-4 mr-20 my-auto">
+    <section className="mt-20 flex gap-5" id="service">
+      <div className="items-left my-auto mr-20 flex h-full w-1/2 flex-col justify-center space-y-4">
         <div className="w-fit rounded-xl border border-gray-200 bg-white px-10 py-2">
           Services
         </div>
@@ -47,7 +47,7 @@ export default function ServiceSection() {
           The Guidance and Counseling Services offer the following to the
           university&apos;s constituents
         </p>
-        <div className="space-y-4 mt-10">
+        <div className="mt-10 space-y-4">
           {servicesObj.map((service) => (
             <div
               key={service.title}
@@ -62,7 +62,7 @@ export default function ServiceSection() {
           ))}
         </div>
       </div>
-      <div className="bg-white relative w-1/2 rounded-4xl h-dvh max-h-[700px] border border-gray-200">
+      <div className="relative h-dvh max-h-[700px] w-1/2 rounded-4xl border border-gray-200 bg-white">
         <Image
           src={img}
           alt="Authentication image"

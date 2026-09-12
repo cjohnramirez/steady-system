@@ -45,7 +45,9 @@ export default function StudentModal() {
   const updateMutation = useMutation({
     mutationFn: updateStudentProfile,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["student", resolvedId] });
+      await queryClient.invalidateQueries({
+        queryKey: ["student", resolvedId],
+      });
       await queryClient.invalidateQueries({ queryKey: ["students"] });
       toast.success("Student profile updated successfully!");
       router.back();

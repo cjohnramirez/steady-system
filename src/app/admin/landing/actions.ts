@@ -130,7 +130,7 @@ export async function fetchAnnouncements(
 export async function insertAnnouncement(values: TablesInsert<"announcement">) {
   const supabase = createClient();
 
-  const { error } = await supabase.from("announcement").insert(values );
+  const { error } = await supabase.from("announcement").insert(values);
 
   if (error) throw new Error(String(error));
 }

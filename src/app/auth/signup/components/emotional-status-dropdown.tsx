@@ -46,12 +46,14 @@ export default function EmotionalStatusDropdown({
 }: FormDropdownInputProps) {
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
-  const { data: emotionalStatusData = [], isLoading: isEmotionalStatusLoading } =
-    useQuery({
-      queryKey: ["emotional-status"],
-      queryFn: () => fetchEmotionalStatus(),
-    });
-  
+  const {
+    data: emotionalStatusData = [],
+    isLoading: isEmotionalStatusLoading,
+  } = useQuery({
+    queryKey: ["emotional-status"],
+    queryFn: () => fetchEmotionalStatus(),
+  });
+
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor={field.name}>Emotional Status</FieldLabel>
@@ -71,11 +73,12 @@ export default function EmotionalStatusDropdown({
           )}
         </SelectTrigger>
         <SelectContent position="item-aligned">
-          {emotionalStatusData && emotionalStatusData.map((emotion, idx) => (
-            <SelectItem value={emotion.id} key={idx}>
-              {strToTitleCase(emotion.name)}
-            </SelectItem>
-          ))}
+          {emotionalStatusData &&
+            emotionalStatusData.map((emotion, idx) => (
+              <SelectItem value={emotion.id} key={idx}>
+                {strToTitleCase(emotion.name)}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
       {isInvalid ? (

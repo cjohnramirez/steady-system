@@ -57,7 +57,9 @@ export default async function insertCounselor(values: CounselorInsert) {
 
   if (roleError) {
     await supabaseAdmin.auth.admin.deleteUser(userId);
-    throw new Error(`Could not assign the counselor role: ${roleError.message}`);
+    throw new Error(
+      `Could not assign the counselor role: ${roleError.message}`,
+    );
   }
 
   const { error: profileError } = await supabaseAdmin
@@ -66,7 +68,9 @@ export default async function insertCounselor(values: CounselorInsert) {
 
   if (profileError) {
     await supabaseAdmin.auth.admin.deleteUser(userId);
-    throw new Error(`Could not create the counselor profile: ${profileError.message}`);
+    throw new Error(
+      `Could not create the counselor profile: ${profileError.message}`,
+    );
   }
 
   return { success: "Counselor account created." };

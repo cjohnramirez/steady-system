@@ -113,10 +113,7 @@ export async function requireRole(...allowed: roles[]): Promise<SessionUser> {
   const user = await requireUser();
 
   if (!user.role || !allowed.includes(user.role)) {
-    throw new AuthorizationError(
-      "You do not have permission to do that.",
-      403,
-    );
+    throw new AuthorizationError("You do not have permission to do that.", 403);
   }
 
   return user;

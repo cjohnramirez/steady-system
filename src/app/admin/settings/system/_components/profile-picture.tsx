@@ -13,8 +13,8 @@ export default function ProfilePicture() {
       <div>
         <h2 className="mb-1 text-lg font-semibold">Organization Icon</h2>
         <p className="text-sm">
-          Upload or update the organization icon. Click the icon to upload
-          a new photo.
+          Upload or update the organization icon. Click the icon to upload a new
+          photo.
         </p>
       </div>
 

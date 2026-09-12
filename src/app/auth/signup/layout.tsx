@@ -6,13 +6,15 @@ export default function SignUpLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   return (
-    <div className="min-h-screen overflow-y-auto p-4 w-full h-full flex items-center">
-      <div className="flex flex-col md:flex-row w-full gap-8 rounded-4xl border p-8 h-full bg-white">
+    <div className="flex h-full min-h-screen w-full items-center overflow-y-auto p-4">
+      <div className="flex h-full w-full flex-col gap-8 rounded-4xl border bg-white p-8 md:flex-row">
         <div className="flex flex-col justify-center md:w-1/2">
           <div className="flex items-center justify-between gap-3">
-            <Link className="flex items-center gap-3 cursor-pointer" href="/home">
+            <Link
+              className="flex cursor-pointer items-center gap-3"
+              href="/home"
+            >
               <Image
                 src="/icon.png"
                 alt="logo"
@@ -27,7 +29,7 @@ export default function SignUpLayout({
             {children}
           </div>
         </div>
-        <div className="relative md:w-1/2 h-[400px] md:h-auto">
+        <div className="relative h-[400px] md:h-auto md:w-1/2">
           <Image
             src="/auth.jpg"
             alt="Authentication image"

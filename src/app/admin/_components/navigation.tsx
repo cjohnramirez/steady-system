@@ -20,11 +20,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
-import { createClient } from "@/utils/supabase/client";
 import { useUserStore } from "@/hooks/auth-store";
-import { useEffect, useState } from "react";
+import { useHydrated } from "@/hooks/use-hydrated";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useConfirmStore } from "@/hooks/confirm-store";
 
 type Navigation = {
   name: string;
@@ -55,39 +54,16 @@ const navigationObj: Navigation[] = [
 ];
 
 export default function NavigationBar() {
-  const { confirm, startLoading, stopLoading } = useConfirmStore();
   const pathName = usePathname();
   const router = useRouter();
+  const signOut = useSignOut();
 
-  const userName = useUserStore.getState().userName;
+  const userName = useUserStore((state) => state.userName);
+  const userRole = useUserStore((state) => state.userRole);
 
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const handleChange = async () => {
-    const ok = await confirm(
-      "Log out?",
-      "Are you sure you want to log out? This will end your current session.",
-    );
-
-    if (!ok) return;
-
-    startLoading();
-
-    useUserStore.getState().setUserName("");
-    useUserStore.getState().setUserRole("");
-
-    const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
-
-    if (error) throw new Error(error.message);
-
-    stopLoading();
-    window.location.reload();
-  };
+  // Matches the server's empty first render, since the store is restored from
+  // localStorage.
+  const isClient = useHydrated();
 
   return (
     <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b bg-white p-6 pb-0">
@@ -106,7 +82,7 @@ export default function NavigationBar() {
                 <>
                   <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
                   <p>{userName}</p>
-                  <Badge variant="secondary">User Role</Badge>
+                  <Badge variant="secondary">{userRole || "admin"}</Badge>
                   <ChevronsUpDown size={20} />
                 </>
               ) : (
@@ -141,7 +117,7 @@ export default function NavigationBar() {
               </div>
               <Button
                 onClick={async () => {
-                  await handleChange();
+                  await signOut();
                 }}
                 className="w-full"
               >
@@ -163,9 +139,6 @@ export default function NavigationBar() {
                   Meet the Developers
                 </Link>{" "}
                 <ArrowUpRight />
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/">User Documentation</Link> <ArrowUpRight />
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Link href="/misc/privacy-policy">Privacy Policy</Link>{" "}

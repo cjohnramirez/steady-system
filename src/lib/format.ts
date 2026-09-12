@@ -33,11 +33,11 @@ export function generateTimeSlots(
 ): string[] {
   // Parse time format "HH:MM:SS+TZ" or "HH:MM:SS" to "HH:MM"
   const parseTimeString = (timeStr: string): [number, number] => {
-    const timePart = timeStr.includes("+") 
-      ? timeStr.split("+")[0] 
-      : timeStr.includes("-") 
-      ? timeStr.split("-")[0]
-      : timeStr;
+    const timePart = timeStr.includes("+")
+      ? timeStr.split("+")[0]
+      : timeStr.includes("-")
+        ? timeStr.split("-")[0]
+        : timeStr;
     const parts = timePart.split(":");
     const h = parseInt(parts[0], 10);
     const m = parseInt(parts[1], 10);
@@ -80,4 +80,38 @@ export function extractPublicId(url: string) {
   const match = url.match(regex);
 
   return match ? match[1] : null;
+}
+
+/**
+ * The guidance office runs on one wall clock, and so does the database function
+ * that generates bookable slots. Every conversion between a calendar day, a time
+ * of day and an instant goes through here so the two cannot disagree.
+ */
+export const APP_TIMEZONE = "Asia/Manila";
+
+/** A slot instant rendered as a local time, for example "8:30 AM". */
+export function formatSlotTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-US", {
+    timeZone: APP_TIMEZONE,
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * The calendar day a Date falls on in the office's timezone, as YYYY-MM-DD.
+ *
+ * Using toISOString() here would be wrong: it converts to UTC first, so an
+ * evening appointment in Manila reports the following day.
+ */
+export function toAppDateString(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
 }

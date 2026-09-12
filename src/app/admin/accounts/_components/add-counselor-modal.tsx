@@ -40,11 +40,11 @@ export default function AddCounselorModal({
     onSuccess: async () => {
       toast.success("Counselor added successfully!");
       setOpen(false);
-      stopLoading()
+      stopLoading();
       queryClient.invalidateQueries({ queryKey: ["counselors"] });
     },
     onError: (err: Error) => {
-      stopLoading()
+      stopLoading();
       toast.error(err.message || "Failed to add counselor");
     },
   });
@@ -68,7 +68,7 @@ export default function AddCounselorModal({
         "Please make sure all details are correct. Afterwards, verify the email for confirmation",
       );
 
-      startLoading()
+      startLoading();
 
       if (!ok) return;
       updateMutation.mutate(value);

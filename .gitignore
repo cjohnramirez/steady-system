@@ -45,3 +45,6 @@ next-env.d.ts
 /supabase/
 # supabase cli scratch
 supabase/.temp/
+
+# playwright mcp scratch
+.playwright-mcp/

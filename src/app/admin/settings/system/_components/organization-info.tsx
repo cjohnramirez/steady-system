@@ -66,7 +66,9 @@ export default function OrganizationInfo() {
     <section className="rounded-2xl border border-gray-200 bg-white p-8">
       <h2 className="mb-1 text-lg font-semibold">Organization Information</h2>
       <p className="mb-6 text-sm">
-        Update key information about the Guidance and Counseling Services office such as office name, contact details, and logo. This information may appear on the landing page and official emails.
+        Update key information about the Guidance and Counseling Services office
+        such as office name, contact details, and logo. This information may
+        appear on the landing page and official emails.
       </p>
       <form
         className="mt-8 space-y-8"

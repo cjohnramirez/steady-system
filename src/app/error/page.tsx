@@ -22,7 +22,8 @@ const REASONS: Record<string, { title: string; detail: string }> = {
 
 const FALLBACK = {
   title: "Something went wrong",
-  detail: "We could not verify your session. Signing in again usually fixes it.",
+  detail:
+    "We could not verify your session. Signing in again usually fixes it.",
 };
 
 export default async function ErrorPage({

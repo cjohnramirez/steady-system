@@ -100,13 +100,19 @@ export async function fetchArticlesByEmotion(
 
   // If emotionalStatus filter returned empty, return all results
   if (emotionalStatus !== "" && (!data || data.length === 0)) {
-    let fallbackQuery = supabase.from("article").select("*", { count: "exact" });
+    let fallbackQuery = supabase
+      .from("article")
+      .select("*", { count: "exact" });
 
     if (search) {
       fallbackQuery = fallbackQuery.ilike("title", `%${search}%`);
     }
 
-    const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery
+    const {
+      data: fallbackData,
+      error: fallbackError,
+      count: fallbackCount,
+    } = await fallbackQuery
       .order("title", { ascending: false })
       .range(from, to);
 
@@ -173,7 +179,11 @@ export async function fetchPlaylistByEmotion(
       fallbackQuery = fallbackQuery.ilike("title", `%${search}%`);
     }
 
-    const { data: fallbackData, error: fallbackError, count: fallbackCount } = await fallbackQuery
+    const {
+      data: fallbackData,
+      error: fallbackError,
+      count: fallbackCount,
+    } = await fallbackQuery
       .order("title", { ascending: false })
       .range(from, to);
 

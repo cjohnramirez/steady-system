@@ -68,9 +68,7 @@ export default function SignUpForm() {
       setIsLoading(true);
 
       try {
-        const res = await SignUpFormAction(
-          value
-        );
+        const res = await SignUpFormAction(value);
 
         if (res?.error) {
           toast.error(res.error);
@@ -238,14 +236,16 @@ export default function SignUpForm() {
             <form.Field name="contact_person" mode="array">
               {(contactsField) => (
                 <>
-                  {(contactsField.state.value).map((_: any, index: number) => (
+                  {contactsField.state.value.map((_: any, index: number) => (
                     <div key={index} className="rounded-lg border">
                       <h4 className="p-4 text-center font-medium">
                         Contact Person No. {index + 1}
                       </h4>
                       <hr className="w-full" />
                       <div className="flex gap-4 p-4">
-                        <form.Field name={`contact_person[${index}].first_name`}>
+                        <form.Field
+                          name={`contact_person[${index}].first_name`}
+                        >
                           {(field) => (
                             <FormInputField
                               field={field}
@@ -266,7 +266,9 @@ export default function SignUpForm() {
                         </form.Field>
                       </div>
                       <div className="flex gap-4 p-4">
-                        <form.Field name={`contact_person[${index}].middle_name`}>
+                        <form.Field
+                          name={`contact_person[${index}].middle_name`}
+                        >
                           {(field) => (
                             <FormInputField
                               field={field}
@@ -285,8 +287,8 @@ export default function SignUpForm() {
                           )}
                         </form.Field>
                       </div>
-                      <div className="px-4 pb-4 w-full">
-                        {(contactsField.state.value).length > 1 && (
+                      <div className="w-full px-4 pb-4">
+                        {contactsField.state.value.length > 1 && (
                           <Button
                             type="button"
                             onClick={() => contactsField.removeValue(index)}

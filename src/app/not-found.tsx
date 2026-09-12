@@ -9,7 +9,7 @@ export default function NotFound() {
   const router = useRouter();
 
   return (
-    <div className="flex h-dvh flex-col items-center justify-between p-10 bg-gray-50">
+    <div className="flex h-dvh flex-col items-center justify-between bg-gray-50 p-10">
       <div className="my-auto space-y-6 text-center">
         <div className="relative ml-15 flex items-center justify-center">
           <TrafficCone size={80} strokeWidth={0.5} />
@@ -21,8 +21,9 @@ export default function NotFound() {
         </div>
         <p className="text-6xl">404 Not Found</p>
         <p className="w-96">
-          Oops, we can&apos;t seem to find this page. You are either does not have
-          the access or you are just out of luck. Try going back home instead!
+          Oops, we can&apos;t seem to find this page. You are either does not
+          have the access or you are just out of luck. Try going back home
+          instead!
         </p>
         <Button
           variant="outline"

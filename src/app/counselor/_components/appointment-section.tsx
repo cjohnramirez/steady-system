@@ -59,10 +59,7 @@ export default function CounselorAppointmentSection({
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             {APPOINTMENT_STATUSES.map((option) => (
-              <DropdownMenuItem
-                key={option}
-                onClick={() => setStatus(option)}
-              >
+              <DropdownMenuItem key={option} onClick={() => setStatus(option)}>
                 <div
                   className={`h-2 w-2 rounded-full ${appointmentStatusDot(option)}`}
                 />
@@ -97,8 +94,8 @@ export default function CounselorAppointmentSection({
             />
           ))
         ) : (
-          <div className="flex h-full items-center justify-center rounded-2xl border gap-4">
-            <CircleOff strokeWidth={1.25}/>
+          <div className="flex h-full items-center justify-center gap-4 rounded-2xl border">
+            <CircleOff strokeWidth={1.25} />
             <p>No appointments found</p>
           </div>
         )}

@@ -46,7 +46,7 @@ export default function ReasonSection({
   );
 
   return (
-    <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-8 h-fit">
+    <div className="h-fit space-y-4 rounded-2xl border border-gray-200 bg-white p-8">
       <p className="font-medium">Select Your Reason</p>
       <div className="grid grid-cols-4 gap-2">
         {appointmentReasons.map((reason) => (

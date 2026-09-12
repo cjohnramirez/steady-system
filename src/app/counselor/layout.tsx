@@ -10,7 +10,7 @@ export default async function CounselorLayout({
 
   return (
     <>
-      <NavigationBar navBarObj={[]} />
+      <NavigationBar />
       <div className="m-auto max-w-[1400px] px-15">{children}</div>
     </>
   );

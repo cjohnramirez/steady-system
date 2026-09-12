@@ -20,9 +20,8 @@ import { announcementUpdateFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import { FormDateTimeField } from "@/components/form-date-time-field";
 import { useState } from "react";
-import { extractPublicId } from "@/lib/format";
-import { deleteFromCloudinary, uploadToCloudinary } from "@/app/actions";
 import ImageUpload from "@/components/image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -36,9 +35,7 @@ export default function AnnouncementUpdateModal({
   id,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false);
+  const image = useImageUpload("announcements");
 
   const { data: announcement, isLoading } = useQuery({
     queryKey: ["announcement", id],
@@ -73,41 +70,16 @@ export default function AnnouncementUpdateModal({
       onChange: announcementUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
-      let finalValues = { ...value };
-      const articleImage = form.state.values.announcement_image;
-
-      if (file) {
-        setIsUploading(true);
-        try {
-          const result = await uploadToCloudinary(file, "announcements");
-
-          if (result && result.optimizedUrl) {
-            finalValues.announcement_image = result.optimizedUrl;
-          }
-        } catch (error) {
-          toast.error("Failed to upload announcement image");
-          setIsUploading(false);
-          return;
-        }
+      try {
+        const imageUrl = await image.resolveImageUrl(value.announcement_image);
+        updateMutation.mutate({ ...value, announcement_image: imageUrl });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload the image.",
+        );
       }
-
-      if (isDeleted) {
-        setIsUploading(true);
-        try {
-          const publicId = extractPublicId(articleImage);
-          if (publicId) {
-            await deleteFromCloudinary(publicId);
-          }
-        } catch (error) {
-          toast.error("Failed to delete announcement image");
-          setIsUploading(false);
-          return;
-        } finally {
-          finalValues.announcement_image = "";
-        }
-      }
-      setIsUploading(false);
-      updateMutation.mutate(finalValues);
     },
   });
 
@@ -118,7 +90,7 @@ export default function AnnouncementUpdateModal({
       open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
-          setFile(null);
+          image.reset();
         }
         setOpen(isOpen);
       }}
@@ -127,7 +99,7 @@ export default function AnnouncementUpdateModal({
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={(e) => {
-          if (isUploading) e.preventDefault();
+          if (image.isBusy) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -135,7 +107,7 @@ export default function AnnouncementUpdateModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-announcement-form"
+          id="announcement-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -144,8 +116,8 @@ export default function AnnouncementUpdateModal({
           <div className="row-span-3">
             <ImageUpload
               initialURL={announcement?.announcement_image ?? ""}
-              setFile={setFile}
-              setIsDeleted={() => setIsDeleted(true)}
+              setFile={image.setFile}
+              setIsDeleted={image.setIsRemoved}
             />
           </div>
           <div className="col-span-2 flex gap-2">
@@ -195,10 +167,10 @@ export default function AnnouncementUpdateModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || image.isBusy}
             form="update-announcement-form"
           >
-            {updateMutation.isPending || (isUploading && <Spinner />)}
+            {updateMutation.isPending || (image.isBusy && <Spinner />)}
             <p>Update</p>
           </Button>
           <DialogClose asChild>
@@ -207,7 +179,7 @@ export default function AnnouncementUpdateModal({
               onClick={() => {
                 setOpen(false);
               }}
-              disabled={isUploading}
+              disabled={image.isBusy}
             >
               Cancel
             </Button>

@@ -6,5 +6,5 @@ export const LoginFormSchema = z.object({
     .string()
     .min(8, "8 or more characters required")
     .max(255, "255 or less characters required"),
-  role: z.enum(["student", "counselor", "admin"])
+  role: z.enum(["student", "counselor", "admin"]),
 });

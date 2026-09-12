@@ -47,7 +47,6 @@ export default function CounselorPage() {
       ),
   });
 
- 
   return (
     <div className="space-y-6 p-10">
       <div className="space-y-2">

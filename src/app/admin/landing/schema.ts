@@ -15,7 +15,7 @@ export const announcementInsertFormSchema = z.object({
     .string()
     .min(1, "Title is required")
     .max(100, "Title must not exceed 100 characters"),
-  announcement_image: z.string()
+  announcement_image: z.string(),
 });
 
 export const articleInsertFormSchema = z.object({

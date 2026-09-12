@@ -31,8 +31,7 @@ export default function ForgetPassword() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "PASSWORD_RECOVERY") {
         setStep("reset");
-      }
-      else if (event === "INITIAL_SESSION") {
+      } else if (event === "INITIAL_SESSION") {
         if (session) {
           setStep("reset");
         }
@@ -122,7 +121,11 @@ export default function ForgetPassword() {
               </emailForm.Field>
             </FieldGroup>
             <div className="flex w-full justify-end gap-4">
-              <Button variant="outline" type="button" onClick={() => router.back()}>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.back()}
+              >
                 Back
               </Button>
               <Button disabled={sendResetEmailMutation.isPending} type="submit">

@@ -105,7 +105,8 @@ export async function fetchCounselorProfile(
     await supabase
       .from("counselor_with_details")
       .select("*")
-      .eq("id", id).limit(1)
+      .eq("id", id)
+      .limit(1)
       .maybeSingle();
 
   if (counselorProfileError) throw counselorProfileError;
@@ -139,45 +140,44 @@ export async function fetchCounselorDeparments(
 export async function updateCounselorProfile(
   values: z.infer<typeof counselorUpdateFormSchema>,
 ) {
-  const supabase = createClient()
+  const supabase = createClient();
 
-  const { id, ...rest} = values
+  const { id, ...rest } = values;
 
   const { error } = await supabase
     .from("counselor")
     .update(rest)
     .eq("id", id)
-    .select("*").single();
+    .select("*")
+    .single();
 
   if (error) throw new DbError("Error updating counselor profile", error);
 }
 
 export async function updateCounselorAvailability(
-  values: TablesUpdate<"counselor">
+  values: TablesUpdate<"counselor">,
 ) {
-
-  const supabase = createClient()
+  const supabase = createClient();
 
   const { error } = await supabase
     .from("counselor")
     .update(values)
     .eq("id", values.id)
-    .select("*").single();
+    .select("*")
+    .single();
 
   if (error) throw new DbError("Error updating counselor availability", error);
 }
 
-export async function updateAppointment(
-  values: TablesUpdate<"appointment">
-) {
-
-  const supabase = createClient()
+export async function updateAppointment(values: TablesUpdate<"appointment">) {
+  const supabase = createClient();
 
   const { error } = await supabase
     .from("appointment")
     .update(values)
     .eq("id", values.id)
-    .select("*").single();
+    .select("*")
+    .single();
 
   if (error) throw new DbError("Error updating appointment", error);
 }

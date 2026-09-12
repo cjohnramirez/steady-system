@@ -45,9 +45,11 @@ export async function fetchOrganizationContact(): Promise<
 > {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from("organization_contact").select("*");
+  const { data, error } = await supabase
+    .from("organization_contact")
+    .select("*");
 
-   if (error) throw new DbError("Error fetching organization data", error);
+  if (error) throw new DbError("Error fetching organization data", error);
 
   return data ?? null;
 }

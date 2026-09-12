@@ -20,8 +20,8 @@ import { playlistInsertFormSchema } from "../schema";
 import { Label } from "@/components/ui/label";
 import FormEmotionalStatusField from "@/components/form-emotional-status-field";
 import { useEffect, useState } from "react";
-import { uploadToCloudinary } from "@/app/actions";
 import ImageUpload from "@/components/image-upload";
+import { useImageUpload } from "@/hooks/use-image-upload";
 
 interface AnnouncementModalProps {
   open: boolean;
@@ -33,8 +33,7 @@ export default function PlaylistAddModal({
   setOpen,
 }: AnnouncementModalProps) {
   const queryClient = useQueryClient();
-  const [file, setFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const image = useImageUpload("playlists");
 
   const updateMutation = useMutation({
     mutationFn: insertPlaylist,
@@ -61,25 +60,16 @@ export default function PlaylistAddModal({
       onChange: playlistInsertFormSchema,
     },
     onSubmit: async ({ value }) => {
-      let finalValues = { ...value };
-
-      if (file) {
-        setIsUploading(true);
-        try {
-          const result = await uploadToCloudinary(file, "playlists");
-
-          if (result && result.optimizedUrl) {
-            finalValues.image = result.optimizedUrl;
-          }
-        } catch (error) {
-          toast.error("Failed to upload playlist image");
-          setIsUploading(false);
-          return;
-        }
+      try {
+        const imageUrl = await image.resolveImageUrl(value.image);
+        updateMutation.mutate({ ...value, image: imageUrl });
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not upload the image.",
+        );
       }
-
-      setIsUploading(false);
-      updateMutation.mutate(finalValues);
     },
   });
 
@@ -94,7 +84,7 @@ export default function PlaylistAddModal({
         className="sm:max-w-[800px]"
         showCloseButton={false}
         onInteractOutside={(e) => {
-          if (isUploading) e.preventDefault();
+          if (image.isBusy) e.preventDefault();
         }}
       >
         <DialogHeader>
@@ -102,7 +92,7 @@ export default function PlaylistAddModal({
         </DialogHeader>
         <form
           className="grid grid-cols-[250px_auto_auto] grid-rows-[auto_auto_auto] gap-4 pt-5"
-          id="update-student-profile-form"
+          id="playlist-form"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
@@ -111,7 +101,7 @@ export default function PlaylistAddModal({
           <div className="row-span-3">
             <ImageUpload
               initialURL={form.state.values.image}
-              setFile={setFile}
+              setFile={image.setFile}
             />
           </div>
           <div className="col-span-2 flex h-full w-full gap-2">
@@ -160,11 +150,11 @@ export default function PlaylistAddModal({
         <DialogFooter>
           <Button
             type="submit"
-            disabled={updateMutation.isPending}
+            disabled={updateMutation.isPending || image.isBusy}
             form="update-student-profile-form"
           >
             {updateMutation.isPending ? <Spinner /> : "Add"}
-          </Button>   
+          </Button>
           <DialogClose asChild>
             <Button
               variant="outline"

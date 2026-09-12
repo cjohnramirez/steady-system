@@ -32,7 +32,7 @@ export default function AssignDepartmentModal({
   counselorId,
 }: AssignDepartmentModalProps) {
   const supabase = createClient();
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   const { data: departments } = useQuery({
     queryKey: ["counselor-departments", counselorId],
     queryFn: () => fetchCounselorDeparments(supabase, counselorId),
@@ -68,11 +68,10 @@ export default function AssignDepartmentModal({
     },
     onSubmit: async ({ value }) => {
       updateMutation.mutate(
-        value.departments.map(dept => ({ department_id: dept.id }))
+        value.departments.map((dept) => ({ department_id: dept.id })),
       );
     },
   });
-
 
   return (
     <Dialog
@@ -102,10 +101,7 @@ export default function AssignDepartmentModal({
           <div className="grid grid-cols-3 gap-4">
             {departments?.length !== 0 ? (
               departments?.map((department, idx) => (
-                <div
-                  key={idx}
-                  className="space-y-2 rounded-2xl border p-4"
-                >
+                <div key={idx} className="space-y-2 rounded-2xl border p-4">
                   <GraduationCap strokeWidth={1.25} />
                   <p>{department.title}</p>
                 </div>

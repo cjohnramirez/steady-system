@@ -53,7 +53,6 @@ export default function CounselorAppointmentTile({
     },
   });
 
-
   if (isLoading)
     return (
       <div className="flex flex-col gap-4 rounded-2xl border p-6">

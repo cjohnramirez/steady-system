@@ -14,7 +14,6 @@ type ConfirmState = {
   cancel: () => void;
 };
 
-
 export const useConfirmStore = create<ConfirmState>((set, get) => ({
   isOpen: false,
   isLoading: false,

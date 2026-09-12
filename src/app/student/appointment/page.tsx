@@ -9,6 +9,7 @@ import { createClient } from "@/utils/supabase/client";
 import { fetchAppointmentCounselor, insertAppointment } from "./actions";
 import { fetchOrganization } from "@/app/home/actions";
 import { useUserStore } from "@/hooks/auth-store";
+import { queryKeys } from "@/lib/query-keys";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -22,7 +23,7 @@ export default function AppointmentPage() {
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const getUserID = useUserStore.getState().id;
+  const getUserID = useUserStore((state) => state.id);
 
   const supabase = createClient();
 
@@ -40,12 +41,13 @@ export default function AppointmentPage() {
     data: appointmentCounselor,
     isLoading: isAppointmentCounselorLoading,
   } = useQuery<Tables<"counselor_with_details">[]>({
-    queryKey: ["appointment-counselor"],
+    queryKey: [...queryKeys.counselors, "for-student", getUserID],
+    enabled: Boolean(getUserID),
     queryFn: () => fetchAppointmentCounselor(getUserID, supabase),
   });
 
   const { data: organization } = useQuery({
-    queryKey: ["organization"],
+    queryKey: queryKeys.organization,
     queryFn: fetchOrganization,
   });
 
@@ -71,7 +73,15 @@ export default function AppointmentPage() {
     },
   });
 
-  if (!appointmentCounselor)
+  if (isAppointmentCounselorLoading || !getUserID) {
+    return (
+      <div className="flex h-[calc(100dvh-250px)] items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!appointmentCounselor || appointmentCounselor.length === 0)
     return (
       <div className="my-20 flex h-[calc(100dvh-250px)] flex-col items-center justify-center rounded-2xl">
         <div className="flex justify-start gap-10">
@@ -109,7 +119,8 @@ export default function AppointmentPage() {
             <div className="flex items-start gap-2">
               <Clock size={20} strokeWidth={1} />
               <p className="text-sm">
-                {parseTime(organization.start_office_hour)} - {parseTime(organization.end_office_hour)}
+                {parseTime(organization.start_office_hour)} -{" "}
+                {parseTime(organization.end_office_hour)}
               </p>
             </div>
           )}

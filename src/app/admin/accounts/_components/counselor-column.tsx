@@ -127,6 +127,6 @@ export const counselorColumn: ColumnDef<Tables<"counselor_with_details">>[] = [
         );
       }
       return <DepartmentCell />;
-    }
-  }
+    },
+  },
 ];

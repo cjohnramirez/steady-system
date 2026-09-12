@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/select";
 import { strToTitleCase } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 
 interface FieldMeta {
   isTouched: boolean;
@@ -39,7 +38,7 @@ interface FormDropdownInputProps<TValue = string> {
   enableDescription?: boolean;
 }
 
-const genderObj = ["male", "female", "non-binary", "prefer not to say"]
+const genderObj = ["male", "female", "non-binary", "prefer not to say"];
 
 export default function GenderField({
   field,

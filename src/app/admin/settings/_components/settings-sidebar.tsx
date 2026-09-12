@@ -41,7 +41,7 @@ export default function SettingsSidebar() {
           onChange={(e) => {
             handleSearch(e.target.value);
           }}
-          defaultValue={searchParams.get('query')?.toString()}
+          defaultValue={searchParams.get("query")?.toString()}
         />
       </InputGroup>
       <div className="flex flex-col gap-4 text-sm">

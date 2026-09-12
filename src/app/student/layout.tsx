@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import NavigationBar from "./_components/navigation";
+import NavigationBar from "@/components/navigation";
 import { guardPage } from "@/lib/auth/session";
 
 export default async function StudentLayout({

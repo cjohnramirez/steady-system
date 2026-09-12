@@ -60,14 +60,14 @@ export default function CounselorProfileModal({
       university_id: String(counselor?.university_id) || "",
       email: counselor?.email || "",
       phone: counselor?.phone ? String(counselor.phone) : "",
-      id: userID 
+      id: userID,
     },
     validators: {
       onChange: counselorUpdateFormSchema,
     },
     onSubmit: async ({ value }) => {
-      updateMutation.mutate(value)
-      useUserStore.setState({ userName: value.username })
+      updateMutation.mutate(value);
+      useUserStore.setState({ userName: value.username });
     },
   });
 
