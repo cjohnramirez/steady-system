@@ -2,7 +2,7 @@
 
 Title:
 
-    fix: audit sweep across auth, database, notifications and UI
+    feat: audit fixes and Steady rebrand
 
 ---
 
@@ -14,10 +14,11 @@ Title:
 - **Keys:** env vars are validated at startup, Cloudinary uploads are signed and go straight from the browser (no 1 MB limit), and deletes are admin-only.
 - **Workflows:** counselor accept, reject and reschedule work, landing CMS saves work, admin student edit validates, table sorting works, and export respects the row count.
 - **UI:** accessible brand amber, status tokens, shared components, mobile layouts, and [docs/ui-guidelines.md](ui-guidelines.md).
-- **Seed:** 150 students, 8 counselors, about 380 appointments, 112 content items with placeholder photos.
+- **Brand:** renamed to Steady with a new mark, generated icons, dark mode, an early access notice, and rewritten privacy policy and terms.
+- **Seed:** 150 students, 8 counselors, about 380 appointments, 112 content items with placeholder photos. Logins use `@steady.test`.
 
 ## Before merging
 
-- Add `/auth/callback` and `/auth/confirm` to Supabase redirect URLs.
-- Set the env vars from `.env.example` in Vercel.
+- Supabase Auth: set Site URL to the production domain and add `https://<domain>/**` to redirect URLs.
+- Vercel: set every variable in `.env.example`, with `NEXT_PUBLIC_APP_URL` as the production domain.
 - Run `node scripts/db/verify.mjs` against the target database.
