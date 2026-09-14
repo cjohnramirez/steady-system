@@ -9,7 +9,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { Notification } from "@/lib/notifications/queries";
@@ -51,11 +50,12 @@ export function NotificationBell({ userId }: { userId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        // overflow-hidden clips the tinted unread rows to the rounded corners;
-        // without it the last row squared off the bottom of the popover.
-        className="w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl p-0"
+        // overflow-hidden clips the tinted unread rows to the rounded corners.
+        // The popover is capped at the space left below the bell, and only the
+        // list scrolls, so the header stays put and nothing is cut off.
+        className="flex max-h-[min(32rem,calc(var(--radix-popover-content-available-height)-1rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl p-0"
       >
-        <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
           <h2 className="font-medium">Notifications</h2>
           {unread > 0 && (
             <Button
@@ -85,7 +85,9 @@ export function NotificationBell({ userId }: { userId: string }) {
             <p>You&apos;re all caught up.</p>
           </div>
         ) : (
-          <ScrollArea className="max-h-96">
+          // A native scroller: max-h on a Radix ScrollArea root never limited its
+          // viewport, so long lists overflowed the popover instead of scrolling.
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
             <ul className="divide-y">
               {items.map((item) => (
                 <NotificationRow
@@ -96,7 +98,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                 />
               ))}
             </ul>
-          </ScrollArea>
+          </div>
         )}
       </PopoverContent>
     </Popover>

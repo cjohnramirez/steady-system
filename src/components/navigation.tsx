@@ -1,8 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, LayoutDashboard, LogOut, Menu } from "lucide-react";
+import {
+  BookOpen,
+  CalendarCheck,
+  ChevronDown,
+  HandHeart,
+  House,
+  Info,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
+  Megaphone,
+  Menu,
+  Music,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -25,7 +41,21 @@ import { NotificationBell } from "@/components/notification-bell";
 import { useViewer } from "@/components/viewer-provider";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { ROLE_HOME, ROLE_LOGIN } from "@/lib/auth/roles";
-import type { NavBar } from "@/app/home/_lib/nav-data";
+import { cn } from "@/lib/utils";
+import type { NavBar, NavIcon } from "@/app/home/_lib/nav-data";
+
+const NAV_ICONS: Record<NavIcon, LucideIcon> = {
+  home: House,
+  about: Info,
+  services: HandHeart,
+  announcements: Megaphone,
+  appointment: CalendarCheck,
+  articles: BookOpen,
+  playlists: Music,
+};
+
+/** Full-width outline button with its icon on the left, used in the menu sheet. */
+const SHEET_BUTTON = "h-11 w-full justify-start gap-3 px-4";
 
 const ROLE_CTA = {
   admin: "Admin dashboard",
@@ -57,7 +87,14 @@ export default function NavigationBar({
       aria-label="Main"
       className="bg-card/95 supports-backdrop-filter:bg-card/80 sticky top-0 z-40 border-b backdrop-blur"
     >
-      <div className="m-auto flex h-18 max-w-[1600px] items-center justify-between gap-4 px-4 md:px-8">
+      {/* With section links, a 1fr/auto/1fr grid keeps them centred on the
+          viewport; plain justify-between centred them between two unequal sides. */}
+      <div
+        className={cn(
+          "m-auto flex h-18 max-w-[1600px] items-center justify-between gap-4 px-4 md:px-8",
+          navBarObj.length > 0 && "lg:grid lg:grid-cols-[1fr_auto_1fr]",
+        )}
+      >
         <BrandMark />
 
         {navBarObj.length > 0 && (
@@ -75,7 +112,7 @@ export default function NavigationBar({
           </ul>
         )}
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-self-end">
           {viewer ? (
             <>
               <NotificationBell userId={viewer.userId} />
@@ -165,44 +202,81 @@ export default function NavigationBar({
                   </div>
                 )}
                 {navBarObj.length > 0 && (
-                  <ul className="flex flex-col">
-                    {navBarObj.map((item) => (
-                      <li key={item.title}>
-                        <a
-                          href={item.link}
-                          className="hover:bg-muted block rounded-md px-3 py-3"
-                        >
-                          {item.title}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                  <ButtonGroup
+                    orientation="vertical"
+                    aria-label="On this page"
+                    className="w-full"
+                  >
+                    {navBarObj.map((item) => {
+                      const Icon = NAV_ICONS[item.icon];
+                      return (
+                        <SheetClose key={item.title} asChild>
+                          <Button
+                            variant="outline"
+                            className={SHEET_BUTTON}
+                            asChild
+                          >
+                            <a href={item.link}>
+                              <Icon aria-hidden />
+                              {item.title}
+                            </a>
+                          </Button>
+                        </SheetClose>
+                      );
+                    })}
+                  </ButtonGroup>
                 )}
-                <div className="flex flex-col gap-2">
+                <ButtonGroup
+                  orientation="vertical"
+                  aria-label="Account"
+                  className="w-full"
+                >
                   {viewer ? (
                     <>
-                      <Button asChild>
+                      <Button
+                        variant="outline"
+                        className={SHEET_BUTTON}
+                        asChild
+                      >
                         <Link href={ROLE_HOME[viewer.role]}>
+                          <LayoutDashboard aria-hidden />
                           {ROLE_CTA[viewer.role]}
                         </Link>
                       </Button>
-                      <Button variant="outline" onClick={() => void signOut()}>
+                      <Button
+                        variant="outline"
+                        className={SHEET_BUTTON}
+                        onClick={() => void signOut()}
+                      >
+                        <LogOut aria-hidden />
                         Log out
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button asChild>
+                      <Button
+                        variant="outline"
+                        className={SHEET_BUTTON}
+                        asChild
+                      >
                         <Link href="/student/appointment">
+                          <CalendarCheck aria-hidden />
                           Book an appointment
                         </Link>
                       </Button>
-                      <Button variant="outline" asChild>
-                        <Link href={ROLE_LOGIN.student}>Log in</Link>
+                      <Button
+                        variant="outline"
+                        className={SHEET_BUTTON}
+                        asChild
+                      >
+                        <Link href={ROLE_LOGIN.student}>
+                          <LogIn aria-hidden />
+                          Log in
+                        </Link>
                       </Button>
                     </>
                   )}
-                </div>
+                </ButtonGroup>
               </div>
             </SheetContent>
           </Sheet>
