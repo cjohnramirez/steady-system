@@ -81,7 +81,10 @@ export default function NavigationBar({
               <NotificationBell userId={viewer.userId} />
               <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="hidden gap-2 px-2 md:flex">
+                  <Button
+                    variant="outline"
+                    className="hidden gap-2 px-2 md:flex"
+                  >
                     <UserAvatar
                       name={fullName || viewer.userName}
                       src={viewer.avatar}

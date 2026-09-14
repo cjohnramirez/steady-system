@@ -55,7 +55,7 @@ export default function NavigationBar() {
             <BrandMark href="/admin/dashboard" />
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="gap-2 px-2">
+                <Button variant="outline" className="gap-2 px-2">
                   <UserAvatar name={fullName} src={viewer.avatar} size="xs" />
                   <span className="max-w-40 truncate">{viewer.userName}</span>
                   <ChevronDown aria-hidden />
@@ -94,7 +94,7 @@ export default function NavigationBar() {
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
                       aria-label="About this system"
                     >

@@ -1,11 +1,17 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
+/**
+ * Circle size and initials size per avatar size. The text size has to sit on the
+ * fallback itself: AvatarFallback sets its own text-sm, which overrode a size set
+ * on the root, so every avatar showed 14px initials and the 24px nav avatar
+ * overflowed.
+ */
 const SIZES = {
-  xs: "size-6 text-[10px]",
-  sm: "size-10 text-sm",
-  md: "size-20 text-xl",
-  lg: "size-28 text-3xl md:size-36",
+  xs: { box: "size-6", text: "text-[9px]" },
+  sm: { box: "size-10", text: "text-xs" },
+  md: { box: "size-20", text: "text-base" },
+  lg: { box: "size-28 md:size-36", text: "text-xl" },
 } as const;
 
 /**
@@ -33,10 +39,13 @@ export function UserAvatar({
     .join("");
 
   return (
-    <Avatar className={cn(SIZES[size], className)}>
+    <Avatar className={cn(SIZES[size].box, className)}>
       {src ? <AvatarImage src={src} alt="" className="object-cover" /> : null}
       <AvatarFallback
-        className="from-brand-light to-brand text-brand-foreground bg-linear-to-t font-medium"
+        className={cn(
+          "from-brand-light to-brand text-brand-foreground bg-linear-to-t font-medium tracking-wide",
+          SIZES[size].text,
+        )}
         aria-label={name}
       >
         {initials}

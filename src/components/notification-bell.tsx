@@ -33,7 +33,7 @@ export function NotificationBell({ userId }: { userId: string }) {
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
           className="relative"
           aria-label={label}
@@ -51,13 +51,15 @@ export function NotificationBell({ userId }: { userId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[min(24rem,calc(100vw-2rem))] p-0"
+        // overflow-hidden clips the tinted unread rows to the rounded corners;
+        // without it the last row squared off the bottom of the popover.
+        className="w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl p-0"
       >
         <div className="flex items-center justify-between gap-2 border-b px-4 py-3">
           <h2 className="font-medium">Notifications</h2>
           {unread > 0 && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => markAllRead.mutate()}
               disabled={markAllRead.isPending}

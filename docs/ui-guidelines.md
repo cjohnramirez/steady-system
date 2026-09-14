@@ -105,6 +105,9 @@ Choices between similar primitives:
 - On/off setting → `Switch`, not a Select with "Active/Inactive".
 - Destructive or irreversible → `useConfirm({ destructive: true })`.
 - Mobile navigation → `Sheet`.
+- Standalone secondary buttons (including icon buttons in the nav) → `outline`, so
+  they carry the same border on white and grey surfaces. `ghost` is only for
+  buttons inside tables, menus and list rows.
 
 ## 6. Icons
 
