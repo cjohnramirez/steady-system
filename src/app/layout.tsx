@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import { Toaster } from "sonner";
+import { BRAND } from "@/lib/brand";
+import { clientEnv } from "@/lib/env/client";
+import { Toaster } from "@/components/ui/sonner";
 import TrackHomePage from "@/components/tracker";
-import ConfirmModal from "@/components/confirm-modal";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,11 +18,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#141210" },
+  ],
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gcs-system.vercel.app/"),
-  title: "GCS System | University Guidance & Counseling",
-  description:
-    "Official Guidance and Counseling Services platform for students, providing announcements, workshops, and Counseling sessions.",
+  // From the environment, so moving to a new domain needs no code change.
+  metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
+  title: {
+    default: `${BRAND.name} | ${BRAND.tagline}`,
+    template: `%s | ${BRAND.name}`,
+  },
+  description: BRAND.description,
+  applicationName: BRAND.name,
   keywords: [
     "Guidance",
     "Counseling",
@@ -29,33 +44,21 @@ export const metadata: Metadata = {
     "Workshops",
     "Announcements",
   ],
-  authors: [{ name: "University GCS Unit" }],
-  creator: "University GCS Unit",
-  publisher: "University GCS Unit",
   verification: {
     google: "YW8hRYwXwmkr7hv5hBSVypGhAUlXzyz4hUmphqjMf-A",
   },
+  // The card image comes from opengraph-image.tsx.
   openGraph: {
-    title: "GCS System | University Guidance & Counseling",
-    description:
-      "Stay updated with announcements, events, and Counseling programs from the Guidance and Counseling Services Unit.",
-    url: "https://gcs-system.vercel.app/",
-    siteName: "GCS System",
-    images: [
-      {
-        url: "/home-page.png",
-        width: 1918,
-        height: 1198,
-      },
-    ],
+    title: `${BRAND.name} | ${BRAND.tagline}`,
+    description: BRAND.description,
+    url: clientEnv.NEXT_PUBLIC_APP_URL,
+    siteName: BRAND.name,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GCS System | University Guidance & Counseling",
-    description:
-      "Official platform for announcements, events, and Counseling sessions.",
-    images: "/home-page.png",
+    title: `${BRAND.name} | ${BRAND.tagline}`,
+    description: BRAND.description,
   },
 };
 
@@ -65,14 +68,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // next-themes adds the theme class before hydration; without this React warns
+    // that the server-rendered <html> attributes differ.
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} h-full w-full bg-gray-50 font-sans text-sm antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-background min-h-dvh font-sans text-sm antialiased`}
       >
-        <Toaster position="top-left" className="font-normal" />
-        <ConfirmModal />
-        <TrackHomePage />
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Toaster position="bottom-right" closeButton />
+          <ConfirmDialog />
+          <TrackHomePage />
+        </Providers>
       </body>
     </html>
   );

@@ -1,49 +1,45 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useUserStore } from "@/hooks/auth-store";
-import { useConfirmStore } from "@/hooks/confirm-store";
+import { useConfirm } from "@/hooks/use-confirm";
 import { createClient } from "@/utils/supabase/client";
 
 /**
  * Confirms, then ends the session.
  *
- * Each of the three navigation bars used to carry its own copy of this, and the
- * copies had drifted. All of them cleared only the name and the role from the
- * persisted store, leaving the previous user's id and mood behind for whoever
- * signed in next on the same browser. Two of them threw on failure, which reached
- * the global error boundary rather than telling the user anything useful, and two
- * called window.location.reload() instead of navigating.
+ * Two things the previous version missed. The React Query cache survived sign-out,
+ * and because most keys did not include a user id, the next person to sign in on
+ * the same browser saw the previous user's profile and appointments until each
+ * query went stale. And the default global scope signed the user out on every
+ * device, not just this one.
  */
 export function useSignOut() {
   const router = useRouter();
-  const { confirm, startLoading, stopLoading } = useConfirmStore();
+  const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   return async function signOut() {
-    const ok = await confirm(
-      "Log out?",
-      "Are you sure you want to log out? This will end your current session.",
-    );
+    const ok = await confirm({
+      title: "Log out?",
+      description: "You will need to sign in again to see your dashboard.",
+      confirmLabel: "Log out",
+    });
 
     if (!ok) return;
 
-    startLoading();
-
-    const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
+    const { error } = await createClient().auth.signOut({ scope: "local" });
 
     if (error) {
-      stopLoading();
       toast.error("Could not sign you out. Please try again.");
       return;
     }
 
-    useUserStore.getState().reset();
-    stopLoading();
+    queryClient.clear();
 
     // replace, not push, so Back does not return to a page the session no longer
-    // has access to.
+    // has access to. refresh re-runs the layouts, which re-read the viewer.
     router.replace("/home");
     router.refresh();
   };

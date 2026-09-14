@@ -1,5 +1,6 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import NavigationBar from "@/components/navigation";
+import { ViewerProvider } from "@/components/viewer-provider";
 import { guardPage } from "@/lib/auth/session";
 
 export default async function StudentLayout({
@@ -7,12 +8,14 @@ export default async function StudentLayout({
 }: {
   children: ReactNode;
 }) {
-  await guardPage("student");
+  const viewer = await guardPage("student");
 
   return (
-    <>
+    <ViewerProvider viewer={viewer}>
       <NavigationBar />
-      <div className="m-auto max-w-[1600px] px-15">{children}</div>
-    </>
+      <main className="m-auto max-w-[1600px] px-4 py-6 md:px-8 md:py-10">
+        {children}
+      </main>
+    </ViewerProvider>
   );
 }

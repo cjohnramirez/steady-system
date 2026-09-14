@@ -1,39 +1,43 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
-import { type NextRequest } from "next/server";
-import { redirect } from "next/navigation";
-
+import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import { safeNextPath } from "@/lib/auth/redirect";
 
+const ALLOWED_TYPES: EmailOtpType[] = [
+  "email",
+  "recovery",
+  "magiclink",
+  "invite",
+  "signup",
+];
+
+/**
+ * Verifies `token_hash` links, for email templates that use
+ * `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=...`. Unlike the
+ * PKCE links handled by /auth/callback, these work on any device.
+ */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams, origin } = new URL(request.url);
+  const tokenHash = searchParams.get("token_hash");
+  const typeParam = searchParams.get("type") as EmailOtpType | null;
+  const type =
+    typeParam && ALLOWED_TYPES.includes(typeParam) ? typeParam : null;
+  // startsWith("/") used to accept //evil.example, an open redirect.
+  const next = safeNextPath(
+    searchParams.get("next"),
+    type === "recovery" ? "/auth/reset-password" : "/home",
+  );
 
-  const token_hash = searchParams.get("token_hash");
-
-  const typeParam = searchParams.get("type");
-  const allowedTypes: EmailOtpType[] = [
-    "email",
-    "recovery",
-    "magiclink",
-    "invite",
-  ];
-  const type = allowedTypes.includes(typeParam as EmailOtpType)
-    ? (typeParam as EmailOtpType)
-    : null;
-
-  const nextParam = searchParams.get("next");
-  const next = nextParam?.startsWith("/") ? nextParam : "/";
-
-  if (token_hash && type) {
+  if (tokenHash && type) {
     const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({
-      token_hash,
+      token_hash: tokenHash,
       type,
     });
-
-    if (!error) {
-      redirect(next);
-    }
+    if (!error) return NextResponse.redirect(`${origin}${next}`);
   }
 
-  redirect("/");
+  return NextResponse.redirect(
+    `${origin}/auth/login/student?error=link-expired`,
+  );
 }

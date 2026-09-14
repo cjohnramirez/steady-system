@@ -1,17 +1,21 @@
+import type { ReactNode } from "react";
 import NavigationBar from "@/components/navigation";
+import { ViewerProvider } from "@/components/viewer-provider";
 import { guardPage } from "@/lib/auth/session";
 
 export default async function CounselorLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  await guardPage("counselor");
+}: {
+  children: ReactNode;
+}) {
+  const viewer = await guardPage("counselor");
 
   return (
-    <>
+    <ViewerProvider viewer={viewer}>
       <NavigationBar />
-      <div className="m-auto max-w-[1400px] px-15">{children}</div>
-    </>
+      <main className="m-auto max-w-[1400px] px-4 py-6 md:px-8 md:py-10">
+        {children}
+      </main>
+    </ViewerProvider>
   );
 }

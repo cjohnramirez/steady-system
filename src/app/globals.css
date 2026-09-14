@@ -41,8 +41,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-brand-light: oklch(0.8653 0.1162 75.55);
-  --color-brand-normal: oklch(0.772 0.1738 64.55);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-light: var(--brand-light);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-approved: var(--status-approved);
+  --color-status-approved-foreground: var(--status-approved-foreground);
+  --color-status-completed: var(--status-completed);
+  --color-status-completed-foreground: var(--status-completed-foreground);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-foreground: var(--status-cancelled-foreground);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-rejected-foreground: var(--status-rejected-foreground);
 }
 
 :root {
@@ -51,8 +64,9 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Primary is the brand amber, so Button, Badge, Calendar and focus rings agree. */
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -62,7 +76,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.72 0.12 65);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -76,44 +90,92 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
+  /* Off-white page, white cards. Cards separate from the page by border, not shadow. */
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
-  --color-brand-light: oklch(0.8653 0.1162 75.55);
-  --color-brand-normal: oklch(0.772 0.1738 64.55);
+
+  /*
+   * Brand. White text on --brand is 4.84:1 and on --brand-hover 6.25:1 (WCAG AA).
+   * The previous amber, oklch(0.772 0.1738 64.55), was about 2:1 with white text.
+   * Check any change with: node scripts/contrast.mjs "<L C H>"
+   */
+  --brand: oklch(0.56 0.13 60);
+  --brand-hover: oklch(0.5 0.12 56);
+  --brand-foreground: oklch(1 0 0);
+  /* Decorative only: avatar gradients, highlights. Never behind text. */
+  --brand-light: oklch(0.8653 0.1162 75.55);
+  /* Tinted surfaces such as an unread notification row. */
+  --brand-subtle: oklch(0.975 0.025 80);
+
+  /* Appointment status. Each foreground is at least 5.4:1 on its background. */
+  --status-pending: oklch(0.96 0.05 85);
+  --status-pending-foreground: oklch(0.45 0.1 60);
+  --status-approved: oklch(0.95 0.05 150);
+  --status-approved-foreground: oklch(0.42 0.1 150);
+  --status-completed: oklch(0.95 0.03 250);
+  --status-completed-foreground: oklch(0.45 0.1 255);
+  --status-cancelled: oklch(0.96 0 0);
+  --status-cancelled-foreground: oklch(0.45 0 0);
+  --status-rejected: oklch(0.95 0.04 25);
+  --status-rejected-foreground: oklch(0.5 0.17 25);
 }
 
+/*
+ * Dark theme. Neutrals lean slightly warm (hue 60) so the amber sits naturally on
+ * them. The brand amber is unchanged, so primary buttons keep white text at 4.84:1;
+ * only tints (subtle rows, status badges) are re-derived for a dark ground.
+ * Status foregrounds are all 8:1 or better on their backgrounds.
+ */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  color-scheme: dark;
+  --background: oklch(0.16 0.004 60);
+  --foreground: oklch(0.97 0.003 80);
+  --card: oklch(0.205 0.005 60);
+  --card-foreground: oklch(0.97 0.003 80);
+  --popover: oklch(0.225 0.005 60);
+  --popover-foreground: oklch(0.97 0.003 80);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
+  --secondary: oklch(0.26 0.006 60);
+  --secondary-foreground: oklch(0.97 0.003 80);
+  --muted: oklch(0.26 0.006 60);
+  --muted-foreground: oklch(0.72 0.01 70);
+  --accent: oklch(0.26 0.006 60);
+  --accent-foreground: oklch(0.97 0.003 80);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.62 0.12 65);
+  --chart-1: oklch(0.7 0.16 55);
+  --chart-2: oklch(0.7 0.1 185);
+  --chart-3: oklch(0.72 0.08 230);
+  --chart-4: oklch(0.83 0.16 85);
+  --chart-5: oklch(0.77 0.17 70);
+  --sidebar: oklch(0.205 0.005 60);
+  --sidebar-foreground: oklch(0.97 0.003 80);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-foreground);
+  --sidebar-accent: oklch(0.26 0.006 60);
+  --sidebar-accent-foreground: oklch(0.97 0.003 80);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: oklch(0.62 0.12 65);
+
+  --brand: oklch(0.56 0.13 60);
+  --brand-hover: oklch(0.62 0.13 62);
+  --brand-foreground: oklch(1 0 0);
+  --brand-light: oklch(0.8653 0.1162 75.55);
+  --brand-subtle: oklch(0.25 0.035 70);
+
+  --status-pending: oklch(0.3 0.05 75);
+  --status-pending-foreground: oklch(0.86 0.1 80);
+  --status-approved: oklch(0.29 0.05 150);
+  --status-approved-foreground: oklch(0.85 0.1 150);
+  --status-completed: oklch(0.29 0.04 255);
+  --status-completed-foreground: oklch(0.85 0.07 250);
+  --status-cancelled: oklch(0.29 0 0);
+  --status-cancelled-foreground: oklch(0.82 0 0);
+  --status-rejected: oklch(0.3 0.06 25);
+  --status-rejected-foreground: oklch(0.84 0.09 25);
 }
 
 @layer base {
@@ -126,6 +188,23 @@
 }
 
 html {
+  color-scheme: light;
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+}
+
+/*
+ * Dialogs, sheets, selects and menus lock scrolling with react-remove-scroll, which
+ * adds the scrollbar's width to the body as margin so the page doesn't widen. The
+ * stable gutter above already keeps that space, so the margin counted it twice and
+ * every overlay shifted the page 15px. The extra "html" wins over its injected rule.
+ */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+  --removed-body-scroll-bar-size: 0px;
+}
+
+/* A stray wide element must never make the whole page scroll sideways on a phone. */
+body {
+  overflow-x: clip;
 }

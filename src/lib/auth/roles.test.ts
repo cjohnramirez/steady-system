@@ -5,6 +5,7 @@ import {
   ROLE_HOME,
   ROLE_LOGIN,
   isRole,
+  pathHasPrefix,
   roleForPath,
 } from "./roles";
 
@@ -45,5 +46,21 @@ describe("role routing", () => {
     expect(isRole("superuser")).toBe(false);
     expect(isRole(null)).toBe(false);
     expect(isRole(undefined)).toBe(false);
+  });
+});
+
+describe("path matching", () => {
+  // `startsWith` treated /students and /administrator as role areas and /authors
+  // as public. A prefix only owns a path when it ends on a segment boundary.
+  it("matches whole segments only", () => {
+    expect(pathHasPrefix("/student", "/student")).toBe(true);
+    expect(pathHasPrefix("/student/appointment", "/student")).toBe(true);
+    expect(pathHasPrefix("/students", "/student")).toBe(false);
+    expect(pathHasPrefix("/authors", "/auth")).toBe(false);
+  });
+
+  it("does not assign look-alike paths to a role", () => {
+    expect(roleForPath("/students")).toBeNull();
+    expect(roleForPath("/administrator")).toBeNull();
   });
 });

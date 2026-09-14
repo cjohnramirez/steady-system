@@ -53,32 +53,32 @@ export const APPOINTMENT_STATUS_PRESENTATION: Record<
 > = {
   pending: {
     label: "Pending",
-    dot: "bg-amber-500",
-    badge: "bg-amber-100 text-amber-900",
+    dot: "bg-status-pending-foreground",
+    badge: "bg-status-pending text-status-pending-foreground",
     description: "Waiting for the counselor to respond.",
   },
   approved: {
     label: "Approved",
-    dot: "bg-blue-500",
-    badge: "bg-blue-100 text-blue-900",
+    dot: "bg-status-approved-foreground",
+    badge: "bg-status-approved text-status-approved-foreground",
     description: "Confirmed and on the calendar.",
   },
   completed: {
     label: "Completed",
-    dot: "bg-green-500",
-    badge: "bg-green-100 text-green-900",
+    dot: "bg-status-completed-foreground",
+    badge: "bg-status-completed text-status-completed-foreground",
     description: "The session has taken place.",
   },
   cancelled: {
     label: "Cancelled",
-    dot: "bg-gray-400",
-    badge: "bg-gray-100 text-gray-800",
+    dot: "bg-status-cancelled-foreground",
+    badge: "bg-status-cancelled text-status-cancelled-foreground",
     description: "Called off by the student.",
   },
   rejected: {
-    label: "Rejected",
-    dot: "bg-red-500",
-    badge: "bg-red-100 text-red-900",
+    label: "Declined",
+    dot: "bg-status-rejected-foreground",
+    badge: "bg-status-rejected text-status-rejected-foreground",
     description: "Declined by the counselor.",
   },
 };
@@ -98,11 +98,11 @@ export function appointmentStatusLabel(value: unknown): string {
 export function appointmentStatusDot(value: unknown): string {
   return isAppointmentStatus(value)
     ? APPOINTMENT_STATUS_PRESENTATION[value].dot
-    : "bg-gray-300";
+    : "bg-muted-foreground";
 }
 
 export function appointmentStatusBadge(value: unknown): string {
   return isAppointmentStatus(value)
     ? APPOINTMENT_STATUS_PRESENTATION[value].badge
-    : "bg-gray-100 text-gray-800";
+    : "bg-muted text-muted-foreground";
 }

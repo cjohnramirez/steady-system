@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
 import { roles } from "@/types/main";
 import { isRole, ROLE_HOME, ROLE_LOGIN } from "./roles";
+import { AuthorizationError } from "./errors";
+import { getViewer } from "./get-viewer";
+import type { Viewer } from "./viewer";
 
 export type SessionUser = {
   id: string;
@@ -9,19 +12,7 @@ export type SessionUser = {
   role: roles | null;
 };
 
-/**
- * Thrown when a caller is missing or holds the wrong role. Carries an HTTP-ish
- * status so a route handler can map it without re-inspecting the message.
- */
-export class AuthorizationError extends Error {
-  readonly status: 401 | 403;
-
-  constructor(message: string, status: 401 | 403) {
-    super(message);
-    this.name = "AuthorizationError";
-    this.status = status;
-  }
-}
+export { AuthorizationError } from "./errors";
 
 /**
  * The verified caller, or null if there is no session.
@@ -120,19 +111,47 @@ export async function requireRole(...allowed: roles[]): Promise<SessionUser> {
 }
 
 /**
- * Layout and page equivalent of `requireRole`: redirects rather than throwing, so a
- * visitor in the wrong place gets moved somewhere useful instead of an error screen.
+ * Layout equivalent of `requireRole`: redirects rather than throwing, and returns
+ * the full viewer so the layout can hand it to client components.
  *
- * Use this in the role layouts. It duplicates what middleware already enforces on
- * purpose, so that a matcher change or a middleware bug cannot silently expose a
- * whole area.
+ * It duplicates what the proxy already enforces on purpose, so that a matcher
+ * change or a proxy bug cannot silently expose a whole area.
  */
-export async function guardPage(...allowed: roles[]): Promise<SessionUser> {
-  const user = await getSessionUser();
+export async function guardPage(...allowed: roles[]): Promise<Viewer> {
+  const viewer = await getViewer();
 
-  if (!user) redirect(ROLE_LOGIN[allowed[0] ?? "student"]);
-  if (!user.role) redirect("/error?reason=no-role");
-  if (!allowed.includes(user.role)) redirect(ROLE_HOME[user.role]);
+  if (!viewer) {
+    const user = await getSessionUser();
+    if (!user) redirect(ROLE_LOGIN[allowed[0] ?? "student"]);
+    // Signed in, but with no role or no profile row to go with it.
+    redirect(user.role ? "/error?reason=no-profile" : "/error?reason=no-role");
+  }
 
-  return user;
+  if (!allowed.includes(viewer.role)) redirect(ROLE_HOME[viewer.role]);
+
+  return viewer;
+}
+
+/** How long a reset link's session may be used to set a new password. */
+const RECOVERY_WINDOW_SECONDS = 60 * 60;
+
+/**
+ * True when the current session was opened by a password-reset link in the last
+ * hour. Without this check, anyone holding an ordinary session (say, on a shared
+ * computer) could set a new password without knowing the current one.
+ */
+export async function isRecoverySession(): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const amr = (data?.claims?.amr ?? []) as {
+    method: string;
+    timestamp: number;
+  }[];
+  const now = Math.floor(Date.now() / 1000);
+
+  return amr.some(
+    (entry) =>
+      entry.method === "recovery" &&
+      now - entry.timestamp < RECOVERY_WINDOW_SECONDS,
+  );
 }

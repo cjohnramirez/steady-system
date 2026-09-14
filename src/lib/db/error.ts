@@ -21,13 +21,3 @@ export class DbError extends Error {
     this.hint = cause.hint;
   }
 }
-
-/** Throws a DbError when the query failed, otherwise returns the rows. */
-export function unwrap<T>(
-  result: { data: T | null; error: PostgrestError | null },
-  message: string,
-): T {
-  if (result.error) throw new DbError(message, result.error);
-  if (result.data === null) throw new Error(`${message}: no data returned`);
-  return result.data;
-}

@@ -1,4 +1,6 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { serverEnv } from "@/lib/env/server";
 import { Database } from "@/types/supabase";
 
 /**
@@ -20,20 +22,15 @@ import { Database } from "@/types/supabase";
  * on behalf of an admin ended up replacing the admin's own session.
  */
 export function createServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      "Supabase service client is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY.",
-    );
-  }
-
-  return createClient<Database>(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-      detectSessionInUrl: false,
+  return createClient<Database>(
+    serverEnv.NEXT_PUBLIC_SUPABASE_URL,
+    serverEnv.SUPABASE_SERVICE_KEY,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
     },
-  });
+  );
 }

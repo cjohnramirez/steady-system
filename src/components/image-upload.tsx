@@ -1,101 +1,99 @@
 "use client";
 
-import { Upload, X } from "lucide-react";
-import { Label } from "./ui/label";
-import { useCallback, useState } from "react";
-import clsx from "clsx";
-import { useDropzone } from "react-dropzone";
-import { CldImage } from "next-cloudinary";
+import { useId } from "react";
 import Image from "next/image";
+import { useDropzone, type FileRejection } from "react-dropzone";
+import { ImageUp, X } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { MAX_IMAGE_BYTES } from "@/hooks/use-image-upload";
+import { cn } from "@/lib/utils";
 
+/**
+ * Choose, preview or remove one image. Uploading happens on save, through
+ * useImageUpload.
+ */
 export default function ImageUpload({
-  initialURL,
-  setFile,
-  setIsDeleted,
+  preview,
+  onChange,
+  label = "Image",
+  className,
 }: {
-  initialURL: string;
-  setFile: (file: File | null) => void;
-  setIsDeleted?: (isDeleted: boolean) => void;
+  preview: string | null;
+  onChange: (file: File | null) => void;
+  label?: string;
+  className?: string;
 }) {
-  const [preview, setPreview] = useState<string | null>(initialURL || null);
-
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      const selectedFile = acceptedFiles[0];
-      if (selectedFile) {
-        setFile(selectedFile);
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setPreview(objectUrl);
-      }
-    },
-    [setFile],
-  );
+  const labelId = useId();
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
     accept: {
-      "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"],
+      "image/jpeg": [],
+      "image/png": [],
+      "image/webp": [],
+      "image/gif": [],
     },
+    maxSize: MAX_IMAGE_BYTES,
     multiple: false,
+    onDropAccepted: ([file]) => onChange(file),
+    onDropRejected: ([rejection]: FileRejection[]) => {
+      const tooBig = rejection?.errors.some((e) => e.code === "file-too-large");
+      toast.error(
+        tooBig
+          ? "Images must be 5 MB or smaller."
+          : "Use a JPG, PNG, WebP or GIF image.",
+      );
+    },
   });
 
   return (
-    <div className="row-span-3 flex aspect-square flex-col gap-4">
-      <Label>Image</Label>
-
+    <div className={cn("flex flex-col gap-2", className)}>
+      <span id={labelId} className="text-sm font-medium">
+        {label}
+      </span>
       <div
-        {...getRootProps()}
-        className={clsx(
-          "relative h-full overflow-hidden rounded-2xl border p-2 transition-colors",
-          isDragActive && "border-blue-500 bg-blue-50",
+        {...getRootProps({ "aria-labelledby": labelId })}
+        className={cn(
+          "bg-muted/40 focus-visible:ring-ring/50 relative flex aspect-video cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed outline-none focus-visible:ring-[3px]",
+          isDragActive && "border-primary bg-brand-subtle",
         )}
       >
+        <input {...getInputProps()} />
         {preview ? (
-          <div className="relative h-full w-full">
-            <button
+          <>
+            <Image
+              src={preview}
+              alt=""
+              fill
+              sizes="(min-width: 640px) 320px, 100vw"
+              className="object-cover"
+              unoptimized={preview.startsWith("blob:")}
+            />
+            <Button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setPreview(null);
-                setFile(null);
-                if (setIsDeleted) {
-                  setIsDeleted(true);
-                }
+              variant="secondary"
+              size="icon-sm"
+              className="absolute top-2 right-2"
+              aria-label="Remove image"
+              onClick={(event) => {
+                event.stopPropagation();
+                onChange(null);
               }}
-              className="absolute top-2 right-2 z-10 cursor-pointer rounded-full border bg-white p-1 shadow-sm hover:bg-gray-100"
             >
-              <X strokeWidth={1.25} size={20} />
-            </button>
-
-            {preview.startsWith("http") ? (
-              <CldImage
-                alt={"preview"}
-                src={preview}
-                fill
-                className="rounded-lg object-cover"
-              />
-            ) : (
-              <Image
-                alt="preview"
-                src={preview}
-                fill
-                className="rounded-lg object-cover"
-              />
-            )}
-          </div>
+              <X />
+            </Button>
+          </>
         ) : (
-          <div className="flex h-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-gray-400 p-4 text-center">
-            <Upload strokeWidth={1.25} />
-            <p>Click or drag to upload image</p>
-            <p className="text-xs text-gray-500">
+          <div className="text-muted-foreground flex flex-col items-center gap-2 p-4 text-center">
+            <ImageUp aria-hidden strokeWidth={1.25} className="size-8" />
+            <p>
               {isDragActive
-                ? "Drop the file here"
-                : "PNG, JPG, WebP or GIF, up to 5 MB"}
+                ? "Drop the image here"
+                : "Click or drag an image here"}
             </p>
+            <p className="text-xs">JPG, PNG, WebP or GIF, up to 5 MB</p>
           </div>
         )}
-
-        <input {...getInputProps()} disabled={false} />
       </div>
     </div>
   );

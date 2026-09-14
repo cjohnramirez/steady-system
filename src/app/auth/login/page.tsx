@@ -1,14 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
+import { ROLE_LOGIN } from "@/lib/auth/roles";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-export default function LoginRedirect() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.push("/auth/login/student");
-  }, [router]);
-
-  return null;
+export default function LoginIndex() {
+  redirect(ROLE_LOGIN.student);
 }

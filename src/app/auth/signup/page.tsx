@@ -1,5 +1,5 @@
-import StudentSignUpPage from "./student/page";
+import { redirect } from "next/navigation";
 
-export default function SignUpRedirect() {
-  return <StudentSignUpPage />;
+export default function SignUpIndex() {
+  redirect("/auth/signup/student");
 }

@@ -46,7 +46,7 @@ describe("appointment status", () => {
   describe("rendering", () => {
     it("labels each status", () => {
       expect(appointmentStatusLabel("pending")).toBe("Pending");
-      expect(appointmentStatusLabel("rejected")).toBe("Rejected");
+      expect(appointmentStatusLabel("rejected")).toBe("Declined");
     });
 
     // The three copies this replaced all built the label with
@@ -55,9 +55,9 @@ describe("appointment status", () => {
       expect(() => appointmentStatusLabel(null)).not.toThrow();
       expect(appointmentStatusLabel(null)).toBe("Unknown");
       expect(appointmentStatusLabel("")).toBe("Unknown");
-      expect(appointmentStatusDot(undefined)).toBe("bg-gray-300");
+      expect(appointmentStatusDot(undefined)).toBe("bg-muted-foreground");
       expect(appointmentStatusBadge(undefined)).toBe(
-        "bg-gray-100 text-gray-800",
+        "bg-muted text-muted-foreground",
       );
     });
   });
