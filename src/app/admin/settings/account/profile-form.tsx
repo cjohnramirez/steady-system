@@ -5,6 +5,7 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { SectionCard } from "@/components/app/section-card";
 import { updateOwnAdminProfile } from "@/lib/admin/actions";
@@ -83,11 +84,8 @@ export default function ProfileForm({ admin }: { admin: Admin }) {
             </form.Field>
           </div>
           <div className="flex justify-end">
-            <Button
-              loading={isSubmitting}
-              type="submit"
-              disabled={isSubmitting || !isDirty}
-            >
+            <Button type="submit" disabled={isSubmitting || !isDirty}>
+              {isSubmitting && <Spinner />}
               Save profile
             </Button>
           </div>

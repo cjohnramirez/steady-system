@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import FormPasswordField from "@/components/form-password-field";
 import { PASSWORD_HINT, passwordSchema } from "@/lib/validation/fields";
 import { AuthHeading } from "../_components/auth-shell";
@@ -71,7 +72,8 @@ export function ResetPasswordForm() {
               />
             )}
           </form.Field>
-          <Button type="submit" className="w-full" loading={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting && <Spinner />}
             Save password
           </Button>
         </FieldGroup>

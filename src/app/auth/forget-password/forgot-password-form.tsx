@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { EmptyState } from "@/components/app/empty-state";
 import { InfoCallout } from "@/components/app/info-callout";
@@ -86,7 +87,8 @@ export function ForgotPasswordForm({ linkExpired }: { linkExpired: boolean }) {
               />
             )}
           </form.Field>
-          <Button type="submit" className="w-full" loading={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting && <Spinner />}
             Send reset link
           </Button>
           <Button variant="ghost" asChild>

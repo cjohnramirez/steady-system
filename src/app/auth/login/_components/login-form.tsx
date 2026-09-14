@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import FormPasswordField from "@/components/form-password-field";
 import { InfoCallout } from "@/components/app/info-callout";
@@ -103,7 +104,8 @@ export default function LoginForm({
               />
             )}
           </form.Field>
-          <Button type="submit" className="w-full" loading={isSubmitting}>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting && <Spinner />}
             {isSubmitting ? "Logging in…" : "Log in"}
           </Button>
           {role === "student" && (

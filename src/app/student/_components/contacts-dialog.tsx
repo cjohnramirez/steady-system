@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { saveContactPersons } from "@/lib/students/actions";
 import { queryKeys } from "@/lib/query-keys";
@@ -155,7 +156,8 @@ export default function ContactsDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} loading={isSubmitting}>
+          <Button type="submit" form={formId} disabled={isSubmitting}>
+            {isSubmitting && <Spinner />}
             Save contacts
           </Button>
         </DialogFooter>

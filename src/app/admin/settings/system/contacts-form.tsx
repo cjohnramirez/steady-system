@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { FormSelectField } from "@/components/form-select-field";
 import { SectionCard } from "@/components/app/section-card";
@@ -116,7 +117,8 @@ export default function ContactsForm({
                     <Plus aria-hidden />
                     Add link
                   </Button>
-                  <Button type="submit" loading={isSubmitting}>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Spinner />}
                     Save links
                   </Button>
                 </div>

@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/utils/supabase/client";
 import { DbError } from "@/lib/db/error";
 
@@ -192,7 +193,8 @@ export default function ExportDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={run} loading={isPending}>
+          <Button onClick={run} disabled={isPending}>
+            {isPending && <Spinner />}
             Download
           </Button>
         </DialogFooter>

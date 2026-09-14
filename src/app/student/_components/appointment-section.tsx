@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CalendarPlus } from "lucide-react";
 import {
   keepPreviousData,
   useQuery,
@@ -15,7 +14,6 @@ import type {
 } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LinkPending } from "@/components/app/link-pending";
 import { SectionCard } from "@/components/app/section-card";
 import { StatusBadge } from "@/components/app/status-badge";
 import { useSignedInViewer } from "@/components/viewer-provider";
@@ -110,31 +108,27 @@ export default function StudentAppointmentSection() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  if (!id) return;
-                  void confirm({
+                onClick={async () => {
+                  const ok = await confirm({
                     title: "Cancel this appointment?",
                     description:
                       "Your counselor will be notified and the time will be freed up.",
                     confirmLabel: "Cancel appointment",
                     cancelLabel: "Keep it",
                     destructive: true,
-                    action: async () => {
-                      const result = await cancelAppointment(id);
-                      if (!result.ok) {
-                        toast.error(result.error);
-                        return;
-                      }
-                      toast.success("Appointment cancelled.");
-                      await Promise.all([
-                        queryClient.invalidateQueries({
-                          queryKey: queryKeys.appointments.all,
-                        }),
-                        queryClient.invalidateQueries({
-                          queryKey: queryKeys.availableSlots.all,
-                        }),
-                      ]);
-                    },
+                  });
+                  if (!ok || !id) return;
+                  const result = await cancelAppointment(id);
+                  if (!result.ok) {
+                    toast.error(result.error);
+                    return;
+                  }
+                  toast.success("Appointment cancelled.");
+                  await queryClient.invalidateQueries({
+                    queryKey: queryKeys.appointments.all,
+                  });
+                  await queryClient.invalidateQueries({
+                    queryKey: queryKeys.availableSlots.all,
                   });
                 }}
               >
@@ -149,7 +143,6 @@ export default function StudentAppointmentSection() {
                 <Link
                   href={`/student/appointment?reason=${encodeURIComponent(reason ?? "")}`}
                 >
-                  <LinkPending />
                   Book again
                 </Link>
               </Button>
@@ -178,15 +171,6 @@ export default function StudentAppointmentSection() {
         data={appointments.data?.data ?? []}
         rowCount={appointments.data?.count ?? 0}
         isLoading={appointments.isLoading}
-        isFetching={appointments.isFetching}
-        isError={appointments.isError}
-        errorTitle="Your appointments couldn't be loaded"
-        onRetry={() => appointments.refetch()}
-        isFiltered={debouncedSearch.trim() !== ""}
-        onClearFilters={() => {
-          setSearch("");
-          setPagination((current) => ({ ...current, pageIndex: 0 }));
-        }}
         pagination={pagination}
         onPaginationChange={setPagination}
         sorting={sorting}
@@ -194,16 +178,7 @@ export default function StudentAppointmentSection() {
         search={search}
         onSearchChange={setSearch}
         searchLabel="Search appointments"
-        empty={{
-          title: "No appointments yet",
-          description: "Book a session whenever you're ready.",
-          icon: CalendarPlus,
-          action: (
-            <Button size="sm" asChild>
-              <Link href="/student/appointment">Book an appointment</Link>
-            </Button>
-          ),
-        }}
+        emptyMessage="No appointments yet. Book one when you're ready."
       />
     </SectionCard>
   );

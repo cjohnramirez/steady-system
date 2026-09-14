@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { hasNextPage } from "@/lib/db/paginate";
@@ -26,10 +25,6 @@ export function PaginationControls({
   isLoading?: boolean;
   itemLabel?: string;
 }) {
-  // Which button started the load, so only that one spins. Cleared once loading
-  // ends, so a later search or filter refetch doesn't spin a page button.
-  const [direction, setDirection] = useState<"previous" | "next" | null>(null);
-  if (!isLoading && direction !== null) setDirection(null);
   const from = total === 0 ? 0 : page * pageSize + 1;
   const to = Math.min(total, (page + 1) * pageSize);
 
@@ -46,11 +41,7 @@ export function PaginationControls({
           size="icon"
           aria-label="Previous page"
           disabled={isLoading || page === 0}
-          loading={isLoading && direction === "previous"}
-          onClick={() => {
-            setDirection("previous");
-            onPageChange(page - 1);
-          }}
+          onClick={() => onPageChange(page - 1)}
         >
           <ChevronLeft />
         </Button>
@@ -59,11 +50,7 @@ export function PaginationControls({
           size="icon"
           aria-label="Next page"
           disabled={isLoading || !hasNextPage(page, pageSize, total)}
-          loading={isLoading && direction === "next"}
-          onClick={() => {
-            setDirection("next");
-            onPageChange(page + 1);
-          }}
+          onClick={() => onPageChange(page + 1)}
         >
           <ChevronRight />
         </Button>

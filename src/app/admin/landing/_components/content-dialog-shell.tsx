@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 
 /**
  * Frame shared by the article, announcement and playlist editors.
@@ -83,7 +84,8 @@ export function ContentDialogShell({
             >
               Cancel
             </Button>
-            <Button type="submit" form={formId} loading={isBusy}>
+            <Button type="submit" form={formId} disabled={isBusy}>
+              {isBusy && <Spinner />}
               {isBusy ? busyLabel : isEditing ? "Save changes" : "Publish"}
             </Button>
           </div>

@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import FormPasswordField from "@/components/form-password-field";
 import { createCounselor } from "@/lib/counselors/actions";
@@ -127,7 +128,8 @@ export default function CounselorCreateDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} loading={isSubmitting}>
+          <Button type="submit" form={formId} disabled={isSubmitting}>
+            {isSubmitting && <Spinner />}
             Create account
           </Button>
         </DialogFooter>

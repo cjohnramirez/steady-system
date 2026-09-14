@@ -60,9 +60,6 @@ export default function ArticleSection({
         searchLabel="Search articles"
         items={query.data?.data ?? []}
         isLoading={query.isLoading}
-        isFetching={query.isFetching && !query.isLoading}
-        isError={query.isError}
-        onRetry={() => query.refetch()}
         total={query.data?.count ?? 0}
         page={page}
         pageSize={PAGE_SIZE}

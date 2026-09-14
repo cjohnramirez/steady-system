@@ -108,11 +108,6 @@ export default function PrivacyPolicy() {
           use no advertising or third-party tracking cookies. Blocking cookies
           will sign you out.
         </p>
-        <p>
-          Device notifications are optional. They are only shown after you turn
-          them on from the notifications menu, and you can switch them off in
-          your browser or device settings at any time.
-        </p>
       </LegalSection>
 
       <LegalSection title="Security and retention">

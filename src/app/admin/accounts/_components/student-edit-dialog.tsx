@@ -22,7 +22,7 @@ import {
   FieldLegend,
 } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ErrorState } from "@/components/app/error-state";
+import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { FormInputField } from "@/components/form-input-field";
 import { FormSelectField } from "@/components/form-select-field";
@@ -67,11 +67,6 @@ export default function StudentEditDialog({
             student={student}
             isDisabled={row.data.is_disabled}
             onClose={onClose}
-          />
-        ) : row.isError ? (
-          <ErrorState
-            title="This student couldn't be loaded"
-            onRetry={() => row.refetch()}
           />
         ) : (
           <Skeleton className="h-96 rounded-xl" />
@@ -210,8 +205,6 @@ function StudentForm({
                   <FormSelectField
                     field={f}
                     label="College"
-                    isLoading={colleges.isLoading}
-                    isError={colleges.isError}
                     options={(colleges.data ?? []).map((c) => ({
                       value: c.id,
                       label: c.abbreviation,
@@ -224,9 +217,6 @@ function StudentForm({
                   <FormSelectField
                     field={f}
                     label="Department"
-                    isLoading={departments.isLoading}
-                    isError={departments.isError}
-                    emptyLabel="No departments in this college yet"
                     disabled={!collegeId}
                     description="Decides which counselor this student books with."
                     options={(departments.data ?? []).map((d) => ({
@@ -269,7 +259,8 @@ function StudentForm({
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" form={formId} loading={isSubmitting}>
+        <Button type="submit" form={formId} disabled={isSubmitting}>
+          {isSubmitting && <Spinner />}
           Save changes
         </Button>
       </DialogFooter>
