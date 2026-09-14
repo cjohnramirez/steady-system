@@ -1,93 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import { uploadToCloudinary, deleteFromCloudinary } from "@/app/actions";
-import { extractPublicId } from "@/lib/format";
+import { useCallback, useEffect, useState } from "react";
+import {
+  deleteImage,
+  signUpload,
+  type UploadTarget,
+} from "@/lib/uploads/actions";
+
+export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 /**
  * The picture half of a content form.
  *
- * All six landing-page modals carried their own copy of this, and the copies had
- * collected problems worth naming, since this hook fixes them:
- *
- * Deleting the old image was treated as fatal. If Cloudinary refused the delete,
- * the whole save was abandoned and the user's text edits were lost, to avoid
- * leaving one orphaned file behind. That trade is backwards, so a failed cleanup
- * is now logged and the save continues.
- *
- * Replacing an image never removed the one it replaced, so every edit leaked a
- * file. Only an explicit removal cleaned up.
- *
- * The submit button was disabled on the mutation but not on the upload, so it
- * stayed clickable for the whole time the image was in flight.
+ * `prepare()` uploads a newly chosen file straight to Cloudinary and returns the URL
+ * to save. `commit()` runs only after the record has saved and removes the image it
+ * replaced. The old hook deleted the previous image before saving, so a failed save
+ * left the record pointing at a file that no longer existed.
  */
-export function useImageUpload(folder: string) {
+export function useImageUpload(target: UploadTarget, initialUrl: string) {
   const [file, setFile] = useState<File | null>(null);
-  const [isRemoved, setIsRemoved] = useState(false);
-  const [isBusy, setIsBusy] = useState(false);
+  const [removed, setRemoved] = useState(false);
+  const [preview, setPreview] = useState<string | null>(initialUrl || null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  /**
-   * Works out the image URL to save.
-   *
-   * Throws with a message suitable for a toast if the upload itself fails, since
-   * saving a record that points at no image is not what the user asked for.
-   */
-  async function resolveImageUrl(currentUrl: string): Promise<string> {
-    if (!file && !isRemoved) return currentUrl;
+  // Blob previews hold the whole file in memory until revoked.
+  useEffect(() => {
+    return () => {
+      if (preview?.startsWith("blob:")) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
-    setIsBusy(true);
+  const choose = useCallback((next: File | null) => {
+    setFile(next);
+    setRemoved(next === null);
+    setPreview(next ? URL.createObjectURL(next) : null);
+  }, []);
+
+  async function prepare(): Promise<string> {
+    if (!file) return removed ? "" : initialUrl;
+
+    setIsUploading(true);
     try {
-      if (file) {
-        const result = await uploadToCloudinary(file, folder);
-        await removeQuietly(currentUrl);
-        return result.optimizedUrl;
-      }
+      const signed = await signUpload(target);
+      if (!signed.ok) throw new Error(signed.error);
 
-      await removeQuietly(currentUrl);
-      return "";
-    } catch (error) {
-      throw new Error(
-        error instanceof Error && error.message
-          ? error.message
-          : "Could not upload the image.",
+      const body = new FormData();
+      body.append("file", file);
+      body.append("api_key", signed.data.apiKey);
+      body.append("timestamp", String(signed.data.timestamp));
+      body.append("signature", signed.data.signature);
+      body.append("folder", signed.data.folder);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${signed.data.cloudName}/image/upload`,
+        { method: "POST", body },
       );
+      const json = (await response.json()) as {
+        secure_url?: string;
+        error?: { message: string };
+      };
+      if (!response.ok || !json.secure_url) {
+        throw new Error(
+          json.error?.message ?? "The image could not be uploaded.",
+        );
+      }
+      return json.secure_url;
     } finally {
-      setIsBusy(false);
+      setIsUploading(false);
     }
   }
 
-  function reset() {
-    setFile(null);
-    setIsRemoved(false);
+  /** After a successful save: remove the image the record used to point at. */
+  async function commit(savedUrl: string) {
+    if (initialUrl && initialUrl !== savedUrl) {
+      const result = await deleteImage(initialUrl);
+      if (!result.ok) console.warn("Old image was not removed:", result.error);
+    }
   }
 
-  return {
-    file,
-    setFile,
-    isRemoved,
-    setIsRemoved,
-    /** True while an image is being uploaded or removed. */
-    isBusy,
-    resolveImageUrl,
-    reset,
-  };
-}
-
-/**
- * Best-effort cleanup of a replaced or removed image.
- *
- * A leftover file in Cloudinary costs a little storage. Losing the user's edit
- * costs them their work, so this never throws.
- */
-async function removeQuietly(url: string): Promise<void> {
-  if (!url) return;
-
-  const publicId = extractPublicId(url);
-  if (!publicId) return;
-
-  try {
-    await deleteFromCloudinary(publicId);
-  } catch (error) {
-    console.warn("Could not remove the previous image:", error);
-  }
+  return { file, preview, choose, prepare, commit, isUploading };
 }

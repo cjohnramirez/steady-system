@@ -1,104 +1,72 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { createServiceClient } from "@/utils/supabase/service";
-import z from "zod";
-import { studentInsertFormSchema } from "./schema";
-import { DbError } from "@/lib/db/error";
+import { clientEnv } from "@/lib/env/client";
+import { fail, ok, toErrorMessage, type Result } from "@/lib/result";
+import { signupSchema, type SignupInput } from "@/lib/validation/student";
 
-export async function fetchDepartment(college: string) {
+/**
+ * Registers a student.
+ *
+ * The profile travels in user_metadata and is written by the on_auth_user_created
+ * trigger in the same transaction as the auth user, so a failure leaves nothing
+ * behind. This replaces four separate service-key writes that stranded an
+ * unusable, signed-in account whenever a later write failed.
+ *
+ * With email confirmation off (the current setting) signUp returns a session and
+ * the student goes straight to their dashboard. With it on, there is no session
+ * yet and the form tells them to check their email. Both work unchanged.
+ */
+export async function signUpStudent(
+  input: SignupInput,
+): Promise<Result<{ needsConfirmation: boolean }>> {
+  const parsed = signupSchema.safeParse(input);
+  if (!parsed.success) return fail(toErrorMessage(parsed.error));
+
+  const {
+    email,
+    password,
+    consent: _consent,
+    college_id: _college,
+    ...profile
+  } = parsed.data;
   const supabase = await createClient();
 
-  if (college) {
-    const { data, error } = await supabase
-      .from("department")
-      .select(`*`)
-      .eq("college_id", college);
+  const { data: available, error: availabilityError } = await supabase.rpc(
+    "is_username_available",
+    { p_username: profile.username },
+  );
 
-    if (error) throw new DbError("Error fetching department", error);
-    return data || [];
-  }
-  return [];
-}
+  if (availabilityError) return fail(toErrorMessage(availabilityError));
+  if (!available) return fail("That username is already taken.");
 
-export async function fetchCollege() {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.from("college").select(`*`);
-
-  if (error) throw new DbError("Error fetching college", error);
-  return data || [];
-}
-
-export default async function SignUpFormAction(
-  values: z.infer<typeof studentInsertFormSchema>,
-): Promise<{ error?: string; success?: string }> {
-  const supabase = await createClient();
-  const supabaseAdmin = await createServiceClient();
-
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: values.email,
-    password: values.password,
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { student_profile: profile },
+      emailRedirectTo: `${clientEnv.NEXT_PUBLIC_APP_URL}/auth/callback?next=/student`,
+    },
   });
 
-  if (signUpError) {
-    return { error: "Sign up failed" };
+  if (error) {
+    if (/already registered|already been registered/i.test(error.message)) {
+      return fail(
+        "An account with that email already exists. Try logging in instead.",
+      );
+    }
+    if (/student_username_key/i.test(error.message)) {
+      // Taken between the availability check and the insert.
+      return fail("That username is already taken.");
+    }
+    if (/database error|violates|constraint/i.test(error.message)) {
+      // The signup trigger raised, and the auth user was rolled back with it.
+      return fail(
+        "We couldn't create your profile. Check your details and try again.",
+      );
+    }
+    return fail(error.message);
   }
 
-  if (!signUpData.user?.id) {
-    return { error: "User ID not found" };
-  }
-
-  const userRole: { user_id: string; role: "student" | "admin" | "counselor" } =
-    {
-      user_id: signUpData.user?.id as string,
-      role: "student",
-    };
-
-  const { error: updateRoleError } = await supabaseAdmin
-    .from("user_roles")
-    .insert([userRole]);
-
-  if (updateRoleError) {
-    return { error: `Failed to update user role: ${updateRoleError.message}` };
-  }
-
-  const { college, password, contact_person, ...otherValues } = values;
-
-  const { data: studentData, error: updateStudentError } = await supabaseAdmin
-    .from("student")
-    .insert({
-      ...otherValues,
-      year_level: Number(values.year_level),
-      university_id: Number(values.university_id),
-      user_id: signUpData.user.id,
-      phone: String(values.phone),
-    })
-    .select();
-
-  if (updateStudentError) {
-    return { error: `Failed to insert student: ${updateStudentError.message}` };
-  }
-
-  if (!studentData?.[0]?.id) {
-    return { error: "Student ID not found" };
-  }
-
-  const contactPersonData = contact_person.map((contact) => ({
-    ...contact,
-    student_id: studentData[0].id,
-    phone: Number(contact.phone),
-  }));
-
-  const { error: insertContactPerson } = await supabaseAdmin
-    .from("contact_person")
-    .insert(contactPersonData);
-
-  if (insertContactPerson) {
-    return {
-      error: `Failed to insert contact person: ${insertContactPerson.message}`,
-    };
-  }
-
-  return { success: "Sign Up successful" };
+  return ok({ needsConfirmation: !data.session });
 }

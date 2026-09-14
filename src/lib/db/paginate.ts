@@ -23,6 +23,11 @@ export function pageRange(page: number, pageSize: number) {
   return { from, to: from + pageSize - 1 };
 }
 
+/** Whether rows exist past the given zero-based page. */
+export function hasNextPage(page: number, pageSize: number, total: number) {
+  return (page + 1) * pageSize < total;
+}
+
 type CountedResult<T> = {
   data: T[] | null;
   error: PostgrestError | null;
@@ -47,3 +52,14 @@ export async function toPage<T>(
 
   return { data: data ?? [], count: count ?? 0 };
 }
+
+/** An ilike pattern for free-text search, or null when there is nothing to search. */
+export function searchPattern(search: string | undefined): string | null {
+  const cleaned = (search ?? "")
+    .replace(/[%_,()\*"]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned ? `%${cleaned}%` : null;
+}
+
+export type SortParam = { id: string; desc: boolean } | undefined;

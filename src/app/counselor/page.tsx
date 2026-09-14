@@ -1,80 +1,27 @@
-"use client";
-
-import { createClient } from "@/utils/supabase/client";
-import CounselorAppointmentSection from "./_components/appointment-section";
-import CounselorProfileSection from "./_components/profile-section";
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/app/page-header";
+import { guardPage } from "@/lib/auth/session";
 import MetricSection from "./_components/metric-section";
-import { useQuery } from "@tanstack/react-query";
-import { useUserStore } from "@/hooks/auth-store";
-import type { AppointmentStatus } from "@/lib/appointments/status";
-import { useEffect, useState } from "react";
-import {
-  fetchCounselorAppointments,
-  fetchCounselorProfile,
-  countCounselorAppointments,
-} from "./actions";
+import ProfileCard from "./_components/profile-card";
+import AppointmentList from "./_components/appointment-list";
 
-export default function CounselorPage() {
-  const supabase = createClient();
-  const counselorID = useUserStore.getState().id;
+export const metadata: Metadata = { title: "Counselor dashboard | GCS" };
 
-  const [username, setUsername] = useState<string | undefined>("");
-
-  useEffect(() => {
-    setUsername(useUserStore.getState().userName);
-  }, []);
-
-  const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 3 });
-  // Empty string means "no status filter".
-  const [status, setStatus] = useState<AppointmentStatus | "">("approved");
-
-  const { data: counts } = useQuery({
-    queryKey: ["count-counselor-appointments"],
-    queryFn: () => countCounselorAppointments(supabase, counselorID),
-  });
-
-  const { data: appointments, isLoading: isLoadingAppointments } = useQuery({
-    queryKey: ["counselor-appointments", status, pagination, search],
-    queryFn: () =>
-      fetchCounselorAppointments(
-        pagination.pageIndex,
-        pagination.pageSize,
-        counselorID,
-        search,
-        supabase,
-        status,
-      ),
-  });
+export default async function CounselorPage() {
+  const viewer = await guardPage("counselor");
 
   return (
-    <div className="space-y-6 p-10">
-      <div className="space-y-2">
-        <p className="text-4xl">Welcome, {username}</p>
-        <p>
-          This is your personalized dashboard, with your profile and
-          appointments
-        </p>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="flex flex-col gap-4">
-          <MetricSection
-            totalAppointments={String(counts?.totalCount ?? "")}
-            pendingAppointments={String(counts?.pendingCount ?? "")}
-            approvedAppointments={String(counts?.approvedCount ?? "")}
-          />
-          <CounselorProfileSection />
+    <div className="flex flex-col gap-6 md:gap-8">
+      <PageHeader
+        title={`Welcome, ${viewer.firstName}`}
+        description="Requests waiting on you, your schedule and your profile."
+      />
+      <div className="grid items-start gap-4 md:gap-6 lg:grid-cols-[2fr_3fr]">
+        <div className="flex flex-col gap-4 md:gap-6">
+          <MetricSection />
+          <ProfileCard />
         </div>
-        <CounselorAppointmentSection
-          status={status}
-          setStatus={setStatus}
-          appointments={appointments?.data ?? []}
-          pagination={pagination}
-          setPagination={setPagination}
-          count={appointments?.count ?? 0}
-          setSearch={setSearch}
-          isLoading={isLoadingAppointments}
-        />
+        <AppointmentList />
       </div>
     </div>
   );

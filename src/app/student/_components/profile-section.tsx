@@ -1,162 +1,129 @@
 "use client";
 
-import { fetchStudent } from "@/app/admin/accounts/@modal/actions";
-import { Button } from "@/components/ui/button";
-import { useUserStore } from "@/hooks/auth-store";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Contact, Edit2, Phone, User } from "lucide-react";
-import { toast } from "sonner";
-import Link from "next/link";
-import { useState } from "react";
-import StudentProfileModal from "./profile-modal";
-import { Skeleton } from "@/components/ui/skeleton";
-import FormEmotionalStatusField from "@/components/form-emotional-status-field";
+import { Contact, UserPen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SectionCard } from "@/components/app/section-card";
+import { DetailList } from "@/components/app/detail-list";
+import { UserAvatar } from "@/components/app/user-avatar";
+import { useSignedInViewer } from "@/components/viewer-provider";
+import { createClient } from "@/utils/supabase/client";
+import {
+  fetchContactPersons,
+  fetchStudentDetails,
+} from "@/lib/students/queries";
+import { queryKeys } from "@/lib/query-keys";
 import { strToTitleCase } from "@/lib/format";
+import ProfileDialog from "./profile-dialog";
+import ContactsDialog from "./contacts-dialog";
 
-export default function ProfileSection() {
-  const studentID = useUserStore.getState().id;
-  const [openProfile, setOpenProfile] = useState(false);
-  const [openContactPerson, setOpenContactPerson] = useState(false);
+export default function ProfileSection({ className }: { className?: string }) {
+  const viewer = useSignedInViewer();
+  const supabase = useMemo(() => createClient(), []);
+  const [editing, setEditing] = useState<"profile" | "contacts" | null>(null);
 
-  const { data: studentData, isLoading } = useQuery({
-    queryKey: ["student-user"],
-    queryFn: () => fetchStudent(studentID),
+  const student = useQuery({
+    queryKey: queryKeys.students.detail(viewer.profileId),
+    queryFn: () => fetchStudentDetails(supabase, viewer.profileId),
   });
 
-  const [emotionalStatus, setEmotionalStatus] = useState("");
+  const contacts = useQuery({
+    queryKey: queryKeys.students.contacts(viewer.profileId),
+    queryFn: () => fetchContactPersons(supabase, viewer.profileId),
+  });
+
+  const s = student.data;
+  const fullName = [viewer.firstName, viewer.lastName]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <>
-      {openProfile && (
-        <StudentProfileModal
-          open={openProfile}
-          setOpen={setOpenProfile}
-          id={studentID}
+    <SectionCard
+      className={className}
+      title="Profile"
+      description="Keep these details current so your counselor can reach you."
+      actions={
+        <>
+          <Button
+            variant="outline"
+            onClick={() => setEditing("contacts")}
+            disabled={!s}
+          >
+            <Contact aria-hidden />
+            Emergency contacts
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setEditing("profile")}
+            disabled={!s}
+          >
+            <UserPen aria-hidden />
+            Edit profile
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-6 md:flex-row md:items-start">
+        <div className="flex items-center gap-4 md:w-48 md:flex-col md:items-start">
+          <UserAvatar name={fullName} src={viewer.avatar} size="lg" />
+          <div className="min-w-0">
+            <p className="truncate font-medium">{fullName}</p>
+            <p className="text-muted-foreground truncate">@{viewer.userName}</p>
+          </div>
+        </div>
+        <DetailList
+          className="flex-1"
+          isLoading={student.isLoading}
+          items={[
+            { label: "Email", value: s?.email },
+            { label: "Phone", value: s?.phone },
+            { label: "College", value: s?.college_name },
+            { label: "Department", value: s?.department },
+            {
+              label: "Year level",
+              value: s?.year_level ? `Year ${s.year_level}` : null,
+            },
+            { label: "University ID", value: s?.university_id },
+            {
+              label: "Gender",
+              value: s?.gender ? strToTitleCase(s.gender) : null,
+            },
+            { label: "Age", value: s?.age },
+            {
+              label: "Counselor",
+              value: s?.counselor_first_name
+                ? `${s.counselor_first_name} ${s.counselor_last_name ?? ""}`.trim()
+                : "No counselor assigned yet",
+            },
+            {
+              label: "Emergency contacts",
+              value: contacts.isLoading
+                ? null
+                : (contacts.data ?? [])
+                    .map((c) => `${c.first_name} ${c.last_name} (${c.phone})`)
+                    .join(", "),
+            },
+          ]}
+        />
+      </div>
+
+      {/* Mounted only while open, so each opening starts from the latest data. */}
+      {s && editing === "profile" && (
+        <ProfileDialog
+          open
+          onOpenChange={(open) => setEditing(open ? "profile" : null)}
+          student={s}
         />
       )}
-      <div className="grid grid-cols-2 grid-rows-3 gap-4 rounded-2xl border border-gray-200 bg-white p-5">
-        <div className="col-span-2 m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5">
-          <div className="flex space-y-2">
-            <FormEmotionalStatusField
-              setEmotionalStatus={setEmotionalStatus}
-              emotionalStatus={
-                emotionalStatus !== ""
-                  ? emotionalStatus
-                  : (studentData?.emotional_status_id ?? "")
-              }
-              studentID={studentID}
-            />
-          </div>
-        </div>
-        <Link
-          href="/portal/#articles"
-          className="relative m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5"
-        >
-          <p className="absolute bottom-5 left-5 w-1/3">View Articles</p>
-          <div className="absolute top-5 right-5 rounded-full border border-gray-200 p-2">
-            <ArrowUpRight strokeWidth={1.25} />
-          </div>
-        </Link>
-        <Link
-          href="/portal/#announcements"
-          className="relative m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5"
-        >
-          <p className="absolute bottom-5 left-5 w-1/3">View Announcements</p>
-          <div className="absolute top-5 right-5 rounded-full border border-gray-200 p-2">
-            <ArrowUpRight strokeWidth={1.25} />
-          </div>
-        </Link>
-        <Link
-          href="/portal/#playlists"
-          className="relative m-0 flex items-center gap-5 rounded-2xl border border-gray-200 p-5"
-        >
-          <p className="absolute bottom-5 left-5 w-1/3">View Playlists</p>
-          <div className="absolute top-5 right-5 rounded-full border border-gray-200 p-2">
-            <ArrowUpRight strokeWidth={1.25} />
-          </div>
-        </Link>
-        <Link
-          href="/portal/"
-          className="relative flex items-center gap-5 rounded-2xl border border-gray-200 p-5"
-        >
-          <p className="absolute bottom-5 left-5 w-1/2">Go to Home Page</p>
-          <div className="absolute top-5 right-5 rounded-full border border-gray-200 p-2">
-            <ArrowUpRight strokeWidth={1.25} />
-          </div>
-        </Link>
-      </div>
-      <div className="col-span-2 rounded-2xl border border-gray-200 bg-white p-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">Profile Information</p>
-            <p>
-              Ensure these details are complete for a better service experience.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setOpenProfile(true)}
-              disabled={isLoading}
-            >
-              <User strokeWidth={1.25} />
-              <p>Edit Profile</p>
-            </Button>
-          </div>
-        </div>
-        <div className="mt-10 grid w-full grid-cols-[150px_1fr] gap-x-8 gap-y-4">
-          <div className="from-brand-light to-brand-normal relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-t">
-            {isLoading ? (
-              <Skeleton className="h-36 w-36 rounded-full" />
-            ) : (
-              <div className="absolute right-0 bottom-0 cursor-pointer rounded-full border border-gray-200 bg-white p-2">
-                <Edit2
-                  onClick={() => toast.info("This is an upcoming feature")}
-                  size={20}
-                />
-              </div>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {isLoading ? (
-              <>
-                {[...Array(8)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex gap-2 overflow-hidden rounded-xl border p-4"
-                  >
-                    <Skeleton className="h-10 w-2/5" />
-                    <Skeleton className="h-10 flex-1" />
-                  </div>
-                ))}
-              </>
-            ) : (
-              [
-                { label: "Username", value: studentData?.username },
-                { label: "First Name", value: studentData?.first_name },
-                { label: "Last Name", value: studentData?.last_name },
-                { label: "Email", value: studentData?.email },
-                { label: "College", value: studentData?.college_name },
-                { label: "Department", value: studentData?.department },
-                { label: "Year Level", value: studentData?.year_level },
-                { label: "University ID", value: studentData?.university_id },
-                { label: "Gender", value: studentData?.gender ?? "" },
-                { label: "Age", value: studentData?.age },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex overflow-hidden rounded-xl border"
-                >
-                  <p className="w-2/5 border-r bg-gray-50 p-4 font-medium">
-                    {item.label}
-                  </p>
-                  <p className="wrap-break-words flex-1 p-4">{item?.value}</p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    </>
+      {contacts.data && editing === "contacts" && (
+        <ContactsDialog
+          open
+          onOpenChange={(open) => setEditing(open ? "contacts" : null)}
+          studentId={viewer.profileId}
+          contacts={contacts.data}
+        />
+      )}
+    </SectionCard>
   );
 }

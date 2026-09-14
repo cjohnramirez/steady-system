@@ -39,7 +39,15 @@ export function isRole(value: unknown): value is roles {
  */
 export function roleForPath(pathname: string): roles | null {
   for (const role of ALL_ROLES) {
-    if (pathname.startsWith(ROLE_AREA[role])) return role;
+    if (pathHasPrefix(pathname, ROLE_AREA[role])) return role;
   }
   return null;
+}
+
+/**
+ * True when `prefix` owns `pathname` on a segment boundary. Plain `startsWith`
+ * made /students part of the student area and /authors a public auth page.
+ */
+export function pathHasPrefix(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }

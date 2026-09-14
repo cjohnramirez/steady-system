@@ -41,8 +41,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-brand-light: oklch(0.8653 0.1162 75.55);
-  --color-brand-normal: oklch(0.772 0.1738 64.55);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-light: var(--brand-light);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-foreground: var(--status-pending-foreground);
+  --color-status-approved: var(--status-approved);
+  --color-status-approved-foreground: var(--status-approved-foreground);
+  --color-status-completed: var(--status-completed);
+  --color-status-completed-foreground: var(--status-completed-foreground);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-foreground: var(--status-cancelled-foreground);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-rejected-foreground: var(--status-rejected-foreground);
 }
 
 :root {
@@ -51,8 +64,9 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  /* Primary is the brand amber, so Button, Badge, Calendar and focus rings agree. */
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -62,7 +76,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.72 0.12 65);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -76,10 +90,34 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
+  /* Off-white page, white cards. Cards separate from the page by border, not shadow. */
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
-  --color-brand-light: oklch(0.8653 0.1162 75.55);
-  --color-brand-normal: oklch(0.772 0.1738 64.55);
+
+  /*
+   * Brand. White text on --brand is 4.84:1 and on --brand-hover 6.25:1 (WCAG AA).
+   * The previous amber, oklch(0.772 0.1738 64.55), was about 2:1 with white text.
+   * Check any change with: node scripts/contrast.mjs "<L C H>"
+   */
+  --brand: oklch(0.56 0.13 60);
+  --brand-hover: oklch(0.5 0.12 56);
+  --brand-foreground: oklch(1 0 0);
+  /* Decorative only: avatar gradients, highlights. Never behind text. */
+  --brand-light: oklch(0.8653 0.1162 75.55);
+  /* Tinted surfaces such as an unread notification row. */
+  --brand-subtle: oklch(0.975 0.025 80);
+
+  /* Appointment status. Each foreground is at least 5.4:1 on its background. */
+  --status-pending: oklch(0.96 0.05 85);
+  --status-pending-foreground: oklch(0.45 0.1 60);
+  --status-approved: oklch(0.95 0.05 150);
+  --status-approved-foreground: oklch(0.42 0.1 150);
+  --status-completed: oklch(0.95 0.03 250);
+  --status-completed-foreground: oklch(0.45 0.1 255);
+  --status-cancelled: oklch(0.96 0 0);
+  --status-cancelled-foreground: oklch(0.45 0 0);
+  --status-rejected: oklch(0.95 0.04 25);
+  --status-rejected-foreground: oklch(0.5 0.17 25);
 }
 
 .dark {
@@ -128,4 +166,9 @@
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+}
+
+/* A stray wide element must never make the whole page scroll sideways on a phone. */
+body {
+  overflow-x: clip;
 }

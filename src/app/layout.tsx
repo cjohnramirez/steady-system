@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import TrackHomePage from "@/components/tracker";
-import ConfirmModal from "@/components/confirm-modal";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +15,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#fafafa",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gcs-system.vercel.app/"),
@@ -65,14 +71,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} h-full w-full bg-gray-50 font-sans text-sm antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-background min-h-dvh font-sans text-sm antialiased`}
       >
-        <Toaster position="top-left" className="font-normal" />
-        <ConfirmModal />
-        <TrackHomePage />
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <Toaster position="bottom-right" closeButton />
+          <ConfirmDialog />
+          <TrackHomePage />
+        </Providers>
       </body>
     </html>
   );

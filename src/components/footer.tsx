@@ -1,122 +1,158 @@
-"use client";
-
-import Image from "next/image";
-import { ArrowUpRight, CalendarCheck2, Home, Mail, Phone } from "lucide-react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { fetchOrganization } from "@/app/home/actions";
-import { NavBar } from "@/app/home/_lib/nav-data";
+import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
+import { BrandMark } from "@/components/app/brand-mark";
+import { createClient } from "@/utils/supabase/server";
+import { formatClockTime, strToTitleCase } from "@/lib/format";
+import type { NavBar } from "@/app/home/_lib/nav-data";
 
-export default function Footer({ navBarObj }: { navBarObj?: NavBar[] }) {
-  const { data: organization } = useQuery({
-    queryKey: ["organization"],
-    queryFn: fetchOrganization,
-  });
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const parseTime = (timeString: string): string => {
-    if (!timeString) return "";
-    // Extract HH:MM from format like "08:00:00+08"
-    const timePart = timeString.split("+")[0] || timeString.split("-")[0];
-    const [hours, minutes] = timePart.split(":").slice(0, 2);
-    const hour = parseInt(hours, 10);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
+/**
+ * Site footer, rendered on the server.
+ *
+ * Fixed: it was a client component purely to fetch office details, prefixed a
+ * literal "0" to the phone number, and fell back to /about and /services, which
+ * never existed.
+ */
+export default async function Footer({
+  navBarObj = [],
+}: {
+  navBarObj?: NavBar[];
+}) {
+  const supabase = await createClient();
+  const [{ data: organization }, { data: contacts }] = await Promise.all([
+    supabase.from("organization").select("*").limit(1).maybeSingle(),
+    supabase
+      .from("organization_contact")
+      .select("id, platform, contact_detail")
+      .order("platform"),
+  ]);
+
+  const openDays = organization?.day_of_week
+    ?.map((open, i) => (open ? DAYS[i] : null))
+    .filter(Boolean)
+    .join(", ");
+
+  const links = (contacts ?? []).filter((c) =>
+    /^https?:\/\//.test(c.contact_detail),
+  );
 
   return (
-    <section className="border-t border-gray-200 bg-white p-15">
-      <div className="m-auto flex max-w-[1600px] justify-between gap-4">
-        <div className="w-1/3 space-y-10">
-          <section className="flex items-center gap-4">
-            <Image src="/icon.png" alt="logo" width={40} height={40} />
-            <p className="font-medium">
-              {organization?.name || "Guidance and Counseling Services"}
-            </p>
-          </section>
-          <p>
-            We are dedicated to the holistic development of every student
-            fostering emotional, psychological, and academic balance through
-            support, Counseling, and care.
+    <footer className="bg-card border-t">
+      <div className="m-auto grid max-w-[1600px] gap-10 px-4 py-12 md:grid-cols-[2fr_1fr_1.5fr] md:px-8 md:py-16">
+        <div className="max-w-sm space-y-4">
+          <BrandMark
+            label={organization?.name ?? "Guidance and Counseling Services"}
+          />
+          <p className="text-muted-foreground">
+            Dedicated to the holistic development of every student through
+            support, counseling and care.
           </p>
-          <div className="space-y-2">
-            <Link
-              href="/misc/privacy-policy"
-              className="flex items-center gap-2"
-            >
-              <p>Privacy Policy</p>
-              <ArrowUpRight strokeWidth={1.25} />
-            </Link>
-            <Link
-              href="/misc/meet-the-developers"
-              className="flex items-center gap-2"
-            >
-              <p>Meet the Developers</p>
-              <ArrowUpRight strokeWidth={1.25} />
-            </Link>
-          </div>
+          <ul className="flex flex-wrap gap-x-4 gap-y-2">
+            <li>
+              <Link
+                href="/misc/privacy-policy"
+                className="underline-offset-4 hover:underline"
+              >
+                Privacy policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/misc/meet-the-developers"
+                className="underline-offset-4 hover:underline"
+              >
+                Meet the developers
+              </Link>
+            </li>
+          </ul>
         </div>
-        <div className="flex gap-20">
-          <div className="space-y-10">
-            <p className="font-medium">Fast Links</p>
-            <div className="flex flex-col gap-4">
-              {navBarObj && navBarObj.length > 0 ? (
-                navBarObj.map((nav) => (
-                  <Link key={nav.link} href={nav.link}>
-                    {nav.title}
-                  </Link>
-                ))
-              ) : (
-                <>
-                  <Link href="/">Home</Link>
-                  <Link href="/about">About</Link>
-                  <Link href="/services">Services</Link>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="space-y-10">
-            <p className="font-medium">Contact Info</p>
-            <div className="flex flex-col gap-4">
-              {organization?.office_location && (
-                <div className="flex items-start gap-2">
-                  <Home size={20} strokeWidth={1} />
-                  <p className="text-sm">{organization.office_location}</p>
-                </div>
-              )}
-              {organization?.email && (
-                <div className="flex items-start gap-2">
-                  <Mail size={20} strokeWidth={1} />
-                  <a href={`mailto:${organization.email}`} className="text-sm">
-                    {organization.email}
+
+        {navBarObj.length > 0 && (
+          <nav aria-labelledby="footer-links">
+            <h2 id="footer-links" className="mb-4 font-medium">
+              On this page
+            </h2>
+            <ul className="text-muted-foreground space-y-2">
+              {navBarObj.map((item) => (
+                <li key={item.link}>
+                  <a href={item.link} className="hover:text-foreground">
+                    {item.title}
                   </a>
-                </div>
-              )}
-              {organization?.phone && (
-                <div className="flex items-start gap-2">
-                  <Phone size={20} strokeWidth={1} />
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+
+        {organization && (
+          <address className="not-italic">
+            <h2 className="mb-4 font-medium">Contact</h2>
+            <ul className="text-muted-foreground space-y-3">
+              <li className="flex gap-2">
+                <MapPin
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="mt-0.5 size-4 shrink-0"
+                />
+                {organization.office_location}
+              </li>
+              <li className="flex gap-2">
+                <Mail
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="mt-0.5 size-4 shrink-0"
+                />
+                <a
+                  href={`mailto:${organization.email}`}
+                  className="hover:text-foreground"
+                >
+                  {organization.email}
+                </a>
+              </li>
+              <li className="flex gap-2">
+                <Phone
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="mt-0.5 size-4 shrink-0"
+                />
+                <a
+                  href={`tel:${String(organization.phone).replace(/[^\d+]/g, "")}`}
+                  className="hover:text-foreground"
+                >
+                  {organization.phone}
+                </a>
+              </li>
+              <li className="flex gap-2">
+                <Clock
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="mt-0.5 size-4 shrink-0"
+                />
+                {openDays}, {formatClockTime(organization.start_office_hour)} –{" "}
+                {formatClockTime(organization.end_office_hour)}
+              </li>
+              {links.map((link) => (
+                <li key={link.id} className="flex gap-2">
+                  <Globe
+                    aria-hidden
+                    strokeWidth={1.5}
+                    className="mt-0.5 size-4 shrink-0"
+                  />
                   <a
-                    href={`tel:${String(organization.phone).replace(/\D/g, "")}`}
-                    className="text-sm"
+                    href={link.contact_detail}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-foreground"
                   >
-                    0{organization.phone}
+                    {strToTitleCase(link.platform)}
                   </a>
-                </div>
-              )}
-              {organization?.start_office_hour &&
-                organization?.end_office_hour && (
-                  <div className="flex items-start gap-2">
-                    <CalendarCheck2 size={20} strokeWidth={1} />
-                    <p className="text-sm">
-                      {parseTime(organization.start_office_hour)} -{" "}
-                      {parseTime(organization.end_office_hour)}
-                    </p>
-                  </div>
-                )}
-            </div>
-          </div>
-        </div>
+                </li>
+              ))}
+            </ul>
+          </address>
+        )}
       </div>
-    </section>
+    </footer>
   );
 }

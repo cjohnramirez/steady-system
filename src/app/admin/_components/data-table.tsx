@@ -1,6 +1,18 @@
 "use client";
 
-import { DataTablePagination } from "./pagination";
+import { useState, type ReactNode } from "react";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  type Column,
+  type ColumnDef,
+  type OnChangeFn,
+  type PaginationState,
+  type SortingState,
+  type VisibilityState,
+} from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown, Columns3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,11 +20,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -22,163 +29,163 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  VisibilityState,
-  PaginationState,
-  OnChangeFn,
-} from "@tanstack/react-table";
-import { Download, SearchIcon, Sidebar } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { SearchInput } from "@/components/app/search-input";
+import { cn } from "@/lib/utils";
+import { DataTablePagination } from "./pagination";
 
-interface DataTableProps<TData, TValue> {
+type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  toolbarExtra?: React.ReactNode;
   isLoading: boolean;
-  rowUrl?: (id: string) => string;
-  rowCount?: number;
-  pagination?: PaginationState;
-  onPaginationChange?: OnChangeFn<PaginationState>;
+  rowCount: number;
+  pagination: PaginationState;
+  onPaginationChange: OnChangeFn<PaginationState>;
+  /** Server-side sorting. Omit to make every header plain text. */
+  sorting?: SortingState;
+  onSortingChange?: OnChangeFn<SortingState>;
+  /** The raw search text. Debounce it where it feeds the query. */
+  search?: string;
   onSearchChange?: (value: string) => void;
-}
+  searchLabel?: string;
+  /** Left side of the toolbar, usually a title or filters. */
+  toolbar?: ReactNode;
+  onRowClick?: (row: TData) => void;
+  emptyMessage?: string;
+};
 
+/**
+ * A server-paginated table.
+ *
+ * Fixed from the previous version: sort headers called toggleSorting on a table
+ * with no sorting state, so they did nothing; the hover class was lost to an
+ * operator-precedence slip; skeleton rows prefetched `/undefined`; and the
+ * footer's "N of N" compared the current page with itself.
+ */
 export function DataTable<TData, TValue>({
   columns,
   data,
-  toolbarExtra,
   isLoading,
-  rowUrl,
   rowCount,
   pagination,
   onPaginationChange,
+  sorting,
+  onSortingChange,
+  search,
   onSearchChange,
+  searchLabel = "Search",
+  toolbar,
+  onRowClick,
+  emptyMessage = "No results.",
 }: DataTableProps<TData, TValue>) {
-  const router = useRouter();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const tableData = useMemo(
-    () => (isLoading ? Array(pagination?.pageSize || 10).fill({}) : data),
-    [isLoading, data, pagination?.pageSize],
-  );
-
-  const tableColumns = useMemo(
-    () =>
-      isLoading
-        ? columns.map((column) => ({
-            ...column,
-            cell: () => <Skeleton className="m-1 h-4 w-full rounded-md p-2" />,
-          }))
-        : columns,
-    [isLoading, columns],
-  );
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data: tableData,
-    columns: tableColumns,
+    data,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
-    rowCount: rowCount ?? 0,
-    state: {
-      columnVisibility,
-      pagination,
+    manualSorting: true,
+    enableSorting: Boolean(onSortingChange),
+    rowCount,
+    state: { columnVisibility, pagination, sorting: sorting ?? [] },
+    onPaginationChange,
+    onSortingChange: (updater) => {
+      onSortingChange?.(updater);
+      onPaginationChange((current) => ({ ...current, pageIndex: 0 }));
     },
-    onPaginationChange: onPaginationChange,
     onColumnVisibilityChange: setColumnVisibility,
   });
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    if (onSearchChange) onSearchChange(value);
-  };
+  const hideable = table
+    .getAllColumns()
+    .filter((column) => column.getCanHide());
 
   return (
-    <div>
-      <div className="mb-4 flex justify-between gap-4">
-        <div>{toolbarExtra}</div>
-        <div className="flex gap-4">
-          <InputGroup className="bg-white">
-            <InputGroupInput
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="max-w-96"
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">{toolbar}</div>
+        <div className="flex flex-wrap items-center gap-2">
+          {onSearchChange && (
+            <SearchInput
+              label={searchLabel}
+              value={search ?? ""}
+              onValueChange={(value) => {
+                onSearchChange(value);
+                onPaginationChange((current) => ({ ...current, pageIndex: 0 }));
+              }}
             />
-            <InputGroupAddon>
-              <SearchIcon />
-            </InputGroupAddon>
-          </InputGroup>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Sidebar />
-                Customize
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          )}
+          {hideable.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Columns3 aria-hidden />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {hideable.map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {typeof column.columnDef.meta === "object" &&
+                    column.columnDef.meta &&
+                    "label" in column.columnDef.meta
+                      ? String(column.columnDef.meta.label)
+                      : column.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
-      <div className="mt-8 overflow-hidden rounded-md border bg-white">
+
+      <div className="bg-card overflow-x-auto rounded-xl border">
         <Table>
-          <TableHeader className="bg-gray-100">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className="p-3">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
+          <TableHeader className="bg-muted/60">
+            {table.getHeaderGroups().map((group) => (
+              <TableRow key={group.id}>
+                {group.headers.map((header) => (
+                  <TableHead key={header.id} className="px-3">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
+          <TableBody aria-busy={isLoading}>
+            {isLoading ? (
+              Array.from(
+                { length: Math.min(pagination.pageSize, 8) },
+                (_, index) => (
+                  <TableRow key={index}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell key={column.id} className="p-3">
+                        <Skeleton className="h-4 w-full" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ),
+              )
+            ) : table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => {
-                    if (rowUrl) router.push(rowUrl(row.original.id));
-                  }}
-                  onMouseEnter={() => {
-                    if (rowUrl) router.prefetch(rowUrl(row.original.id));
-                  }}
-                  className={
-                    rowUrl ? `cursor-pointer` : `` + `hover:bg-gray-50`
+                  onClick={
+                    onRowClick ? () => onRowClick(row.original) : undefined
                   }
+                  className={cn(onRowClick && "cursor-pointer")}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-3">
@@ -193,10 +200,10 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
-                  className="h-24 p-3 text-center"
+                  colSpan={table.getVisibleLeafColumns().length}
+                  className="text-muted-foreground h-24 text-center"
                 >
-                  No results
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
@@ -205,5 +212,33 @@ export function DataTable<TData, TValue>({
       </div>
       <DataTablePagination table={table} />
     </div>
+  );
+}
+
+/** A header that sorts the column on click and shows the direction. */
+export function SortableHeader<TData, TValue>({
+  column,
+  title,
+}: {
+  column: Column<TData, TValue>;
+  title: string;
+}) {
+  if (!column.getCanSort()) return <span>{title}</span>;
+
+  const sorted = column.getIsSorted();
+  const Icon =
+    sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : ArrowUpDown;
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="-ml-2 h-8 px-2"
+      onClick={() => column.toggleSorting(sorted === "asc")}
+      aria-label={`Sort by ${title}`}
+    >
+      {title}
+      <Icon aria-hidden className="text-muted-foreground" />
+    </Button>
   );
 }

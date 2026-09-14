@@ -1,142 +1,72 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { CalendarX } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaginationState } from "@tanstack/react-table";
-import { useState } from "react";
-import { fetchAnnouncementsByDate } from "../actions";
+import { AnnouncementCard } from "@/components/content/cards";
+import { ContentGrid } from "@/components/content/content-grid";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { createClient } from "@/utils/supabase/client";
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";
-import { Tables } from "@/types/supabase";
-import { Button } from "@/components/ui/button";
-import AnnouncementTile from "./announcement-tile";
+import { fetchAnnouncements } from "@/lib/content/queries";
+import { queryKeys } from "@/lib/query-keys";
 
-const DATE_FILTERS = {
-  "This Week": 7,
-  "This Month": 30,
-  "This Year": 365,
-};
-
-type FilterKey = keyof typeof DATE_FILTERS;
+const PAGE_SIZE = 4;
 
 export default function AnnouncementSection() {
-  const supabase = createClient();
-
-  const [activeTab, setActiveTab] = useState<FilterKey>("This Week");
+  const supabase = useMemo(() => createClient(), []);
+  const [when, setWhen] = useState<"upcoming" | "past">("upcoming");
   const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 3,
-  });
-  const daysFromNow = DATE_FILTERS[activeTab];
+  const [page, setPage] = useState(0);
+  const debounced = useDebouncedValue(search);
+  const params = { page, pageSize: PAGE_SIZE, search: debounced, when };
 
-  const { data: announcements, isLoading } = useQuery({
-    queryKey: [
-      "announcements",
-      activeTab,
-      pagination.pageIndex,
-      pagination.pageSize,
-      search,
-    ],
-    queryFn: () =>
-      fetchAnnouncementsByDate(
-        supabase,
-        pagination.pageIndex,
-        pagination.pageSize,
-        search,
-        daysFromNow,
-      ),
+  const query = useQuery({
+    queryKey: queryKeys.announcements.list(params),
+    queryFn: () => fetchAnnouncements(supabase, params),
+    placeholderData: keepPreviousData,
   });
-
-  const list: Tables<"announcement">[] = announcements?.data || [];
-  const count = announcements?.count;
 
   return (
-    <section className="flex flex-col gap-4" id="announcements">
-      <div>
-        <p className="font-medium">Announcements and Events</p>
-        <p>
-          View all events of the Guidance and Counseling Services, alongside
-          external events and announcements
-        </p>
-      </div>
-      <div className="flex items-center justify-between">
+    <ContentGrid
+      id="announcements"
+      title="Announcements and events"
+      description="Workshops, talks and programs from the guidance office."
+      filters={
         <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as FilterKey)}
+          value={when}
+          onValueChange={(value) => {
+            setWhen(value as "upcoming" | "past");
+            setPage(0);
+          }}
         >
-          <TabsList>
-            {Object.keys(DATE_FILTERS).map((label) => (
-              <TabsTrigger key={label} value={label}>
-                {label}
-              </TabsTrigger>
-            ))}
+          <TabsList aria-label="Show">
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="past">Past</TabsTrigger>
           </TabsList>
         </Tabs>
-        <InputGroup className="w-fit bg-white px-2">
-          <Search strokeWidth={1.25} />
-          <InputGroupInput
-            placeholder="Search by title"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearch(e.target.value)
-            }
-          />
-        </InputGroup>
-      </div>
-      {isLoading ? (
-        <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, idx) => (
-            <AnnouncementTile key={`skeleton-${idx}`} isLoading={true} />
-          ))}
-        </div>
-      ) : list.length === 0 ? (
-        <div className="flex w-full items-center justify-center gap-4 rounded-2xl border bg-white py-12">
-          <CircleOff strokeWidth={1.25} />
-          <p>No more events</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-4">
-          {list.map((data, idx) => (
-            <AnnouncementTile
-              key={data.id || idx}
-              announcementData={data}
-              isLoading={false}
-            />
-          ))}
-        </div>
+      }
+      search={search}
+      onSearchChange={setSearch}
+      searchLabel="Search announcements"
+      items={query.data?.data ?? []}
+      isLoading={query.isLoading}
+      total={query.data?.count ?? 0}
+      page={page}
+      pageSize={PAGE_SIZE}
+      onPageChange={setPage}
+      itemLabel="events"
+      empty={{
+        title:
+          when === "upcoming"
+            ? "Nothing scheduled right now"
+            : "No past events",
+        description: "Check back soon.",
+        icon: CalendarX,
+      }}
+      renderItem={(item) => (
+        <AnnouncementCard key={item.id} announcement={item} />
       )}
-      <div className="flex items-center justify-between">
-        <p>
-          Showing {list.length} of {count} result(s)
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            disabled={pagination.pageIndex === 0}
-            onClick={() =>
-              setPagination((prev) => ({
-                ...prev,
-                pageIndex: Math.max(prev.pageIndex - 1, 0),
-              }))
-            }
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            disabled={list.length < pagination.pageSize}
-            onClick={() =>
-              setPagination((prev) => ({
-                ...prev,
-                pageIndex: prev.pageIndex + 1,
-              }))
-            }
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
-    </section>
+    />
   );
 }

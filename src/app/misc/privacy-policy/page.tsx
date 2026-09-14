@@ -1,81 +1,32 @@
-import { Clock2, Mail } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
+import { Clock, Mail } from "lucide-react";
 
-type TeamMember = {
-  id: number;
-  name: string;
-  role: string;
-  email: string;
-  image: string;
-};
-
-export const teamMembers: TeamMember[] = [
-  {
-    id: 1,
-    name: "Gerlie Campion",
-    role: "Technical Writer and Documentation Specialist",
-    email: "campiongerlie18@gmail.com",
-    image: "",
-  },
-  {
-    id: 2,
-    name: "Francis Adrian Esteban",
-    role: "Quality Assurance (QA) and Tester",
-    email: "francisadrian.esteban@1.ustp.edu.ph",
-    image: "",
-  },
-  {
-    id: 3,
-    name: "Jhey Gulde",
-    role: "Backend Developer and System Architect",
-    email: "gulde.jhey8@gmail.com",
-    image: "",
-  },
-  {
-    id: 4,
-    name: "Kathleen Grace Gultiano",
-    role: "UI/UX Designer",
-    email: "gultiano.kathleengrace@gmail.com",
-    image: "",
-  },
-  {
-    id: 5,
-    name: "John Carl Ramirez",
-    role: "Project Manager and Full-Stack Developer",
-    email: "johncarl.ramirez.dev@gmail.com",
-    image: "",
-  },
-  {
-    id: 6,
-    name: "Renchille Pateño",
-    role: "Support and Maintenance Team Lead",
-    email: "pateno.renchille2002@gmail.com",
-    image: "",
-  },
-];
+export const metadata: Metadata = { title: "Privacy policy | GCS" };
 
 export default function PrivacyPolicy() {
   return (
-    <main className="my-10 w-full rounded-4xl border bg-white">
-      <section className="flex items-center justify-between border-b">
-        <div className="space-y-2 p-10">
-          <p className="text-6xl">Privacy Policy</p>
-          <p className="w-4/5">
-            This Privacy Policy explains how we collect, use, and protect your
-            information when you use our website. By accessing or using the
-            site, you agree to the practices described here.
+    <article className="bg-card w-full overflow-hidden rounded-3xl border md:rounded-4xl">
+      <header className="flex flex-col-reverse gap-6 border-b p-6 sm:flex-row sm:items-center sm:justify-between md:p-10">
+        <div className="max-w-2xl space-y-3">
+          <h1 className="text-4xl tracking-tight md:text-5xl">
+            Privacy policy
+          </h1>
+          <p className="text-muted-foreground">
+            How we collect, use and protect your information when you use this
+            website. By using the site, you agree to the practices described
+            here.
           </p>
         </div>
-        <div className="relative mr-10 h-25 w-40">
-          <Image
-            src="/codebridge-icon.png"
-            alt="placeholder"
-            fill
-            className="rounded-4xl object-cover p-4"
-          />
-        </div>
-      </section>
-      <section className="space-y-4 p-10">
+        <Image
+          src="/codebridge-icon.png"
+          alt="CodeBridge"
+          width={120}
+          height={75}
+          className="h-auto w-24 object-contain"
+        />
+      </header>
+      <div className="max-w-3xl space-y-4 p-6 leading-relaxed md:p-10">
         <p>
           We collect information that you voluntarily provide when interacting
           with our website, such as through contact forms, account settings,
@@ -131,23 +82,21 @@ export default function PrivacyPolicy() {
           We may update this Privacy Policy from time to time, and any changes
           will be posted on this page with a revised “Last Updated” date.
         </p>
-        <p>
-          For any questions about this Privacy Policy, you may contact us at
-        </p>
-        <div className="flex gap-4">
+        <p>For any questions about this privacy policy, contact us:</p>
+        <div className="flex flex-wrap gap-3">
           <a
-            className="flex w-fit items-center gap-4 rounded-3xl border px-4 py-2"
+            className="hover:bg-muted flex items-center gap-2 rounded-full border px-4 py-2"
             href="mailto:codebridge.llc@gmail.com"
           >
-            <Mail strokeWidth={1.25} />
-            <p>codebridge.llc@gmail.com</p>
+            <Mail aria-hidden strokeWidth={1.5} className="size-4" />
+            codebridge.llc@gmail.com
           </a>
-          <div className="flex w-fit items-center gap-4 rounded-3xl border px-4 py-2">
-            <Clock2 strokeWidth={1.25} />
-            <p>Last Updated on November 27, 2025</p>
-          </div>
+          <p className="text-muted-foreground flex items-center gap-2 rounded-full border px-4 py-2">
+            <Clock aria-hidden strokeWidth={1.5} className="size-4" />
+            Last updated November 27, 2025
+          </p>
         </div>
-      </section>
-    </main>
+      </div>
+    </article>
   );
 }

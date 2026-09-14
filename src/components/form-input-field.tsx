@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   Field,
   FieldDescription,
@@ -7,32 +8,11 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-interface FieldMeta {
-  isTouched: boolean;
-  isValid: boolean;
-  errors?: Array<{ message?: string } | undefined>;
-}
-
-interface FieldState<TValue> {
-  value?: TValue | null;
-  meta: FieldMeta;
-}
-
-interface FieldLike<TValue = string> {
-  name: string;
-  state: FieldState<TValue>;
-  handleBlur: () => void;
-  handleChange: (value: TValue) => void;
-}
-
-interface FormInputFieldProps<TValue = string> {
-  field: FieldLike<TValue>;
-  label: string;
-  placeholder: string;
-  description?: React.ReactNode;
-  type?: string;
-}
+import {
+  fieldErrors,
+  isFieldInvalid,
+  type FieldLike,
+} from "@/components/form/field-like";
 
 export function FormInputField<TValue = string>({
   field,
@@ -40,33 +20,50 @@ export function FormInputField<TValue = string>({
   placeholder,
   description,
   type = "text",
-}: FormInputFieldProps<TValue>) {
-  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    field.handleChange(
-      type === "number" ? (Number(value) as TValue) : (value as TValue),
-    );
-  };
+  autoComplete,
+  inputMode,
+  className,
+}: {
+  field: FieldLike<TValue>;
+  label: string;
+  placeholder?: string;
+  description?: ReactNode;
+  type?: string;
+  autoComplete?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  className?: string;
+}) {
+  const invalid = isFieldInvalid(field);
 
   return (
-    <Field data-invalid={isInvalid}>
+    <Field data-invalid={invalid} className={className}>
       <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
       <Input
         id={field.name}
         name={field.name}
         type={type}
-        value={String(field.state.value ?? "")}
+        // Number fields start at 0 so the form type stays numeric; show that as empty.
+        value={
+          type === "number" && !field.state.value
+            ? ""
+            : String(field.state.value ?? "")
+        }
         onBlur={field.handleBlur}
-        onChange={handleChange}
-        aria-invalid={isInvalid}
+        onChange={(event) => {
+          const value = event.target.value;
+          field.handleChange(
+            (type === "number" ? Number(value) : value) as TValue,
+          );
+        }}
+        aria-invalid={invalid}
         placeholder={placeholder}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
       />
-      {isInvalid ? (
-        <FieldError errors={field.state.meta.errors} />
+      {invalid ? (
+        <FieldError errors={fieldErrors(field)} />
       ) : (
-        <FieldDescription>{description ?? null}</FieldDescription>
+        description && <FieldDescription>{description}</FieldDescription>
       )}
     </Field>
   );

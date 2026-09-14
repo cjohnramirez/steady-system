@@ -1,22 +1,37 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StatusScreen } from "@/components/app/status-screen";
+import { SignOutButton } from "./sign-out-button";
 
 /**
- * A real route at /error.
+ * Where the proxy and the layout guards send a session they cannot use.
  *
- * Middleware has always redirected here when it could not work out who the caller
- * is, but the path never existed, so the redirect landed on the 404 page instead.
- * `src/app/error.tsx` does not serve this URL: that file is Next's error boundary
- * convention and only renders when a segment throws.
+ * `no-role` arrives already signed out (the proxy ends the session first, which is
+ * what stops this page redirecting to itself). `no-profile` is still signed in, so
+ * it offers a sign-out.
  */
-
-const REASONS: Record<string, { title: string; detail: string }> = {
+const REASONS: Record<
+  string,
+  { title: string; detail: string; signedIn: boolean }
+> = {
   "no-role": {
-    title: "Your account has no role yet",
+    title: "Your account isn't set up yet",
     detail:
-      "You are signed in, but the account is not registered as a student, counselor or admin. Ask the guidance office to finish setting it up.",
+      "You were signed out because this account has no student, counselor or admin role. Ask the guidance office to finish setting it up.",
+    signedIn: false,
+  },
+  unavailable: {
+    title: "We couldn't check your account",
+    detail:
+      "Something went wrong reaching the server. Please try again in a moment.",
+    signedIn: false,
+  },
+  "no-profile": {
+    title: "We couldn't find your profile",
+    detail:
+      "You're signed in, but there is no profile attached to this account. Sign out and try again, or contact the guidance office.",
+    signedIn: true,
   },
 };
 
@@ -24,6 +39,7 @@ const FALLBACK = {
   title: "Something went wrong",
   detail:
     "We could not verify your session. Signing in again usually fixes it.",
+  signedIn: false,
 };
 
 export default async function ErrorPage({
@@ -32,29 +48,20 @@ export default async function ErrorPage({
   searchParams: Promise<{ reason?: string }>;
 }) {
   const { reason } = await searchParams;
-  const { title, detail } = (reason && REASONS[reason]) || FALLBACK;
+  const { title, detail, signedIn } = (reason && REASONS[reason]) || FALLBACK;
 
   return (
-    <div className="flex h-dvh flex-col items-center justify-between bg-gray-50 p-10">
-      <div className="my-auto max-w-md space-y-6 text-center">
-        <div className="flex items-center justify-center">
-          <ShieldAlert size={80} strokeWidth={0.5} />
-        </div>
-        <p className="text-4xl">{title}</p>
-        <p>{detail}</p>
-        <div className="flex items-center justify-center gap-3">
-          <Button asChild variant="outline" size="cta">
-            <Link href="/auth/login/student">Sign in again</Link>
-          </Button>
-          <Button asChild variant="ghost" size="cta">
-            <Link href="/home">Go home</Link>
-          </Button>
-        </div>
-      </div>
-      <div className="flex place-content-end items-center gap-4">
-        <Image src="/icon.png" alt="logo" width={40} height={40} />
-        <p>Guidance and Counseling Services</p>
-      </div>
-    </div>
+    <StatusScreen icon={ShieldAlert} title={title} description={detail}>
+      {signedIn ? (
+        <SignOutButton />
+      ) : (
+        <Button asChild>
+          <Link href="/auth/login/student">Sign in</Link>
+        </Button>
+      )}
+      <Button variant="outline" asChild>
+        <Link href="/home">Back to home</Link>
+      </Button>
+    </StatusScreen>
   );
 }

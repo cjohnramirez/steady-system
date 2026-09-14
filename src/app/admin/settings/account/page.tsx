@@ -1,49 +1,24 @@
-"use client";
+import type { Metadata } from "next";
+import { createClient } from "@/utils/supabase/server";
+import { guardPage } from "@/lib/auth/session";
+import ProfileForm from "./profile-form";
+import PasswordForm from "./password-form";
 
-import AdminProfile from "./_components/profile-information";
-import ChangePassword from "./_components/change-password";
-import { useSearchParams } from "next/navigation";
-import { CircleOff } from "lucide-react";
-import { Suspense } from "react";
+export const metadata: Metadata = { title: "Account settings | GCS Admin" };
 
-interface SettingSection {
-  name: string;
-  section: React.ReactNode;
-}
-
-const settingSectionObj: SettingSection[] = [
-  {
-    name: "Profile Information",
-    section: <AdminProfile />,
-  },
-  {
-    name: "Change Password",
-    section: <ChangePassword />,
-  },
-];
-
-export default function AccountSettingsPage() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("query") ?? "";
-
-  const filteredObj = settingSectionObj.filter((section) =>
-    section.name.toLowerCase().includes(query.toLowerCase()),
-  );
+export default async function AccountSettingsPage() {
+  const viewer = await guardPage("admin");
+  const supabase = await createClient();
+  const { data: admin } = await supabase
+    .from("admin")
+    .select("first_name, last_name, username, phone, university_id, email")
+    .eq("id", viewer.profileId)
+    .single();
 
   return (
-    <main className="flex-1 space-y-8">
-      {filteredObj.length > 0 ? (
-        filteredObj.map((section) => (
-          <Suspense key={section.name} fallback={<div>Loading...</div>}>
-            <div>{section.section}</div>
-          </Suspense>
-        ))
-      ) : (
-        <section className="flex items-center justify-center gap-4 rounded-2xl border border-gray-200 bg-white p-8">
-          <CircleOff size={20} />
-          <p>No results</p>
-        </section>
-      )}
-    </main>
+    <>
+      {admin && <ProfileForm admin={admin} />}
+      <PasswordForm />
+    </>
   );
 }

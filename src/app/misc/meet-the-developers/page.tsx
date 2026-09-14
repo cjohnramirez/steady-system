@@ -1,6 +1,9 @@
-import { Mail } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
+import { Mail } from "lucide-react";
+import { UserAvatar } from "@/components/app/user-avatar";
+
+export const metadata: Metadata = { title: "Meet the developers | GCS" };
 
 type TeamMember = {
   id: number;
@@ -10,7 +13,7 @@ type TeamMember = {
   image: string;
 };
 
-export const teamMembers: TeamMember[] = [
+const teamMembers: TeamMember[] = [
   {
     id: 1,
     name: "Gerlie Campion",
@@ -57,41 +60,48 @@ export const teamMembers: TeamMember[] = [
 
 export default function MeetTheDevelopers() {
   return (
-    <main className="w-full rounded-4xl border bg-white">
-      <section className="flex items-center justify-between border-b">
-        <div className="space-y-2 p-10">
-          <p className="text-6xl">Meet the developers</p>
-          <p>Welcome! Here is a little about the team behind this project.</p>
+    <article className="bg-card w-full overflow-hidden rounded-3xl border md:rounded-4xl">
+      <header className="flex flex-col-reverse gap-6 border-b p-6 sm:flex-row sm:items-center sm:justify-between md:p-10">
+        <div className="space-y-3">
+          <h1 className="text-4xl tracking-tight md:text-5xl">
+            Meet the developers
+          </h1>
+          <p className="text-muted-foreground">
+            The team behind the GCS system.
+          </p>
         </div>
-        <div className="relative h-25 w-40">
-          <Image
-            src="/codebridge-icon.png"
-            alt="placeholder"
-            fill
-            className="rounded-4xl object-cover p-4"
-          />
-        </div>
-      </section>
-      <section className="grid grid-cols-2 grid-rows-3 gap-10 p-10">
-        {teamMembers.map((member, idx) => (
-          <div key={idx} className="flex gap-5">
-            <div className="from-brand-light to-brand-normal h-25 w-25 rounded-full bg-linear-to-t" />
-            <div className="flex flex-col justify-between">
+        <Image
+          src="/codebridge-icon.png"
+          alt="CodeBridge"
+          width={120}
+          height={75}
+          className="h-auto w-24 object-contain"
+        />
+      </header>
+      <ul className="grid gap-6 p-6 sm:grid-cols-2 md:p-10">
+        {teamMembers.map((member) => (
+          <li key={member.id} className="flex items-start gap-4">
+            <UserAvatar name={member.name} src={member.image} size="md" />
+            <div className="min-w-0 space-y-2">
               <div>
-                <p className="font-medium">{member.name}</p>
-                <p>{member.role}</p>
+                <h2 className="font-medium">{member.name}</h2>
+                <p className="text-muted-foreground">{member.role}</p>
               </div>
               <a
-                className="flex items-center gap-4 rounded-2xl border px-4 py-2"
+                className="hover:bg-muted flex w-fit max-w-full items-center gap-2 rounded-full border px-3 py-1.5"
                 href={`mailto:${member.email}`}
               >
-                <Mail strokeWidth={1.25} />
-                <p>{member.email}</p>
+                <Mail
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="size-4 shrink-0"
+                />
+                <span className="truncate">{member.email}</span>
               </a>
             </div>
-          </div>
+          </li>
         ))}
-      </section>
-    </main>
+      </ul>
+    </article>
   );
 }
