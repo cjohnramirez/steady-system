@@ -11,6 +11,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { IconBadge } from "@/components/app/icon-badge";
 import { createClient } from "@/utils/supabase/server";
 import { formatEventRange } from "@/lib/format";
@@ -102,6 +103,7 @@ export default async function HomePage() {
         aria-labelledby="hero-title"
         className="flex scroll-mt-24 flex-col gap-8 pt-10 md:pt-16"
       >
+        <EarlyAccessNotice />
         <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-start">
           <div className="max-w-3xl space-y-5">
             <h1
