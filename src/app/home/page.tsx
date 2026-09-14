@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { IconBadge } from "@/components/app/icon-badge";
+import { LinkPending } from "@/components/app/link-pending";
 import { createClient } from "@/utils/supabase/server";
 import { formatEventRange } from "@/lib/format";
 import { CAMPUS_ADDRESS } from "@/lib/organization/address";
@@ -121,11 +122,16 @@ export default async function HomePage() {
               <Button size="lg" asChild>
                 <Link href="/student/appointment">
                   Book an appointment
-                  <ArrowRight aria-hidden />
+                  <LinkPending>
+                    <ArrowRight aria-hidden />
+                  </LinkPending>
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/portal">Visit the portal</Link>
+                <Link href="/portal">
+                  <LinkPending />
+                  Visit the portal
+                </Link>
               </Button>
             </div>
           </div>
@@ -269,7 +275,9 @@ export default async function HomePage() {
           <Button variant="outline" asChild>
             <Link href="/portal#announcements">
               See all announcements
-              <ArrowRight aria-hidden />
+              <LinkPending>
+                <ArrowRight aria-hidden />
+              </LinkPending>
             </Link>
           </Button>
         </div>
@@ -292,7 +300,9 @@ export default async function HomePage() {
           <Button size="lg" asChild>
             <Link href="/student/appointment">
               Book an appointment
-              <ArrowRight aria-hidden />
+              <LinkPending>
+                <ArrowRight aria-hidden />
+              </LinkPending>
             </Link>
           </Button>
           {organization?.email && (

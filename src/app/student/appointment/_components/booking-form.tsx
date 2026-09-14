@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { EmptyState } from "@/components/app/empty-state";
@@ -326,8 +325,7 @@ export default function BookingForm({
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isPending}>
-            {isPending && <Spinner />}
+          <Button type="submit" loading={isPending}>
             Request appointment
           </Button>
         </div>

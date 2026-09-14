@@ -15,6 +15,7 @@ import type {
 } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { LinkPending } from "@/components/app/link-pending";
 import { SectionCard } from "@/components/app/section-card";
 import { StatusBadge } from "@/components/app/status-badge";
 import { useSignedInViewer } from "@/components/viewer-provider";
@@ -109,27 +110,31 @@ export default function StudentAppointmentSection() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={async () => {
-                  const ok = await confirm({
+                onClick={() => {
+                  if (!id) return;
+                  void confirm({
                     title: "Cancel this appointment?",
                     description:
                       "Your counselor will be notified and the time will be freed up.",
                     confirmLabel: "Cancel appointment",
                     cancelLabel: "Keep it",
                     destructive: true,
-                  });
-                  if (!ok || !id) return;
-                  const result = await cancelAppointment(id);
-                  if (!result.ok) {
-                    toast.error(result.error);
-                    return;
-                  }
-                  toast.success("Appointment cancelled.");
-                  await queryClient.invalidateQueries({
-                    queryKey: queryKeys.appointments.all,
-                  });
-                  await queryClient.invalidateQueries({
-                    queryKey: queryKeys.availableSlots.all,
+                    action: async () => {
+                      const result = await cancelAppointment(id);
+                      if (!result.ok) {
+                        toast.error(result.error);
+                        return;
+                      }
+                      toast.success("Appointment cancelled.");
+                      await Promise.all([
+                        queryClient.invalidateQueries({
+                          queryKey: queryKeys.appointments.all,
+                        }),
+                        queryClient.invalidateQueries({
+                          queryKey: queryKeys.availableSlots.all,
+                        }),
+                      ]);
+                    },
                   });
                 }}
               >
@@ -144,6 +149,7 @@ export default function StudentAppointmentSection() {
                 <Link
                   href={`/student/appointment?reason=${encodeURIComponent(reason ?? "")}`}
                 >
+                  <LinkPending />
                   Book again
                 </Link>
               </Button>

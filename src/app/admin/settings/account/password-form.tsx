@@ -4,7 +4,6 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import FormPasswordField from "@/components/form-password-field";
 import { SectionCard } from "@/components/app/section-card";
 import { changeOwnPassword } from "@/lib/admin/actions";
@@ -64,8 +63,7 @@ export default function PasswordForm() {
             </form.Field>
           </div>
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Spinner />}
+            <Button type="submit" loading={isSubmitting}>
               Change password
             </Button>
           </div>

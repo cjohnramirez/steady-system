@@ -16,7 +16,6 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import FormPasswordField from "@/components/form-password-field";
 import { FormSelectField } from "@/components/form-select-field";
@@ -447,8 +446,7 @@ export default function SignUpForm() {
           </FieldSet>
 
           <div className="flex flex-col gap-4">
-            <Button type="submit" size="lg" disabled={isSubmitting}>
-              {isSubmitting && <Spinner />}
+            <Button type="submit" size="lg" loading={isSubmitting}>
               {isSubmitting ? "Creating your account…" : "Create account"}
             </Button>
             <p className="text-muted-foreground text-center">

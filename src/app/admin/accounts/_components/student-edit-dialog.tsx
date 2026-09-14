@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/field";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/app/error-state";
-import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { FormInputField } from "@/components/form-input-field";
 import { FormSelectField } from "@/components/form-select-field";
@@ -270,8 +269,7 @@ function StudentForm({
         <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" form={formId} disabled={isSubmitting}>
-          {isSubmitting && <Spinner />}
+        <Button type="submit" form={formId} loading={isSubmitting}>
           Save changes
         </Button>
       </DialogFooter>
