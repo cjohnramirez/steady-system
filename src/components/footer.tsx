@@ -3,6 +3,7 @@ import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
 import { BrandMark } from "@/components/app/brand-mark";
 import { createClient } from "@/utils/supabase/server";
 import { formatClockTime, strToTitleCase } from "@/lib/format";
+import { CAMPUS_ADDRESS } from "@/lib/organization/address";
 import type { NavBar } from "@/app/home/_lib/nav-data";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -95,7 +96,10 @@ export default async function Footer({
                   strokeWidth={1.5}
                   className="mt-0.5 size-4 shrink-0"
                 />
-                {organization.office_location}
+                <span>
+                  {CAMPUS_ADDRESS}
+                  <span className="block">{organization.office_location}</span>
+                </span>
               </li>
               <li className="flex gap-2">
                 <Mail

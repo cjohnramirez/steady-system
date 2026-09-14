@@ -14,7 +14,9 @@ import { Button } from "@/components/ui/button";
 import { IconBadge } from "@/components/app/icon-badge";
 import { createClient } from "@/utils/supabase/server";
 import { formatEventRange } from "@/lib/format";
+import { CAMPUS_ADDRESS, campusMapsUrl } from "@/lib/organization/address";
 import hero from "@/assets/hero.jpg";
+import { AboutMosaic } from "./_components/about-mosaic";
 import { SectionIntro } from "./_components/section-intro";
 
 const SERVICES = [
@@ -52,29 +54,45 @@ export default async function HomePage() {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const [{ data: organization }, { data: articles }, { data: events }] =
-    await Promise.all([
-      supabase
-        .from("organization")
-        .select("office_location, email")
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("article")
-        .select("id, title, author_name, article_image")
-        .order("added_at", { ascending: false })
-        .limit(3),
-      supabase
-        .from("announcement")
-        .select("id, title, location, start_date, end_date, announcement_image")
-        .gte("end_date", now)
-        .order("start_date")
-        .limit(3),
-    ]);
-
-  const location =
-    organization?.office_location ?? "Guidance and Counseling Services office";
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+  const [
+    { data: organization },
+    { data: article },
+    { data: activity },
+    { data: playlist },
+    { data: events },
+  ] = await Promise.all([
+    supabase
+      .from("organization")
+      .select("office_location, email")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("article")
+      .select("title, author_name, article_image")
+      .order("added_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    // A past event, so the About tile doesn't repeat "Upcoming events" below.
+    supabase
+      .from("announcement")
+      .select("title, location, announcement_image")
+      .lt("end_date", now)
+      .order("end_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("playlist")
+      .select("title, creator, image")
+      .order("title")
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("announcement")
+      .select("id, title, location, start_date, end_date, announcement_image")
+      .gte("end_date", now)
+      .order("start_date")
+      .limit(3),
+  ]);
 
   return (
     <div className="flex flex-col gap-24 pb-24 md:gap-32">
@@ -84,7 +102,7 @@ export default async function HomePage() {
         aria-labelledby="hero-title"
         className="flex scroll-mt-24 flex-col gap-8 pt-10 md:pt-16"
       >
-        <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+        <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-start">
           <div className="max-w-3xl space-y-5">
             <h1
               id="hero-title"
@@ -115,9 +133,20 @@ export default async function HomePage() {
               <h2 className="font-medium">Find us</h2>
             </div>
             <div className="space-y-4 p-4">
-              <p>{location}</p>
+              <address className="space-y-1 not-italic">
+                <p className="font-medium">{CAMPUS_ADDRESS}</p>
+                {organization?.office_location && (
+                  <p className="text-muted-foreground">
+                    {organization.office_location}
+                  </p>
+                )}
+              </address>
               <Button variant="outline" asChild>
-                <a href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={campusMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Open in Google Maps
                   <ArrowUpRight aria-hidden />
                 </a>
@@ -152,51 +181,18 @@ export default async function HomePage() {
             emotionally.
           </p>
         </SectionIntro>
-        {articles && articles.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-3">
-            {articles.map((article, index) => (
-              <Link
-                key={article.id}
-                href="/portal#articles"
-                className={`group bg-card focus-visible:ring-ring/50 relative flex min-h-64 flex-col justify-end overflow-hidden rounded-3xl border p-3 outline-none focus-visible:ring-[3px] ${index === 0 ? "md:col-span-2 md:min-h-80" : ""}`}
-              >
-                <Image
-                  src={article.article_image || "/placeholder.png"}
-                  alt=""
-                  fill
-                  sizes={
-                    index === 0
-                      ? "(min-width: 768px) 66vw, 100vw"
-                      : "(min-width: 768px) 33vw, 100vw"
-                  }
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                />
-                <span className="bg-card/95 relative flex items-center gap-3 rounded-2xl p-4 backdrop-blur">
-                  <span className="min-w-0 flex-1">
-                    <span className="text-muted-foreground block text-xs">
-                      Recommended reading
-                    </span>
-                    <span className="block truncate font-medium">
-                      {article.title}
-                    </span>
-                  </span>
-                  <ArrowUpRight
-                    aria-hidden
-                    strokeWidth={1.25}
-                    className="size-5 shrink-0"
-                  />
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
+        <AboutMosaic
+          article={article}
+          activity={activity}
+          playlist={playlist}
+        />
       </section>
 
       {/* Services */}
       <section
         id="service"
         aria-labelledby="service-title"
-        className="grid scroll-mt-24 items-center gap-10 lg:grid-cols-2"
+        className="grid scroll-mt-24 gap-10 lg:grid-cols-2"
       >
         <div className="flex flex-col gap-8">
           <SectionIntro
@@ -222,14 +218,16 @@ export default async function HomePage() {
             ))}
           </ul>
         </div>
-        <div className="bg-card relative hidden aspect-[4/5] overflow-hidden rounded-4xl border p-3 lg:block">
+        {/* The photo has no height of its own (fill is absolutely positioned), so
+            the row takes the list's height and the photo stretches to match it.
+            A fixed 4:5 ratio made it far taller than the list. */}
+        <div className="bg-card relative hidden overflow-hidden rounded-4xl border p-3 lg:block">
           <div className="relative h-full overflow-hidden rounded-3xl">
             <Image
-              src={hero}
+              src="/auth.jpg"
               alt=""
               fill
               sizes="50vw"
-              placeholder="blur"
               className="object-cover"
             />
           </div>

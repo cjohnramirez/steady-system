@@ -73,7 +73,7 @@ insert into public.organization (
   'GCS',
   'gcs@university.test',
   '+639171234567',
-  'Student Center, Ground Floor',
+  'Room 1, Bldg 02, Science Complex',
   '{false,true,true,true,true,true,false}',
   '08:00',
   '17:00'
