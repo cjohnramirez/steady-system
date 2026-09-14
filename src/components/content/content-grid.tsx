@@ -3,13 +3,18 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { EmptyState } from "@/components/app/empty-state";
+import { ErrorState } from "@/components/app/error-state";
 import { PaginationControls } from "@/components/app/pagination-controls";
 import { SearchInput } from "@/components/app/search-input";
+import { cn } from "@/lib/utils";
 import { ContentCardSkeleton } from "./content-card";
 
 /**
- * Search, grid, empty state and pager for a content list. The portal and the admin
- * CMS each had three near-identical copies of this layout.
+ * Search, grid, loading, empty and error states, and pager for a content list. The
+ * portal and the admin CMS each had three near-identical copies of this layout.
+ *
+ * While a new page or filter loads, the current tiles stay in place but dim, so
+ * the grid doesn't collapse and jump; the first load shows skeleton tiles.
  */
 export function ContentGrid<T>({
   id,
@@ -22,6 +27,9 @@ export function ContentGrid<T>({
   searchLabel,
   items,
   isLoading,
+  isFetching = false,
+  isError = false,
+  onRetry,
   total,
   page,
   pageSize,
@@ -40,6 +48,10 @@ export function ContentGrid<T>({
   searchLabel: string;
   items: T[];
   isLoading: boolean;
+  /** A refetch over tiles already shown (paging, search, mood). Dims the grid. */
+  isFetching?: boolean;
+  isError?: boolean;
+  onRetry?: () => unknown;
   total: number;
   page: number;
   pageSize: number;
@@ -81,19 +93,30 @@ export function ContentGrid<T>({
       </header>
 
       {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          aria-busy
+        >
           {Array.from({ length: pageSize }, (_, index) => (
             <ContentCardSkeleton key={index} />
           ))}
         </div>
+      ) : isError && items.length === 0 ? (
+        <ErrorState title={`${title} couldn't be loaded`} onRetry={onRetry} />
       ) : items.length === 0 ? (
         <EmptyState
-          title={empty.title}
+          title={search ? "No matches" : empty.title}
           description={search ? "Try a different search." : empty.description}
           icon={empty.icon}
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div
+          aria-busy={isFetching}
+          className={cn(
+            "grid gap-4 transition-opacity sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+            isFetching && "opacity-60",
+          )}
+        >
           {items.map(renderItem)}
         </div>
       )}
@@ -103,7 +126,7 @@ export function ContentGrid<T>({
         pageSize={pageSize}
         total={total}
         onPageChange={onPageChange}
-        isLoading={isLoading}
+        isLoading={isLoading || isFetching}
         itemLabel={itemLabel}
       />
     </section>

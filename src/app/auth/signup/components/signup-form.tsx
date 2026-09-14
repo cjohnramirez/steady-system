@@ -236,9 +236,9 @@ export default function SignUpForm() {
                   <FormSelectField
                     field={field}
                     label="College"
-                    placeholder={
-                      colleges.isLoading ? "Loading…" : "Select a college"
-                    }
+                    isLoading={colleges.isLoading}
+                    isError={colleges.isError}
+                    placeholder="Select a college"
                     options={(colleges.data ?? []).map((college) => ({
                       value: college.id,
                       label: college.full_name || college.abbreviation,
@@ -251,6 +251,9 @@ export default function SignUpForm() {
                   <FormSelectField
                     field={field}
                     label="Department"
+                    isLoading={departments.isLoading}
+                    isError={departments.isError}
+                    emptyLabel="No departments in this college yet"
                     disabled={!collegeId}
                     placeholder={
                       collegeId
@@ -290,6 +293,8 @@ export default function SignUpForm() {
                 <FormSelectField
                   field={field}
                   label="How are you feeling lately?"
+                  isLoading={moods.isLoading}
+                  isError={moods.isError}
                   description="We use this to suggest articles and playlists. You can change it any time."
                   options={(moods.data ?? []).map((mood) => ({
                     value: mood.id,

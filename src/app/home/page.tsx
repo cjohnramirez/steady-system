@@ -18,6 +18,7 @@ import { formatEventRange } from "@/lib/format";
 import { CAMPUS_ADDRESS } from "@/lib/organization/address";
 import hero from "@/assets/hero.jpg";
 import { AboutMosaic } from "./_components/about-mosaic";
+import { TileImage } from "@/components/content/tile-image";
 import { SectionIntro } from "./_components/section-intro";
 
 const SERVICES = [
@@ -213,13 +214,7 @@ export default async function HomePage() {
             A fixed 4:5 ratio made it far taller than the list. */}
         <div className="bg-card relative hidden overflow-hidden rounded-4xl border p-3 lg:block">
           <div className="relative h-full overflow-hidden rounded-3xl">
-            <Image
-              src="/auth.jpg"
-              alt=""
-              fill
-              sizes="50vw"
-              className="object-cover"
-            />
+            <TileImage src="/auth.jpg" sizes="50vw" />
           </div>
         </div>
       </section>
@@ -246,12 +241,9 @@ export default async function HomePage() {
                 className="group bg-card hover:bg-muted/40 focus-visible:ring-ring/50 flex flex-col gap-3 rounded-2xl border p-2 transition-colors outline-none focus-visible:ring-[3px]"
               >
                 <span className="bg-muted relative block aspect-[16/10] overflow-hidden rounded-xl">
-                  <Image
-                    src={event.announcement_image || "/placeholder.png"}
-                    alt=""
-                    fill
+                  <TileImage
+                    src={event.announcement_image}
                     sizes="(min-width: 768px) 33vw, 100vw"
-                    className="object-cover"
                   />
                 </span>
                 <span className="flex flex-col gap-1 px-2 pb-2">

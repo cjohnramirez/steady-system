@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarCog, UserPen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ErrorState } from "@/components/app/error-state";
 import { DetailList } from "@/components/app/detail-list";
 import { SectionCard } from "@/components/app/section-card";
 import { UserAvatar } from "@/components/app/user-avatar";
@@ -80,24 +81,32 @@ export default function ProfileCard() {
           )}
         </div>
       </div>
-      <DetailList
-        isLoading={counselor.isLoading}
-        items={[
-          { label: "Email", value: c?.email },
-          { label: "Phone", value: c?.phone },
-          { label: "Working days", value: workingDays },
-          {
-            label: "Hours",
-            value: c
-              ? `${formatClockTime(c.start_time)} – ${formatClockTime(c.end_time)}`
-              : null,
-          },
-          {
-            label: "Departments",
-            value: c?.department ?? "None assigned yet. Ask an administrator.",
-          },
-        ]}
-      />
+      {counselor.isError ? (
+        <ErrorState
+          title="Your profile couldn't be loaded"
+          onRetry={() => counselor.refetch()}
+        />
+      ) : (
+        <DetailList
+          isLoading={counselor.isLoading}
+          items={[
+            { label: "Email", value: c?.email },
+            { label: "Phone", value: c?.phone },
+            { label: "Working days", value: workingDays },
+            {
+              label: "Hours",
+              value: c
+                ? `${formatClockTime(c.start_time)} – ${formatClockTime(c.end_time)}`
+                : null,
+            },
+            {
+              label: "Departments",
+              value:
+                c?.department ?? "None assigned yet. Ask an administrator.",
+            },
+          ]}
+        />
+      )}
 
       {c && editing === "profile" && (
         <ProfileDialog

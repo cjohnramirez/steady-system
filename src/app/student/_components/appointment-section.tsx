@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { CalendarPlus } from "lucide-react";
 import {
   keepPreviousData,
   useQuery,
@@ -171,6 +172,15 @@ export default function StudentAppointmentSection() {
         data={appointments.data?.data ?? []}
         rowCount={appointments.data?.count ?? 0}
         isLoading={appointments.isLoading}
+        isFetching={appointments.isFetching}
+        isError={appointments.isError}
+        errorTitle="Your appointments couldn't be loaded"
+        onRetry={() => appointments.refetch()}
+        isFiltered={debouncedSearch.trim() !== ""}
+        onClearFilters={() => {
+          setSearch("");
+          setPagination((current) => ({ ...current, pageIndex: 0 }));
+        }}
         pagination={pagination}
         onPaginationChange={setPagination}
         sorting={sorting}
@@ -178,7 +188,16 @@ export default function StudentAppointmentSection() {
         search={search}
         onSearchChange={setSearch}
         searchLabel="Search appointments"
-        emptyMessage="No appointments yet. Book one when you're ready."
+        empty={{
+          title: "No appointments yet",
+          description: "Book a session whenever you're ready.",
+          icon: CalendarPlus,
+          action: (
+            <Button size="sm" asChild>
+              <Link href="/student/appointment">Book an appointment</Link>
+            </Button>
+          ),
+        }}
       />
     </SectionCard>
   );
