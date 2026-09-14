@@ -1,123 +1,91 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PaginationState } from "@tanstack/react-table";
-import { useState } from "react";
-import { fetchAnnouncementsByDate, fetchArticlesByEmotion } from "../actions";
+import { useMemo, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { BookOpen } from "lucide-react";
+import { ArticleCard } from "@/components/content/cards";
+import { ContentGrid } from "@/components/content/content-grid";
+import { ExternalLinkDialog } from "@/components/content/external-link-dialog";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { createClient } from "@/utils/supabase/client";
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
-import { ChevronLeft, ChevronRight, CircleOff, Search } from "lucide-react";
-import { Tables } from "@/types/supabase";
-import { Button } from "@/components/ui/button";
-import { useUserStore } from "@/hooks/auth-store";
-import ArticleTile from "./article-tile";
-import Link from "next/link";
+import type { Tables } from "@/types/supabase";
+import { fetchArticles } from "@/lib/content/queries";
+import { queryKeys } from "@/lib/query-keys";
+import { ALL_MOODS, MoodFilter } from "./mood-filter";
 
-export default function ArticleSection() {
-  const supabase = createClient();
+const PAGE_SIZE = 8;
 
+export default function ArticleSection({
+  defaultMoodId,
+}: {
+  defaultMoodId?: string;
+}) {
+  const supabase = useMemo(() => createClient(), []);
+  const [mood, setMood] = useState(defaultMoodId ?? ALL_MOODS);
   const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 3,
+  const [page, setPage] = useState(0);
+  const [opening, setOpening] = useState<Tables<"article"> | null>(null);
+  const debounced = useDebouncedValue(search);
+  const params = {
+    page,
+    pageSize: PAGE_SIZE,
+    search: debounced,
+    emotionalStatusId: mood === ALL_MOODS ? undefined : mood,
+  };
+
+  const query = useQuery({
+    queryKey: queryKeys.articles.list(params),
+    queryFn: () => fetchArticles(supabase, params),
+    placeholderData: keepPreviousData,
   });
-
-  const userEmotionalStatus = useUserStore().emotionalStatus;
-
-  const { data: articles, isLoading } = useQuery({
-    queryKey: ["articles", pagination.pageIndex, pagination.pageSize, search],
-    queryFn: () =>
-      fetchArticlesByEmotion(
-        supabase,
-        pagination.pageIndex,
-        pagination.pageSize,
-        search,
-        userEmotionalStatus,
-      ),
-  });
-
-  const list: Tables<"article">[] = articles?.data || [];
-  const count = articles?.count;
 
   return (
-    <section className="flex flex-col gap-4" id="articles">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="font-medium">Articles</p>
-          <p>
-            View all articles, curated based on your emotional status (you can
-            change it{" "}
-            <Link href="student/profile/">
-              <u className="cursor-pointer">here</u>
-            </Link>
-            )
-          </p>
-        </div>
-        <InputGroup className="w-fit bg-white px-2">
-          <Search strokeWidth={1.25} />
-          <InputGroupInput
-            placeholder="Search by title"
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearch(e.target.value)
-            }
+    <>
+      <ContentGrid
+        id="articles"
+        title="Articles"
+        description="Short reads chosen by the guidance office."
+        filters={
+          <MoodFilter
+            label="Filter articles by mood"
+            value={mood}
+            onChange={(value) => {
+              setMood(value);
+              setPage(0);
+            }}
           />
-        </InputGroup>
-      </div>
-      {isLoading ? (
-        <div className="grid h-[600px] grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, idx) => (
-            <ArticleTile key={`skeleton-${idx}`} isLoading={true} />
-          ))}
-        </div>
-      ) : list.length > 0 ? (
-        <div className="grid h-[600px] grid-cols-3 gap-4">
-          {list.map((data, idx) => (
-            <ArticleTile
-              key={data.id || idx}
-              articleData={data}
-              isLoading={false}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex h-[600px] w-full items-center justify-center gap-4 rounded-2xl border bg-white">
-          <CircleOff strokeWidth={1.25} />
-          <p>No events for this time period</p>
-        </div>
+        }
+        search={search}
+        onSearchChange={setSearch}
+        searchLabel="Search articles"
+        items={query.data?.data ?? []}
+        isLoading={query.isLoading}
+        total={query.data?.count ?? 0}
+        page={page}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+        itemLabel="articles"
+        empty={{
+          title: "No articles for this mood yet",
+          description: 'Try "Any mood" to see everything.',
+          icon: BookOpen,
+        }}
+        renderItem={(item) => (
+          <ArticleCard
+            key={item.id}
+            article={item}
+            onSelect={() => setOpening(item)}
+            actionLabel={`Read ${item.title}`}
+          />
+        )}
+      />
+      {opening && (
+        <ExternalLinkDialog
+          url={opening.link}
+          title={opening.title}
+          onClose={() => setOpening(null)}
+        />
       )}
-
-      <div className="flex items-center justify-between">
-        <p>
-          Showing {list.length} of {count} result(s)
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            disabled={pagination.pageIndex === 0}
-            onClick={() =>
-              setPagination((prev) => ({
-                ...prev,
-                pageIndex: Math.max(prev.pageIndex - 1, 0),
-              }))
-            }
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            disabled={list.length < pagination.pageSize}
-            onClick={() =>
-              setPagination((prev) => ({
-                ...prev,
-                pageIndex: prev.pageIndex + 1,
-              }))
-            }
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      </div>
-    </section>
+    </>
   );
 }

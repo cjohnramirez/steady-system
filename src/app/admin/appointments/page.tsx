@@ -1,87 +1,22 @@
-"use client";
+import type { Metadata } from "next";
+import { PageHeader } from "@/components/app/page-header";
+import { InfoCallout } from "@/components/app/info-callout";
+import AppointmentsView from "./_components/appointments-view";
 
-import { DataTable } from "../_components/data-table";
-import { appointmentColumns } from "./_components/appointment-column";
-import { createClient } from "@/utils/supabase/client";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { fetchAppointments } from "./actions";
-import { PaginationState } from "@tanstack/react-table";
+export const metadata: Metadata = { title: "Appointments" };
 
-type TabName = "all" | "pending" | "approved" | "completed" | "cancelled";
-
-export default function AppointmentPage() {
-  const supabase = createClient();
-
-  const [activeTab, setActiveTab] = useState<TabName>("all");
-  const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  const { data, isLoading } = useQuery({
-    queryKey: [
-      "appointments",
-      activeTab,
-      pagination.pageIndex,
-      pagination.pageSize,
-      search,
-    ],
-    queryFn: () =>
-      fetchAppointments(supabase, {
-        page: pagination.pageIndex,
-        pageSize: pagination.pageSize,
-        status: activeTab,
-        search: search,
-      }),
-    placeholderData: keepPreviousData,
-  });
-
-  const appointmentData = data?.data || [];
-  const totalCount = data?.count || 0;
-
-  const tabsList: TabName[] = [
-    "all",
-    "pending",
-    "approved",
-    "completed",
-    "cancelled",
-  ];
-
+export default function AdminAppointmentsPage() {
   return (
-    <div>
-      <DataTable
-        columns={appointmentColumns}
-        data={appointmentData}
-        isLoading={isLoading}
-        rowUrl={(id: string) => `/admin/appointments/${id}`}
-        rowCount={totalCount}
-        pagination={pagination}
-        onPaginationChange={setPagination}
-        onSearchChange={(val) => {
-          setSearch(val);
-          setPagination((p) => ({ ...p, pageIndex: 0 }));
-        }}
-        toolbarExtra={
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => {
-              setActiveTab(v as TabName);
-              setPagination((p) => ({ ...p, pageIndex: 0 }));
-            }}
-          >
-            <TabsList>
-              {tabsList.map((tab) => (
-                <TabsTrigger key={tab} value={tab} className="capitalize">
-                  {tab}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        }
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        title="Appointments"
+        description="Every booking across all counselors."
       />
+      <InfoCallout title="Confidentiality">
+        Appointment records are protected under the Data Privacy Act. Open notes
+        only when there is an administrative need.
+      </InfoCallout>
+      <AppointmentsView />
     </div>
   );
 }

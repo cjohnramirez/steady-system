@@ -1,11 +1,21 @@
 "use server";
 
-import { createServiceClient } from "@/utils/supabase/service";
+import { createClient } from "@/utils/supabase/server";
 
+/**
+ * Counts one visit.
+ *
+ * Anonymous visitors are the point, so there is no auth check here. There is also
+ * no service-role key: `increment_daily_visitor` is a security-definer function
+ * with execute granted to anon.
+ */
 export async function updateAnalytics() {
-  const supabaseAdmin = await createServiceClient();
+  const supabase = await createClient();
 
-  const { error } = await supabaseAdmin.rpc("increment_daily_visitor");
+  const { error } = await supabase.rpc("increment_daily_visitor");
 
-  if (error) throw new Error("Error incrementing visitors: " + error.message);
+  if (error) {
+    // A missed page view is not worth breaking a page render over.
+    console.warn("Visitor analytics update failed:", error.message);
+  }
 }

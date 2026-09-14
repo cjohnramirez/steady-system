@@ -1,124 +1,161 @@
 "use client";
 
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import { Bell, BookOpenIcon, ChevronsUpDown } from "lucide-react";
-import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
+  ArrowUpRight,
+  BookOpen,
+  ChevronDown,
+  Home,
+  LogOut,
+  Settings,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import clsx from "clsx";
-import { createClient } from "@/utils/supabase/client";
-import { useUserStore } from "@/hooks/auth-store";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { BrandMark } from "@/components/app/brand-mark";
+import { UserAvatar } from "@/components/app/user-avatar";
+import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { useSignedInViewer } from "@/components/viewer-provider";
+import { useSignOut } from "@/hooks/use-sign-out";
+import { pathHasPrefix } from "@/lib/auth/roles";
+import { cn } from "@/lib/utils";
 
-type Navigation = {
-  name: string;
-  link: string;
-};
-
-const navigationObj: Navigation[] = [
-  {
-    name: "Dashboard",
-    link: "/admin/dashboard",
-  },
-  {
-    name: "Accounts",
-    link: "/admin/accounts",
-  },
-  {
-    name: "Appointments",
-    link: "/admin/appointments",
-  },
-  {
-    name: "Landing Page",
-    link: "/admin/landing",
-  },
-  {
-    name: "Settings",
-    link: "/admin/settings",
-  },
+const SECTIONS = [
+  { name: "Dashboard", link: "/admin/dashboard" },
+  { name: "Accounts", link: "/admin/accounts" },
+  { name: "Appointments", link: "/admin/appointments" },
+  { name: "Landing page", link: "/admin/landing" },
+  { name: "Settings", link: "/admin/settings" },
 ];
 
-export async function handleChange() {
-  useUserStore.getState().setUserName("");
-  useUserStore.getState().setUserRole("");
-
-  const supabase = createClient();
-  const { error } = await supabase.auth.signOut();
-
-  if (error) throw new Error(error.message);
-
-  window.location.reload();
-}
-
 export default function NavigationBar() {
-  const pathName = usePathname();
-  const router = useRouter();
+  const pathname = usePathname();
+  const viewer = useSignedInViewer();
+  const signOut = useSignOut();
+  const fullName =
+    `${viewer.firstName} ${viewer.lastName}`.trim() || viewer.userName;
 
   return (
-    <div className="sticky top-0 z-2 flex w-full flex-col gap-5 border-b-1 bg-white p-5 pb-0">
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-10">
-          <div
-            className="flex cursor-pointer items-center gap-4"
-            onClick={() => router.replace("/home")}
-          >
-            <Image src="/icon.png" alt="GCS Icon" width={40} height={40} />
-            <p>Guidance and Counseling Services</p>
+    <header className="bg-card sticky top-0 z-40 border-b">
+      <div className="m-auto flex max-w-[1600px] flex-col gap-4 px-4 pt-4 lg:px-8">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-6">
+            <BrandMark href="/admin/dashboard" />
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2 px-2">
+                  <UserAvatar name={fullName} src={viewer.avatar} size="xs" />
+                  <span className="max-w-40 truncate">{viewer.userName}</span>
+                  <ChevronDown aria-hidden />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-60">
+                <DropdownMenuLabel className="font-normal">
+                  <p className="truncate font-medium">{fullName}</p>
+                  <p className="text-muted-foreground text-xs">Administrator</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/settings/account">
+                    <Settings aria-hidden />
+                    Account settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/home">
+                    <Home aria-hidden />
+                    Public site
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => void signOut()}>
+                  <LogOut aria-hidden />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger className="flex items-center gap-4">
-              <div className="from-brand-light to-brand-normal h-6 w-6 rounded-full bg-linear-to-t" />
-              <p>Username</p>
-              <Badge variant="secondary">User Role</Badge>
-              <ChevronsUpDown size={20} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Account Options</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={async () => {
-                  await handleChange();
-                }}
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NotificationBell userId={viewer.userId} />
+            <DropdownMenu modal={false}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      aria-label="About this system"
+                    >
+                      <BookOpen />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>About this system</TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/misc/meet-the-developers">
+                    Meet the developers
+                    <ArrowUpRight aria-hidden className="ml-auto" />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/misc/privacy-policy">
+                    Privacy policy
+                    <ArrowUpRight aria-hidden className="ml-auto" />
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/misc/terms">
+                    Terms and informed consent
+                    <ArrowUpRight aria-hidden className="ml-auto" />
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+        <nav
+          aria-label="Admin sections"
+          className="-mb-px flex gap-6 overflow-x-auto"
+        >
+          {SECTIONS.map((section) => {
+            const active =
+              pathHasPrefix(pathname, section.link) ||
+              (pathname === "/admin" && section.link === "/admin/dashboard");
+
+            return (
+              <Link
+                key={section.link}
+                href={section.link}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "border-b-2 pb-3 whitespace-nowrap transition-colors",
+                  active
+                    ? "border-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground border-transparent",
+                )}
               >
-                Log Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="flex gap-4">
-          <Button variant="outline" className="w-9">
-            <Bell />
-          </Button>
-          <Button variant="outline" className="w-9">
-            <BookOpenIcon />
-          </Button>
-        </div>
+                {section.name}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
-      <div className="flex gap-8 pl-5">
-        {navigationObj.map((nav) => {
-          const isActive =
-            (pathName === "/admin" && nav.name === "Dashboard") ||
-            pathName === nav.link ||
-            pathName.startsWith(`${nav.link}`);
-
-          const activeStatus = clsx("border-b-2 pb-2", {
-            "border-gray-700": isActive,
-            "border-none": !isActive,
-          });
-
-          return (
-            <Link href={nav.link} key={nav.name} className={activeStatus}>
-              {nav.name}
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+    </header>
   );
 }

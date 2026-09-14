@@ -1,19 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function LoadingAppointments() {
+export default function Loading() {
   return (
-    <div className="h-[calc(100vh-250px)]">
-      <div className="mb-4 flex items-center justify-between">
-        <Skeleton className="bg-muted h-10 w-[300px] rounded-md" />
-        <div className="flex gap-4">
-          <Skeleton className="bg-muted h-10 w-[300px] rounded-md" />
-          <Skeleton className="bg-muted h-10 w-[80px] rounded-md" />
-          <Skeleton className="bg-muted h-10 w-[80px] rounded-md" />
-        </div>
-      </div>
-      <div className="h-full">
-        <Skeleton className="h-full w-full rounded-md" />
-      </div>
+    <div className="flex flex-col gap-8" aria-busy>
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-16 rounded-xl" />
+      <Skeleton className="h-[32rem] rounded-2xl" />
     </div>
   );
 }

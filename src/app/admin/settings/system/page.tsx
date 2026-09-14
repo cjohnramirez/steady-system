@@ -1,44 +1,34 @@
-"use client";
+import type { Metadata } from "next";
+import { createClient } from "@/utils/supabase/server";
+import { EmptyState } from "@/components/app/empty-state";
+import OrganizationForm from "./organization-form";
+import ContactsForm from "./contacts-form";
 
-import { useSearchParams } from "next/navigation";
-import { CircleOff } from "lucide-react";
-import { Suspense } from "react";
-import OrganizationInfo from "./_components/organization-info";
+export const metadata: Metadata = { title: "Office details" };
 
-interface SettingSection {
-  name: string;
-  section: React.ReactNode;
-}
+export default async function SystemSettingsPage() {
+  const supabase = await createClient();
+  const [{ data: organization }, { data: contacts }] = await Promise.all([
+    supabase.from("organization").select("*").limit(1).maybeSingle(),
+    supabase
+      .from("organization_contact")
+      .select("platform, contact_detail")
+      .order("platform"),
+  ]);
 
-const settingSectionObj: SettingSection[] = [
-  {
-    name: "Organization Info",
-    section: <OrganizationInfo />
+  if (!organization) {
+    return (
+      <EmptyState
+        title="No office record"
+        description="Run the database seed to create one."
+      />
+    );
   }
-];
-
-export default function SystemSettingsPage() {
-  const searchParams = useSearchParams();
-  const query = searchParams.get("query") ?? "";
-
-  const filteredObj = settingSectionObj.filter((section) =>
-    section.name.toLowerCase().includes(query.toLowerCase()),
-  );
 
   return (
-    <main className="flex-1 space-y-8">
-      {filteredObj.length > 0 ? (
-        filteredObj.map((section) => (
-          <Suspense key={section.name} fallback={<div>Loading...</div>}>
-            <div>{section.section}</div>
-          </Suspense>
-        ))
-      ) : (
-        <section className="flex items-center justify-center gap-4 rounded-2xl border border-gray-200 bg-white p-8">
-          <CircleOff size={20} />
-          <p>No results</p>
-        </section>
-      )}
-    </main>
+    <>
+      <OrganizationForm organization={organization} />
+      <ContactsForm contacts={contacts ?? []} />
+    </>
   );
 }

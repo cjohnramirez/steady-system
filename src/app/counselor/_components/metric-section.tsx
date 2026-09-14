@@ -1,35 +1,51 @@
-export default function MetricSection({
-  totalAppointments,
-  pendingAppointments,
-  approvedAppointments,
-}: {
-  totalAppointments: string;
-  pendingAppointments: string;
-  approvedAppointments: string;
-}) {
+"use client";
+
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SectionCard } from "@/components/app/section-card";
+import { useSignedInViewer } from "@/components/viewer-provider";
+import { createClient } from "@/utils/supabase/client";
+import { fetchCounselorAppointmentCounts } from "@/lib/appointments/queries";
+import { queryKeys } from "@/lib/query-keys";
+
+/**
+ * Appointment counts. The key sits under appointments.all, so any appointment
+ * change (including one arriving over Realtime) refreshes these too. They used to
+ * go stale until a full reload.
+ */
+export default function MetricSection() {
+  const viewer = useSignedInViewer();
+  const supabase = useMemo(() => createClient(), []);
+
+  const counts = useQuery({
+    queryKey: queryKeys.appointments.counselorCounts(viewer.profileId),
+    queryFn: () => fetchCounselorAppointmentCounts(supabase, viewer.profileId),
+  });
+
+  const items = [
+    { label: "Waiting for you", value: counts.data?.pending },
+    { label: "Upcoming", value: counts.data?.approved },
+    { label: "Completed", value: counts.data?.completed },
+    { label: "All time", value: counts.data?.total },
+  ];
+
   return (
-    <section className="flex flex-col space-y-4 rounded-2xl border border-gray-200 bg-white p-8">
-      <div>
-        <p className="font-medium">Metric</p>
-        <p>View some insightful information here.</p>
-      </div>
-      <div className="flex gap-3 rounded-2xl border p-3">
-        <div className="flex-2 rounded-2xl border p-3 text-center">
-          <p>Total Appointments</p>
-          <p className="text-3xl">{totalAppointments}</p>
-        </div>
-        <div className="flex-1 rounded-2xl border p-3 text-center">
-          <p>Approved</p>
-          <p className="text-3xl">{approvedAppointments}</p>
-        </div>
-        <div className="flex-1 rounded-2xl border p-3 text-center">
-          <p>Pending</p>
-          <p className="text-3xl">{pendingAppointments}</p>
-        </div>
-      </div>
-      <div className="rounded-2xl border p-5 text-center">
-        <p>Graph will be shown here</p>
-      </div>
-    </section>
+    <SectionCard title="At a glance">
+      <dl className="grid grid-cols-2 gap-3">
+        {items.map((item) => (
+          <div key={item.label} className="rounded-xl border p-4">
+            <dt className="text-muted-foreground">{item.label}</dt>
+            <dd className="mt-1 text-3xl tracking-tight tabular-nums">
+              {counts.isLoading ? (
+                <Skeleton className="h-9 w-12" />
+              ) : (
+                (item.value ?? 0)
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </SectionCard>
   );
 }

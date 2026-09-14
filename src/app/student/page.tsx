@@ -1,28 +1,42 @@
-"use client";
-
-import { useUserStore } from "@/hooks/auth-store";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { CalendarPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/app/page-header";
+import { guardPage } from "@/lib/auth/session";
 import ProfileSection from "./_components/profile-section";
+import MoodCard from "./_components/mood-card";
+import QuickLinks from "./_components/quick-links";
 import StudentAppointmentSection from "./_components/appointment-section";
-import { useEffect, useState } from "react";
 
-export default function StudentPage() {
-  const username = useUserStore.getState().userName ?? "";
+export const metadata: Metadata = { title: "My dashboard" };
+
+export default async function StudentPage() {
+  // Cached per request, so this reuses the layout's lookup.
+  const viewer = await guardPage("student");
 
   return (
-    <div className="space-y-6 p-10">
-      <div className="space-y-2">
-        <p className="text-4xl">Welcome, {username ?? ""}</p>
-        <p>
-          This is your personalized dashboard, with your profile and
-          appointments
-        </p>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <ProfileSection />
-        <div className="col-span-3 rounded-2xl border border-gray-200 bg-white p-8">
-          <StudentAppointmentSection />
+    <div className="flex flex-col gap-6 md:gap-8">
+      <PageHeader
+        title={`Welcome, ${viewer.firstName}`}
+        description="Your profile, how you're feeling and your appointments, in one place."
+        actions={
+          <Button asChild>
+            <Link href="/student/appointment">
+              <CalendarPlus aria-hidden />
+              Book an appointment
+            </Link>
+          </Button>
+        }
+      />
+      <div className="grid gap-4 md:gap-6 xl:grid-cols-3">
+        <div className="flex flex-col gap-4 md:gap-6">
+          <MoodCard />
+          <QuickLinks />
         </div>
+        <ProfileSection className="xl:col-span-2" />
       </div>
+      <StudentAppointmentSection />
     </div>
   );
 }

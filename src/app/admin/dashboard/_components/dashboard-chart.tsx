@@ -1,40 +1,48 @@
+"use client";
+
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import type { DashboardPoint } from "@/lib/admin/dashboard";
 
-const chartConfig = {
-  numberOfVisitors: {
-    label: "Number Of Visitors",
-    color: "var(--color-brand-normal)",
-  },
-} satisfies ChartConfig;
+export type ChartMetric = "visitors" | "logins" | "appointments";
 
-export default function dashboardChart({
-  chartData,
+/** Dates arrive as YYYY-MM-DD Manila days; parsed at noon so no timezone shifts the label. */
+const label = (value: string, opts: Intl.DateTimeFormatOptions) =>
+  new Date(`${value}T12:00:00`).toLocaleDateString("en-US", opts);
+
+export default function DashboardChart({
+  data,
+  metric,
+  label: seriesLabel,
 }: {
-  chartData: {
-    label: string;
-    value: { date: string; number_of_visitors: number }[];
-  };
+  data: DashboardPoint[];
+  metric: ChartMetric;
+  label: string;
 }) {
+  const config = {
+    [metric]: { label: seriesLabel, color: "var(--color-brand)" },
+  } satisfies ChartConfig;
+
   return (
-    <ChartContainer
-      config={chartConfig}
-      className="aspect-auto h-[400px] w-full"
-    >
-      <AreaChart data={chartData.value}>
+    <ChartContainer config={config} className="aspect-auto h-[360px] w-full">
+      <AreaChart data={data} margin={{ left: 0, right: 8 }}>
         <defs>
-          <linearGradient id="fillnumberOfVisitors" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={`fill-${metric}`} x1="0" y1="0" x2="0" y2="1">
             <stop
               offset="5%"
-              stopColor="var(--color-numberOfVisitors)"
-              stopOpacity={0.8}
+              stopColor={`var(--color-${metric})`}
+              stopOpacity={0.35}
             />
-            <stop offset="95%" stopColor="white" stopOpacity={0.8} />
+            <stop
+              offset="95%"
+              stopColor={`var(--color-${metric})`}
+              stopOpacity={0.02}
+            />
           </linearGradient>
         </defs>
         <CartesianGrid vertical={false} />
@@ -44,34 +52,37 @@ export default function dashboardChart({
           axisLine={false}
           tickMargin={10}
           minTickGap={32}
-          tickFormatter={(value) => {
-            const day = new Date(value);
-            return day.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            });
-          }}
+          tickFormatter={(value: string) =>
+            label(value, { month: "short", day: "numeric" })
+          }
+        />
+        <YAxis
+          width={40}
+          tickLine={false}
+          axisLine={false}
+          allowDecimals={false}
         />
         <ChartTooltip
           cursor={false}
           content={
             <ChartTooltipContent
-              labelFormatter={(value) => {
-                return new Date(value).toLocaleDateString("en-US", {
+              indicator="dot"
+              labelFormatter={(value: string) =>
+                label(value, {
+                  weekday: "short",
                   month: "short",
                   day: "numeric",
-                });
-              }}
-              indicator="dot"
+                })
+              }
             />
           }
         />
         <Area
-          dataKey="number_of_visitors"
-          type="natural"
-          fill="url(#fillnumberOfVisitors)"
-          stroke="var(--color-numberOfVisitors)"
-          stackId="a"
+          dataKey={metric}
+          type="monotone"
+          fill={`url(#fill-${metric})`}
+          stroke={`var(--color-${metric})`}
+          strokeWidth={2}
         />
       </AreaChart>
     </ChartContainer>

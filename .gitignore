@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase
+supabase/.branches/
+# supabase cli scratch
+supabase/.temp/
+
+# playwright mcp scratch
+.playwright-mcp/
+
+# seed placeholder photos (re-download with scripts/seed/download-images.mjs)
+scripts/seed/images/

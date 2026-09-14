@@ -1,17 +1,21 @@
 import NavigationBar from "@/components/navigation";
-import { homeNavBarObj } from "./_lib/nav-data";
 import Footer from "@/components/footer";
+import { ViewerProvider } from "@/components/viewer-provider";
+import { getViewer } from "@/lib/auth/get-viewer";
+import { homeNavBarObj } from "./_lib/nav-data";
 
-export default function HomeLayout({
+export default async function HomeLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const viewer = await getViewer();
+
   return (
-    <>
+    <ViewerProvider viewer={viewer}>
       <NavigationBar navBarObj={homeNavBarObj} />
-      <div className="m-auto max-w-[1400px] px-15">{children}</div>
+      <main className="m-auto max-w-[1400px] px-4 md:px-8">{children}</main>
       <Footer navBarObj={homeNavBarObj} />
-    </>
+    </ViewerProvider>
   );
 }

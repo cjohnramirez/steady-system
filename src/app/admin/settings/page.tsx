@@ -1,5 +1,5 @@
-import AccountSettingsPage from "./account/page";
+import { redirect } from "next/navigation";
 
-export default function SettingsPage() {
-  return <AccountSettingsPage />
+export default function SettingsIndexPage() {
+  redirect("/admin/settings/account");
 }

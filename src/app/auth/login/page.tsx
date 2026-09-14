@@ -1,5 +1,6 @@
-import LoginPage from "./[role]/page";
+import { redirect } from "next/navigation";
+import { ROLE_LOGIN } from "@/lib/auth/roles";
 
-export default function LoginRedirect() {
-  return <LoginPage params={Promise.resolve({ role: "student" })} />;
+export default function LoginIndex() {
+  redirect(ROLE_LOGIN.student);
 }

@@ -1,49 +1,34 @@
 "use client";
 
+import Link from "next/link";
+import { HeartCrack } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HeartCrack, RefreshCcw } from "lucide-react";
-import { Geist } from "next/font/google";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-export default function GlobalError({
+import { StatusScreen } from "@/components/app/status-screen";
+
+export default function ErrorBoundary({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const router = useRouter();
-
   return (
-    <div className="flex h-dvh flex-col items-center justify-between bg-gray-50 p-10 font-sans">
-      <div className="my-auto space-y-6 text-center">
-        <div className="flex items-center justify-center">
-          <HeartCrack size={80} strokeWidth={0.5} />
-        </div>
-        <p className="text-6xl">The site is broken</p>
-        <p className="m-auto w-96">
-          Whoaaaa, there seems to be some error with the site! Here is probably
-          what happened
-        </p>
-        <div className="mt-10 flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-6">
-          <div className="text-left">
-            <p className="font-medium">Error Message</p>
-            <p>{error.message}</p>
-          </div>
-          <Button
-            variant="outline"
-            className="flex items-center justify-between gap-2 rounded-2xl border border-gray-200 p-2"
-            onClick={() => reset()}
-          >
-            <RefreshCcw size={20} strokeWidth={1.5} />
-            <p>Refresh</p>
-          </Button>
-        </div>
-      </div>
-      <div className="flex place-content-end items-center gap-4">
-        <Image src="/icon.png" alt="logo" width={40} height={40} />
-        <p>Guidance and Counselling Services</p>
-      </div>
-    </div>
+    <StatusScreen
+      icon={HeartCrack}
+      title="Something went wrong"
+      description={
+        // The raw message is deliberately not shown. It can carry database detail,
+        // and this page renders for students. The digest is what finds the real
+        // error in the server logs.
+        error.digest
+          ? `Please try again. If it keeps happening, quote reference ${error.digest}.`
+          : "Please try again in a moment."
+      }
+    >
+      <Button onClick={() => reset()}>Try again</Button>
+      <Button variant="outline" asChild>
+        <Link href="/home">Back to home</Link>
+      </Button>
+    </StatusScreen>
   );
 }
