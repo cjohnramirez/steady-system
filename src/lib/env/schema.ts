@@ -5,7 +5,10 @@ const nonEmpty = z.string().trim().min(1, "is not set");
 const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.url("must be a URL"),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: nonEmpty,
-  NEXT_PUBLIC_APP_URL: z.url("must be a URL"),
+  // Stored without a trailing slash, since links append "/auth/callback" to it.
+  NEXT_PUBLIC_APP_URL: z
+    .url("must be a URL")
+    .transform((url) => url.replace(/\/+$/, "")),
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: nonEmpty,
 });
 

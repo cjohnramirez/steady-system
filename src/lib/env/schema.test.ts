@@ -30,6 +30,18 @@ describe("parseClientEnv", () => {
     ).toThrow(/NEXT_PUBLIC_SUPABASE_URL[\s\S]*\.env\.example/);
   });
 
+  // Links are built as `${NEXT_PUBLIC_APP_URL}/auth/callback`. A value copied with
+  // a trailing slash produced "//auth/callback", which Supabase's redirect
+  // allow-list does not match, so password-reset and sign-up emails failed.
+  it("drops trailing slashes from the app URL", () => {
+    expect(
+      parseClientEnv({
+        ...client,
+        NEXT_PUBLIC_APP_URL: "https://steady.vercel.app/",
+      }).NEXT_PUBLIC_APP_URL,
+    ).toBe("https://steady.vercel.app");
+  });
+
   it("rejects a URL that is not a URL", () => {
     expect(() =>
       parseClientEnv({ ...client, NEXT_PUBLIC_SUPABASE_URL: "abc" }),
