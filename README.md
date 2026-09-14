@@ -79,7 +79,7 @@ git checkout dev
 
 ### 3️⃣ Install Dependencies
 
-Ensure you have **Node.js 20+** and **pnpm** installed.
+Ensure you have **Node.js 22+** and **pnpm** installed.
 
 ```bash
 pnpm install
@@ -87,14 +87,39 @@ pnpm install
 
 ### 4️⃣ Setup Environment Variables
 
-Create a `.env.local` file in the root directory with the following variables:
+Copy `.env.example` to `.env.local` and fill it in. The app checks these on startup and
+names anything missing.
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+### 5️⃣ Set Up the Database
+
+Migrations live in `supabase/migrations` and demo data in `supabase/seeds`. Docker is not
+required. With `SUPABASE_DB_URL` set:
+
+```bash
+node scripts/db/push.mjs                  # apply pending migrations
+node scripts/db/push.mjs --include-seed   # ...and load demo data (never in production)
+npx supabase login                        # once, for the two commands below
+node scripts/db/gen-types.mjs             # regenerate src/types/supabase.ts
+node scripts/db/verify.mjs                # check row-level security and triggers
 ```
 
-### 5️⃣ Run the Development Server
+In the Supabase dashboard:
+
+- **Authentication, URL configuration:** add `<app url>/auth/callback` and
+  `<app url>/auth/confirm` to the redirect URLs.
+- **Authentication, Hooks (optional):** point the custom access token hook at
+  `public.custom_access_token_hook`. It saves a query per request; the app works
+  without it.
+
+Seeded accounts all use the password `Password123!`: `admin@gcs.test`,
+`counselor@gcs.test` to `counselor8@gcs.test`, `student@gcs.test`, `student2@gcs.test` and
+`student001@gcs.test` to `student150@gcs.test`.
+
+Placeholder photos: `node scripts/seed/download-images.mjs`, then
+`node scripts/seed/upload-images.mjs` (uploads to Cloudinary and regenerates
+`supabase/seeds/25_images.sql`).
+
+### 6️⃣ Run the Development Server
 
 ```bash
 pnpm dev
@@ -114,6 +139,7 @@ Visit [http://localhost:3000](http://localhost:3000) to view the app.
 | `pnpm lint`       | Run ESLint                              |
 | `pnpm format`     | Format code with Prettier               |
 | `pnpm type-check` | Run TypeScript type checking            |
+| `pnpm test`       | Run unit tests                          |
 
 ---
 
@@ -130,9 +156,10 @@ src/
 │   ├── student/           # Student dashboard & appointment booking
 │   └── misc/              # Miscellaneous pages (privacy policy, developers)
 ├── components/            # Reusable UI components
-│   └── ui/               # Base UI components (button, input, dialog, etc.)
+│   ├── app/              # Shared app components (SectionCard, PageHeader, ...)
+│   └── ui/               # shadcn primitives
 ├── hooks/                 # Custom React hooks (auth-store, confirm-store)
-├── lib/                   # Utility functions (format.ts, utils.ts)
+├── lib/                   # Data (queries.ts / actions.ts per domain), validation, auth
 ├── types/                 # TypeScript type definitions
 └── utils/                 # Supabase client utilities
 ```
@@ -168,6 +195,7 @@ src/
 ## 🧾 Notes
 
 - Run `pnpm type-check` before pushing to catch TypeScript errors.
+- UI work follows [docs/ui-guidelines.md](docs/ui-guidelines.md).
 - Keep `.env.local` secure — never commit it.
 - Follow commit message rules to maintain a clean history.
 - This project uses **pnpm** exclusively (enforced via preinstall script).
