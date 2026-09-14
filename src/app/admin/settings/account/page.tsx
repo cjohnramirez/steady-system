@@ -4,7 +4,7 @@ import { guardPage } from "@/lib/auth/session";
 import ProfileForm from "./profile-form";
 import PasswordForm from "./password-form";
 
-export const metadata: Metadata = { title: "Account settings | GCS Admin" };
+export const metadata: Metadata = { title: "Account settings" };
 
 export default async function AccountSettingsPage() {
   const viewer = await guardPage("admin");

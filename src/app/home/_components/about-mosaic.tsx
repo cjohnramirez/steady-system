@@ -97,7 +97,7 @@ export function AboutMosaic({
     key: "portal",
     href: "/portal",
     icon: Compass,
-    title: "Explore the GCS portal",
+    title: "Explore the portal",
     meta: "Articles, events and music picked for how you feel.",
     // Without a playlist it takes both columns, so the row has no gap.
     className: playlist ? "" : "md:col-span-2",

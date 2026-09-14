@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { MonitorSmartphone } from "lucide-react";
 import NavigationBar from "./_components/navigation";
 import { ViewerProvider } from "@/components/viewer-provider";
 import { guardPage } from "@/lib/auth/session";
+import { BRAND } from "@/lib/brand";
+
+export const metadata: Metadata = {
+  title: {
+    default: `${BRAND.name} Admin`,
+    template: `%s | ${BRAND.name} Admin`,
+  },
+};
 
 export default async function AdminLayout({
   children,

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/app/page-header";
 import AccountsView from "./_components/accounts-view";
 
-export const metadata: Metadata = { title: "Accounts | GCS Admin" };
+export const metadata: Metadata = { title: "Accounts" };
 
 export default function AccountsPage() {
   return (

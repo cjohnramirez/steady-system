@@ -5,7 +5,7 @@ import MetricSection from "./_components/metric-section";
 import ProfileCard from "./_components/profile-card";
 import AppointmentList from "./_components/appointment-list";
 
-export const metadata: Metadata = { title: "Counselor dashboard | GCS" };
+export const metadata: Metadata = { title: "Counselor dashboard" };
 
 export default async function CounselorPage() {
   const viewer = await guardPage("counselor");

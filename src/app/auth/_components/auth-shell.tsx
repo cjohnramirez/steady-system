@@ -34,7 +34,7 @@ export function AuthShell({
           )}
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <BrandMark label="GCS" />
+            <BrandMark />
             {headerAction}
           </div>
           <div className="flex flex-1 flex-col justify-center py-8 md:py-12">

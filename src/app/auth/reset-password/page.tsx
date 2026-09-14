@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/app/empty-state";
 import { isRecoverySession } from "@/lib/auth/session";
 import { ResetPasswordForm } from "./reset-password-form";
 
-export const metadata: Metadata = { title: "Choose a new password | GCS" };
+export const metadata: Metadata = { title: "Choose a new password" };
 
 export default async function ResetPasswordPage() {
   if (!(await isRecoverySession())) {

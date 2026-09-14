@@ -84,7 +84,7 @@ export function PlaylistCard({
       }
       title={playlist.title ?? ""}
       meta={[
-        { icon: Music, label: playlist.creator || "GCS" },
+        { icon: Music, label: playlist.creator || "Steady" },
         ...(playlist.emotional_status_name
           ? [
               {

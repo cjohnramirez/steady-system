@@ -42,9 +42,7 @@ export default async function Footer({
     <footer className="bg-card border-t">
       <div className="m-auto grid max-w-[1600px] gap-10 px-4 py-12 md:grid-cols-[2fr_1fr_1.5fr] md:px-8 md:py-16">
         <div className="max-w-sm space-y-4">
-          <BrandMark
-            label={organization?.name ?? "Guidance and Counseling Services"}
-          />
+          <BrandMark />
           <p className="text-muted-foreground">
             Dedicated to the holistic development of every student through
             support, counseling and care.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/app/page-header";
 import LandingView from "./_components/landing-view";
 
-export const metadata: Metadata = { title: "Landing page content | GCS Admin" };
+export const metadata: Metadata = { title: "Landing page content" };
 
 export default function LandingPage() {
   return (

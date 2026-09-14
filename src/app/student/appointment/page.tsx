@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { guardPage } from "@/lib/auth/session";
 import BookingForm from "./_components/booking-form";
 
-export const metadata: Metadata = { title: "Book an appointment | GCS" };
+export const metadata: Metadata = { title: "Book an appointment" };
 
 export default async function AppointmentPage({
   searchParams,

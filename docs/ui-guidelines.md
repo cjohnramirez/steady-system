@@ -1,4 +1,4 @@
-# GCS UI guidelines
+# Steady UI guidelines
 
 How new screens should look and be built so they match the rest of the site. When in
 doubt, copy an existing screen: the student dashboard (`src/app/student`) and the
@@ -13,6 +13,19 @@ portal (`src/app/portal`) follow every rule below.
 - **Amber means action.** The brand colour is for primary buttons, selected states,
   unread dots and focus. Never use it for large backgrounds or body text.
 - **Photography carries warmth.** Hero and content images use large rounded corners.
+
+## Brand
+
+- **Name:** Steady. Page titles are set per page ("My dashboard"); the root layout's
+  title template adds "| Steady" (and "| Steady Admin" under `/admin`). Don't
+  hard-code the name; import `BRAND` from `src/lib/brand.ts`.
+- **Mark:** Lean, a smaller form tipped against a taller one, in `--brand-light` and
+  `--brand`. Use `BrandMark` (mark plus name, linking home) or `SteadyMark` alone.
+  Never recolour it outside those two tokens, and don't bring back the old hand logo
+  or "GCS" wording.
+- **Generated assets:** `app/icon.svg`, `app/apple-icon.tsx` and
+  `app/opengraph-image.tsx`. They use the hex copies in `BRAND_HEX`; update those if
+  the brand tokens change.
 
 ## 2. Tokens
 
@@ -84,7 +97,7 @@ of the old inconsistencies.
 | Appointment status                      | `StatusBadge`                                     | `components/app/status-badge`             |
 | Search box                              | `SearchInput` + `useDebouncedValue`               | `components/app/search-input`             |
 | Prev/next for a list                    | `PaginationControls`                              | `components/app/pagination-controls`      |
-| Logo link                               | `BrandMark`                                       | `components/app/brand-mark`               |
+| Logo and name linking home              | `BrandMark` (`SteadyMark` for the mark alone)     | `components/app/brand-mark`               |
 | Server-paginated table                  | `DataTable`, `SortableHeader`                     | `app/admin/_components/data-table`        |
 | Article / announcement / playlist tile  | `ArticleCard`, `AnnouncementCard`, `PlaylistCard` | `components/content/cards`                |
 | Tile grid with search and pager         | `ContentGrid`                                     | `components/content/content-grid`         |

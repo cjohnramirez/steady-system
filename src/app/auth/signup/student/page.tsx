@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AuthHeading } from "../../_components/auth-shell";
 import SignUpForm from "../components/signup-form";
 
-export const metadata: Metadata = { title: "Create a student account | GCS" };
+export const metadata: Metadata = { title: "Create a student account" };
 
 export default function StudentSignUpPage() {
   return (

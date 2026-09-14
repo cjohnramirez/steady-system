@@ -9,7 +9,7 @@ import MoodCard from "./_components/mood-card";
 import QuickLinks from "./_components/quick-links";
 import StudentAppointmentSection from "./_components/appointment-section";
 
-export const metadata: Metadata = { title: "My dashboard | GCS" };
+export const metadata: Metadata = { title: "My dashboard" };
 
 export default async function StudentPage() {
   // Cached per request, so this reuses the layout's lookup.

@@ -103,7 +103,7 @@ export default function ExportDialog({
         );
         const link = document.createElement("a");
         link.href = url;
-        link.download = `gcs-${type}-${new Date().toISOString().slice(0, 10)}.${fileType}`;
+        link.download = `steady-${type}-${new Date().toISOString().slice(0, 10)}.${fileType}`;
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 10_000);
 

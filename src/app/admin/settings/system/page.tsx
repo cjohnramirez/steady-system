@@ -4,7 +4,7 @@ import { EmptyState } from "@/components/app/empty-state";
 import OrganizationForm from "./organization-form";
 import ContactsForm from "./contacts-form";
 
-export const metadata: Metadata = { title: "Office details | GCS Admin" };
+export const metadata: Metadata = { title: "Office details" };
 
 export default async function SystemSettingsPage() {
   const supabase = await createClient();

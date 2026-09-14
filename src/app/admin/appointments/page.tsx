@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { InfoCallout } from "@/components/app/info-callout";
 import AppointmentsView from "./_components/appointments-view";
 
-export const metadata: Metadata = { title: "Appointments | GCS Admin" };
+export const metadata: Metadata = { title: "Appointments" };
 
 export default function AdminAppointmentsPage() {
   return (

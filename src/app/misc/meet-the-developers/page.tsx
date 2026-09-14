@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Mail } from "lucide-react";
 import { UserAvatar } from "@/components/app/user-avatar";
 
-export const metadata: Metadata = { title: "Meet the developers | GCS" };
+export const metadata: Metadata = { title: "Meet the developers" };
 
 type TeamMember = {
   id: number;
@@ -66,9 +66,7 @@ export default function MeetTheDevelopers() {
           <h1 className="text-4xl tracking-tight md:text-5xl">
             Meet the developers
           </h1>
-          <p className="text-muted-foreground">
-            The team behind the GCS system.
-          </p>
+          <p className="text-muted-foreground">The team behind Steady.</p>
         </div>
         <Image
           src="/codebridge-icon.png"

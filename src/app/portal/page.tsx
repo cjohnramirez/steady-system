@@ -12,9 +12,9 @@ import ArticleSection from "./_components/article-section";
 import PlaylistSection from "./_components/playlist-section";
 
 export const metadata: Metadata = {
-  title: "GCS Portal | Articles, events and playlists",
+  title: "Portal: articles, events and playlists",
   description:
-    "Curated reading, music and upcoming events from the Guidance and Counseling Services.",
+    "Curated reading, music and upcoming events from your guidance and counseling office.",
 };
 
 const SECTIONS = [
@@ -60,11 +60,11 @@ export default async function PortalPage() {
       >
         <div className="flex min-w-0 flex-col gap-4">
           <div className="space-y-3 py-4">
-            <h1 className="text-4xl tracking-tight md:text-6xl">GCS Portal</h1>
+            <h1 className="text-4xl tracking-tight md:text-6xl">Portal</h1>
             <p className="text-muted-foreground max-w-xl">
               {mood
                 ? `Reading and music picked for when you're feeling ${mood.name}, plus what's coming up at the guidance office.`
-                : "Curated reading, music and upcoming events from the Guidance and Counseling Services."}
+                : "Curated reading, music and upcoming events from your guidance and counseling office."}
             </p>
           </div>
           {article && (

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import { BRAND } from "@/lib/brand";
 import { Toaster } from "@/components/ui/sonner";
 import TrackHomePage from "@/components/tracker";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -24,9 +25,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gcs-system.vercel.app/"),
-  title: "GCS System | University Guidance & Counseling",
-  description:
-    "Official Guidance and Counseling Services platform for students, providing announcements, workshops, and Counseling sessions.",
+  title: {
+    default: `${BRAND.name} | ${BRAND.tagline}`,
+    template: `%s | ${BRAND.name}`,
+  },
+  description: BRAND.description,
+  applicationName: BRAND.name,
   keywords: [
     "Guidance",
     "Counseling",
@@ -35,33 +39,21 @@ export const metadata: Metadata = {
     "Workshops",
     "Announcements",
   ],
-  authors: [{ name: "University GCS Unit" }],
-  creator: "University GCS Unit",
-  publisher: "University GCS Unit",
   verification: {
     google: "YW8hRYwXwmkr7hv5hBSVypGhAUlXzyz4hUmphqjMf-A",
   },
+  // The card image comes from opengraph-image.tsx.
   openGraph: {
-    title: "GCS System | University Guidance & Counseling",
-    description:
-      "Stay updated with announcements, events, and Counseling programs from the Guidance and Counseling Services Unit.",
+    title: `${BRAND.name} | ${BRAND.tagline}`,
+    description: BRAND.description,
     url: "https://gcs-system.vercel.app/",
-    siteName: "GCS System",
-    images: [
-      {
-        url: "/home-page.png",
-        width: 1918,
-        height: 1198,
-      },
-    ],
+    siteName: BRAND.name,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GCS System | University Guidance & Counseling",
-    description:
-      "Official platform for announcements, events, and Counseling sessions.",
-    images: "/home-page.png",
+    title: `${BRAND.name} | ${BRAND.tagline}`,
+    description: BRAND.description,
   },
 };
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Clock, Mail } from "lucide-react";
 
-export const metadata: Metadata = { title: "Privacy policy | GCS" };
+export const metadata: Metadata = { title: "Privacy policy" };
 
 export default function PrivacyPolicy() {
   return (

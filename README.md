@@ -1,6 +1,6 @@
-# 📌 GCS Management and Landing Page System
+# 📌 Steady
 
-A **Next.js 16** web application for a Guidance Counseling System (GCS) built as a school project.  
+A **Next.js 16** web application for student guidance and counseling, built as a school project.  
 This repository follows a two-branch workflow (`main` and `dev`) and uses **GitHub Actions** for CI/CD with **Vercel** for staging and production deployments.
 
 ---

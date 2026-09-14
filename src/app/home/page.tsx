@@ -111,9 +111,8 @@ export default async function HomePage() {
               Nurturing student growth and well-being
             </h1>
             <p className="text-muted-foreground max-w-xl text-base">
-              The Guidance and Counseling Services supports every student&apos;s
-              emotional, psychological and academic balance through counseling,
-              programs and care.
+              Steady supports every student&apos;s emotional, psychological and
+              academic balance through counseling, programs and care.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" asChild>
@@ -123,7 +122,7 @@ export default async function HomePage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/portal">Visit the GCS portal</Link>
+                <Link href="/portal">Visit the portal</Link>
               </Button>
             </div>
           </div>
@@ -175,10 +174,9 @@ export default async function HomePage() {
       >
         <SectionIntro eyebrow="About us" title="Who we are" id="about-title">
           <p>
-            The Guidance and Counseling Services is an essential part of the
-            university&apos;s education program, with a welcoming space and
-            responsive services that help students succeed academically and
-            emotionally.
+            Steady brings your guidance and counseling office online: a
+            welcoming space and responsive services that help students succeed
+            academically and emotionally.
           </p>
         </SectionIntro>
         <AboutMosaic
