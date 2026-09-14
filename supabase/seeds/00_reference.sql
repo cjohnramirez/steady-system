@@ -72,7 +72,7 @@ insert into public.organization (
   'Guidance and Counseling Services',
   'GCS',
   'gcs@university.test',
-  639171234567,
+  '+639171234567',
   'Student Center, Ground Floor',
   '{false,true,true,true,true,true,false}',
   '08:00',
@@ -148,7 +148,7 @@ insert into public.admin (
 ) values (
   '55555555-5555-5555-5555-000000000001',
   '44444444-4444-4444-4444-000000000001',
-  'gcsadmin', 'admin@gcs.test', 'Grace', 'Mendoza', '09171234567', 20200001
+  'gcsadmin', 'admin@gcs.test', 'Grace', 'Mendoza', '09171234567', 2020000001
 ) on conflict do nothing;
 
 insert into public.counselor (
@@ -157,7 +157,7 @@ insert into public.counselor (
 ) values (
   '66666666-6666-6666-6666-000000000001',
   '44444444-4444-4444-4444-000000000002',
-  'mcruz', 'counselor@gcs.test', 'Maria', 'Cruz', '09179876543', 20200002,
+  'mcruz', 'counselor@gcs.test', 'Maria', 'Cruz', '09179876543', 2020000002,
   true, '{false,true,true,true,true,true,false}', '08:00', '17:00'
 ) on conflict do nothing;
 
@@ -183,71 +183,19 @@ insert into public.student (
   ('88888888-8888-8888-8888-000000000001',
    '44444444-4444-4444-4444-000000000003',
    'jdelacruz', 'student@gcs.test', 'Juan', 'Santos', 'Dela Cruz',
-   '09171112222', 'male', 20, 20211234, 3,
+   '09171112222', 'male', 20, 2021001234, 3,
    '77777777-7777-7777-7777-000000000001',
    '11111111-1111-1111-1111-000000000005'),
   ('88888888-8888-8888-8888-000000000002',
    '44444444-4444-4444-4444-000000000004',
    'aramos', 'student2@gcs.test', 'Ana', null, 'Ramos',
-   '09173334444', 'female', 19, 20211235, 2,
+   '09173334444', 'female', 19, 2021001235, 2,
    '77777777-7777-7777-7777-000000000001',
    '11111111-1111-1111-1111-000000000003')
 on conflict do nothing;
 
 insert into public.contact_person (student_id, first_name, middle_name, last_name, phone) values
-  ('88888888-8888-8888-8888-000000000001', 'Rosa', null, 'Dela Cruz', 639175556666),
-  ('88888888-8888-8888-8888-000000000002', 'Pedro', 'L', 'Ramos', 639177778888)
+  ('88888888-8888-8888-8888-000000000001', 'Rosa', null, 'Dela Cruz', '+639175556666'),
+  ('88888888-8888-8888-8888-000000000002', 'Pedro', 'L', 'Ramos', '+639177778888')
 on conflict do nothing;
 
--- ---------------------------------------------------------------------------
--- Content
--- ---------------------------------------------------------------------------
-
-insert into public.announcement (title, description, location, start_date, end_date) values
-  ('Mental Health Awareness Week',
-   'A week of talks, workshops and drop-in sessions open to all students.',
-   'Student Center Auditorium',
-   now() + interval '3 days', now() + interval '10 days'),
-  ('Peer Counseling Orientation',
-   'Introductory session for students interested in becoming peer counselors.',
-   'Room 204, CITC Building',
-   now() + interval '14 days', now() + interval '14 days 3 hours')
-on conflict do nothing;
-
-insert into public.article (title, content, link, author_name, publisher_name, emotional_status_id) values
-  ('Managing Exam Season Stress',
-   'Practical techniques for staying steady when deadlines stack up.',
-   'https://example.test/exam-stress', 'Dr. L. Fernandez', 'University Press',
-   '11111111-1111-1111-1111-000000000004'),
-  ('Sleep and Student Performance',
-   'Why rest is the first thing to protect and the first thing students drop.',
-   'https://example.test/sleep', 'Dr. R. Villanueva', 'University Press',
-   '11111111-1111-1111-1111-000000000005'),
-  ('When You Feel Alone on Campus',
-   'Finding connection in a large university.',
-   'https://example.test/belonging', 'M. Reyes', 'Campus Health',
-   '11111111-1111-1111-1111-000000000007')
-on conflict do nothing;
-
-insert into public.playlist (title, link, creator, emotional_status_id) values
-  ('Calm Focus', 'https://open.spotify.com/playlist/example1', 'GCS Unit',
-   '11111111-1111-1111-1111-000000000004'),
-  ('Wind Down', 'https://open.spotify.com/playlist/example2', 'GCS Unit',
-   '11111111-1111-1111-1111-000000000005'),
-  ('Lift Off', 'https://open.spotify.com/playlist/example3', 'GCS Unit',
-   '11111111-1111-1111-1111-000000000008')
-on conflict do nothing;
-
--- ---------------------------------------------------------------------------
--- Analytics backfill, so the dashboard charts have something to draw
--- ---------------------------------------------------------------------------
-
-insert into public.analytics_daily_visitor (date, number_of_visitors)
-select d::date, 20 + (random() * 80)::int
-from generate_series(current_date - interval '29 days', current_date, interval '1 day') d
-on conflict (date) do nothing;
-
-insert into public.analytics_daily_login (date, number_of_logins)
-select d::date, 5 + (random() * 30)::int
-from generate_series(current_date - interval '29 days', current_date, interval '1 day') d
-on conflict (date) do nothing;
