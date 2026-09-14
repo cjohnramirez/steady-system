@@ -168,6 +168,17 @@ html {
   scrollbar-gutter: stable;
 }
 
+/*
+ * Dialogs, sheets, selects and menus lock scrolling with react-remove-scroll, which
+ * adds the scrollbar's width to the body as margin so the page doesn't widen. The
+ * stable gutter above already keeps that space, so the margin counted it twice and
+ * every overlay shifted the page 15px. The extra "html" wins over its injected rule.
+ */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+  --removed-body-scroll-bar-size: 0px;
+}
+
 /* A stray wide element must never make the whole page scroll sideways on a phone. */
 body {
   overflow-x: clip;
