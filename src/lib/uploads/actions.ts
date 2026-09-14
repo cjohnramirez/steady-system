@@ -16,10 +16,10 @@ cloudinary.config({
 
 /** Where each kind of upload goes. Clients pick a key, never a raw folder name. */
 const FOLDERS = {
-  announcements: "gcs/announcements",
-  articles: "gcs/articles",
-  playlists: "gcs/playlists",
-  avatars: "gcs/avatars",
+  announcements: "steady/announcements",
+  articles: "steady/articles",
+  playlists: "steady/playlists",
+  avatars: "steady/avatars",
 } as const;
 
 export type UploadTarget = keyof typeof FOLDERS;
@@ -73,14 +73,15 @@ export async function signUpload(
 
 /**
  * Deletes an image that a saved record no longer points at. Admin only, and only
- * inside the app's own `gcs/` folders: the shared seed photos under `gcs-seed/`
- * are used by many rows and must survive any one of them being edited.
+ * inside the app's own `steady/` folders: the shared seed photos under
+ * `steady-seed/` are used by many rows and must survive any one of them being
+ * edited.
  */
 export async function deleteImage(url: string): Promise<Result> {
   try {
     await requireRole("admin");
     const publicId = extractPublicId(url);
-    if (!publicId || !publicId.startsWith("gcs/")) return ok();
+    if (!publicId || !publicId.startsWith("steady/")) return ok();
 
     const result = await cloudinary.uploader.destroy(
       publicId.replace(/\.[a-z0-9]+$/i, ""),

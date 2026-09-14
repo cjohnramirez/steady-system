@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { BRAND } from "@/lib/brand";
+import { clientEnv } from "@/lib/env/client";
 import { Toaster } from "@/components/ui/sonner";
 import TrackHomePage from "@/components/tracker";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -27,7 +28,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gcs-system.vercel.app/"),
+  // From the environment, so moving to a new domain needs no code change.
+  metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
   title: {
     default: `${BRAND.name} | ${BRAND.tagline}`,
     template: `%s | ${BRAND.name}`,
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: `${BRAND.name} | ${BRAND.tagline}`,
     description: BRAND.description,
-    url: "https://gcs-system.vercel.app/",
+    url: clientEnv.NEXT_PUBLIC_APP_URL,
     siteName: BRAND.name,
     type: "website",
   },

@@ -111,9 +111,9 @@ In the Supabase dashboard:
   `public.custom_access_token_hook`. It saves a query per request; the app works
   without it.
 
-Seeded accounts all use the password `Password123!`: `admin@gcs.test`,
-`counselor@gcs.test` to `counselor8@gcs.test`, `student@gcs.test`, `student2@gcs.test` and
-`student001@gcs.test` to `student150@gcs.test`.
+Seeded accounts all use the password `Password123!`: `admin@steady.test`,
+`counselor@steady.test` to `counselor8@steady.test`, `student@steady.test`, `student2@steady.test` and
+`student001@steady.test` to `student150@steady.test`.
 
 Placeholder photos: `node scripts/seed/download-images.mjs`, then
 `node scripts/seed/upload-images.mjs` (uploads to Cloudinary and regenerates

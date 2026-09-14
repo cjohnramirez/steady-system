@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { updateAnalytics } from "@/app/actions";
 import { toAppDateString } from "@/lib/format";
 
-const KEY = "gcs-visit-counted-on";
+const KEY = "steady-visit-counted-on";
 
 /**
  * Counts one visit per browser per day.

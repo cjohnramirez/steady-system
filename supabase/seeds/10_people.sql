@@ -4,9 +4,9 @@
 -- Everything is derived from row numbers rather than random(), so a reset always
 -- produces the same accounts. Every account uses the password Password123!.
 --
---   counselor2@gcs.test .. counselor8@gcs.test
---   admin2@gcs.test
---   student001@gcs.test .. student150@gcs.test
+--   counselor2@steady.test .. counselor8@steady.test
+--   admin2@steady.test
+--   student001@steady.test .. student150@steady.test
 
 -- ---------------------------------------------------------------------------
 -- Departments
@@ -41,16 +41,16 @@ create temporary table seed_users (id uuid, email text, role public.app_role);
 
 insert into seed_users
 select ('44444444-4444-4444-4444-' || lpad((10 + n)::text, 12, '0'))::uuid,
-       'counselor' || (n + 1) || '@gcs.test',
+       'counselor' || (n + 1) || '@steady.test',
        'counselor'
 from generate_series(1, 7) as n;
 
 insert into seed_users values
-  ('44444444-4444-4444-4444-000000000020', 'admin2@gcs.test', 'admin');
+  ('44444444-4444-4444-4444-000000000020', 'admin2@steady.test', 'admin');
 
 insert into seed_users
 select ('44444444-4444-4444-4444-' || lpad((1000 + n)::text, 12, '0'))::uuid,
-       'student' || lpad(n::text, 3, '0') || '@gcs.test',
+       'student' || lpad(n::text, 3, '0') || '@steady.test',
        'student'
 from generate_series(1, 150) as n;
 
@@ -91,7 +91,7 @@ on conflict (user_id) do nothing;
 
 insert into public.admin (id, user_id, username, email, first_name, last_name, phone, university_id)
 values ('55555555-5555-5555-5555-000000000002', '44444444-4444-4444-4444-000000000020',
-        'rbautista', 'admin2@gcs.test', 'Ramon', 'Bautista', '09181234567', 2019000002)
+        'rbautista', 'admin2@steady.test', 'Ramon', 'Bautista', '09181234567', 2019000002)
 on conflict do nothing;
 
 -- Varied hours and working days, so the booking calendar shows real differences
@@ -101,25 +101,25 @@ insert into public.counselor (
   is_active, day_of_week, start_time, end_time
 ) values
   ('66666666-6666-6666-6666-000000000002', '44444444-4444-4444-4444-000000000011',
-   'jvillanueva', 'counselor2@gcs.test', 'Jose', 'Villanueva', '09172345678', 2018000011,
+   'jvillanueva', 'counselor2@steady.test', 'Jose', 'Villanueva', '09172345678', 2018000011,
    true, '{false,true,true,true,true,true,false}', '09:00', '16:00'),
   ('66666666-6666-6666-6666-000000000003', '44444444-4444-4444-4444-000000000012',
-   'lreyes', 'counselor3@gcs.test', 'Liza', 'Reyes', '09173456789', 2018000012,
+   'lreyes', 'counselor3@steady.test', 'Liza', 'Reyes', '09173456789', 2018000012,
    true, '{false,true,false,true,false,true,false}', '08:00', '12:00'),
   ('66666666-6666-6666-6666-000000000004', '44444444-4444-4444-4444-000000000013',
-   'agarcia', 'counselor4@gcs.test', 'Antonio', 'Garcia', '09174567890', 2017000013,
+   'agarcia', 'counselor4@steady.test', 'Antonio', 'Garcia', '09174567890', 2017000013,
    true, '{false,false,true,false,true,false,true}', '13:00', '17:00'),
   ('66666666-6666-6666-6666-000000000005', '44444444-4444-4444-4444-000000000014',
-   'cfernandez', 'counselor5@gcs.test', 'Carmela', 'Fernandez', '09175678901', 2016000014,
+   'cfernandez', 'counselor5@steady.test', 'Carmela', 'Fernandez', '09175678901', 2016000014,
    true, '{false,true,true,true,true,true,false}', '08:00', '17:00'),
   ('66666666-6666-6666-6666-000000000006', '44444444-4444-4444-4444-000000000015',
-   'mtorres', 'counselor6@gcs.test', 'Miguel', 'Torres', '09176789012', 2019000015,
+   'mtorres', 'counselor6@steady.test', 'Miguel', 'Torres', '09176789012', 2019000015,
    true, '{false,true,true,false,true,true,false}', '10:00', '15:00'),
   ('66666666-6666-6666-6666-000000000007', '44444444-4444-4444-4444-000000000016',
-   'pnavarro', 'counselor7@gcs.test', 'Patricia', 'Navarro', '09177890123', 2020000016,
+   'pnavarro', 'counselor7@steady.test', 'Patricia', 'Navarro', '09177890123', 2020000016,
    true, '{false,true,true,true,true,false,false}', '08:30', '16:30'),
   ('66666666-6666-6666-6666-000000000008', '44444444-4444-4444-4444-000000000017',
-   'dlim', 'counselor8@gcs.test', 'Daniel', 'Lim', '09178901234', 2021000017,
+   'dlim', 'counselor8@steady.test', 'Daniel', 'Lim', '09178901234', 2021000017,
    false, '{false,true,true,true,true,true,false}', '08:00', '17:00')
 on conflict do nothing;
 
@@ -162,7 +162,7 @@ select
   lower(first_names[1 + (n * 7) % array_length(first_names, 1)])
     || lower(replace(last_names[1 + (n * 11) % array_length(last_names, 1)], ' ', ''))
     || n,
-  'student' || lpad(n::text, 3, '0') || '@gcs.test',
+  'student' || lpad(n::text, 3, '0') || '@steady.test',
   first_names[1 + (n * 7) % array_length(first_names, 1)],
   case when n % 3 = 0 then null else last_names[1 + (n * 5) % array_length(last_names, 1)] end,
   last_names[1 + (n * 11) % array_length(last_names, 1)],

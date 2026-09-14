@@ -15,7 +15,7 @@ select
   t.title,
   t.description,
   (array['Student Center Auditorium','Room 204, CITC Building','University Gymnasium',
-         'GCS Office, Science Complex','Open Grounds','Library Function Hall',
+         'Guidance Office, Student Services Building','Open Grounds','Library Function Hall',
          'Online via Google Meet','CEA Lecture Hall'])[1 + (t.n % 8)],
   date_trunc('hour', now()) + make_interval(days => (t.n * 3) - 60, hours => 9),
   date_trunc('hour', now()) + make_interval(days => (t.n * 3) - 60 + (t.n % 4), hours => 12 + (t.n % 5))
@@ -38,7 +38,7 @@ from (
     ('Board Exam Readiness Session', 'Coping strategies for licensure exam candidates.'),
     ('Art Therapy Afternoon', 'Express what words cannot. No art experience needed.'),
     ('Digital Detox Challenge', 'A week-long challenge to rebuild healthier screen habits.'),
-    ('LGBTQ+ Support Circle', 'A safe and affirming peer space, facilitated by GCS staff.'),
+    ('LGBTQ+ Support Circle', 'A safe and affirming peer space, facilitated by guidance staff.'),
     ('Financial Wellness Workshop', 'Budgeting basics for students living away from home.'),
     ('Sleep Hygiene Clinic', 'Why rest matters and how to protect it during finals.'),
     ('Resume Writing Workshop', 'Build a first resume with feedback from career advisers.'),
@@ -61,7 +61,7 @@ from (
     ('Motivation Reset Workshop', 'For anyone who has lost momentum this semester.'),
     ('Public Speaking Confidence', 'Manage presentation anxiety with small, practical steps.'),
     ('Holiday Break Wellness Tips', 'Staying well while away from campus routines.'),
-    ('Semester Opening Assembly', 'Meet the GCS team and learn about our services.')
+    ('Semester Opening Assembly', 'Meet the guidance team and learn about our services.')
   ) as v(title, description)
 ) as t;
 
@@ -78,7 +78,7 @@ select
   'https://example.test/articles/' || a.n,
   (array['Dr. L. Fernandez','Dr. R. Villanueva','M. Reyes','Prof. A. Santos',
          'Dr. C. Mercado','J. Ocampo, RPsy','Dr. P. Lim','K. Aquino, RGC'])[1 + (a.n % 8)],
-  (array['University Press','Campus Health','Mindful Campus','GCS Journal'])[1 + (a.n % 4)],
+  (array['University Press','Campus Health','Mindful Campus','Steady Journal'])[1 + (a.n % 4)],
   ('11111111-1111-1111-1111-' || lpad((1 + ((a.n - 1) / 5) % 8)::text, 12, '0'))::uuid,
   now() - make_interval(days => a.n * 4)
 from (
@@ -135,7 +135,7 @@ insert into public.playlist (title, link, creator, emotional_status_id)
 select
   p.title,
   'https://open.spotify.com/playlist/demo' || lpad(p.n::text, 3, '0'),
-  (array['GCS Unit','Peer Counselors','Student Council','Campus Radio'])[1 + (p.n % 4)],
+  (array['Guidance Office','Peer Counselors','Student Council','Campus Radio'])[1 + (p.n % 4)],
   ('11111111-1111-1111-1111-' || lpad((1 + ((p.n - 1) / 4) % 8)::text, 12, '0'))::uuid
 from (
   select (row_number() over ())::int as n, title

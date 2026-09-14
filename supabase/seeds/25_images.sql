@@ -3,22 +3,22 @@
 -- matched to images in a fixed order, cycling when there are more rows than photos.
 
 with images as (select array[
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355092/gcs-seed/announcements/announcement-01.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355093/gcs-seed/announcements/announcement-02.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355094/gcs-seed/announcements/announcement-03.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355095/gcs-seed/announcements/announcement-04.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355097/gcs-seed/announcements/announcement-05.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355098/gcs-seed/announcements/announcement-06.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355099/gcs-seed/announcements/announcement-07.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355101/gcs-seed/announcements/announcement-08.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355102/gcs-seed/announcements/announcement-09.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355103/gcs-seed/announcements/announcement-10.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355104/gcs-seed/announcements/announcement-11.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355106/gcs-seed/announcements/announcement-12.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355107/gcs-seed/announcements/announcement-13.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355109/gcs-seed/announcements/announcement-14.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355110/gcs-seed/announcements/announcement-15.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355111/gcs-seed/announcements/announcement-16.jpg'
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396854/steady-seed/announcements/announcement-01.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396855/steady-seed/announcements/announcement-02.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396856/steady-seed/announcements/announcement-03.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396858/steady-seed/announcements/announcement-04.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396859/steady-seed/announcements/announcement-05.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396860/steady-seed/announcements/announcement-06.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396861/steady-seed/announcements/announcement-07.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396862/steady-seed/announcements/announcement-08.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396863/steady-seed/announcements/announcement-09.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396864/steady-seed/announcements/announcement-10.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396866/steady-seed/announcements/announcement-11.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396867/steady-seed/announcements/announcement-12.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396868/steady-seed/announcements/announcement-13.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396869/steady-seed/announcements/announcement-14.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396871/steady-seed/announcements/announcement-15.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396872/steady-seed/announcements/announcement-16.jpg'
   ] as urls),
 ranked as (select id, row_number() over (order by start_date) as n from public.announcement)
 update public.announcement t
@@ -27,22 +27,22 @@ from ranked, images
 where t.id = ranked.id and t.announcement_image = '';
 
 with images as (select array[
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355112/gcs-seed/articles/article-01.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355114/gcs-seed/articles/article-02.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355115/gcs-seed/articles/article-03.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355116/gcs-seed/articles/article-04.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355117/gcs-seed/articles/article-05.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355119/gcs-seed/articles/article-06.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355121/gcs-seed/articles/article-07.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355122/gcs-seed/articles/article-08.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355123/gcs-seed/articles/article-09.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355124/gcs-seed/articles/article-10.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355126/gcs-seed/articles/article-11.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355127/gcs-seed/articles/article-12.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355128/gcs-seed/articles/article-13.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355129/gcs-seed/articles/article-14.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355130/gcs-seed/articles/article-15.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355131/gcs-seed/articles/article-16.jpg'
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396873/steady-seed/articles/article-01.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396874/steady-seed/articles/article-02.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396875/steady-seed/articles/article-03.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396876/steady-seed/articles/article-04.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396877/steady-seed/articles/article-05.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396878/steady-seed/articles/article-06.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396880/steady-seed/articles/article-07.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396881/steady-seed/articles/article-08.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396882/steady-seed/articles/article-09.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396883/steady-seed/articles/article-10.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396884/steady-seed/articles/article-11.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396885/steady-seed/articles/article-12.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396887/steady-seed/articles/article-13.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396888/steady-seed/articles/article-14.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396889/steady-seed/articles/article-15.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396891/steady-seed/articles/article-16.jpg'
   ] as urls),
 ranked as (select id, row_number() over (order by added_at desc) as n from public.article)
 update public.article t
@@ -51,18 +51,18 @@ from ranked, images
 where t.id = ranked.id and t.article_image = '';
 
 with images as (select array[
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355132/gcs-seed/playlists/playlist-01.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355134/gcs-seed/playlists/playlist-02.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355135/gcs-seed/playlists/playlist-03.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355136/gcs-seed/playlists/playlist-04.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355138/gcs-seed/playlists/playlist-05.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355139/gcs-seed/playlists/playlist-06.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355140/gcs-seed/playlists/playlist-07.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355141/gcs-seed/playlists/playlist-08.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355143/gcs-seed/playlists/playlist-09.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355144/gcs-seed/playlists/playlist-10.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355146/gcs-seed/playlists/playlist-11.jpg',
-    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789355147/gcs-seed/playlists/playlist-12.jpg'
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396892/steady-seed/playlists/playlist-01.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396893/steady-seed/playlists/playlist-02.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396894/steady-seed/playlists/playlist-03.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396895/steady-seed/playlists/playlist-04.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396896/steady-seed/playlists/playlist-05.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396897/steady-seed/playlists/playlist-06.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396899/steady-seed/playlists/playlist-07.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396900/steady-seed/playlists/playlist-08.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396901/steady-seed/playlists/playlist-09.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396902/steady-seed/playlists/playlist-10.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396903/steady-seed/playlists/playlist-11.jpg',
+    'https://res.cloudinary.com/dch6eenk5/image/upload/v1789396904/steady-seed/playlists/playlist-12.jpg'
   ] as urls),
 ranked as (select id, row_number() over (order by title) as n from public.playlist)
 update public.playlist t

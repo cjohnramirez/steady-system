@@ -14,7 +14,7 @@ Steps a reviewer can actually follow. Which page, signed in as which role, what
 they should see. "Tested locally" is not a step.
 
 Seeded accounts, password Password123!
-  admin@gcs.test   counselor@gcs.test   student@gcs.test   student2@gcs.test
+  admin@steady.test   counselor@steady.test   student@steady.test   student2@steady.test
 -->
 
 ## Checklist

@@ -4,10 +4,10 @@
 -- in with, which the project has never had. Every account below uses the password
 -- Password123! and none of them should ever exist in a deployed environment.
 --
---   admin@gcs.test      admin
---   counselor@gcs.test  counselor, assigned to Computer Science
---   student@gcs.test    student in Computer Science
---   student2@gcs.test   student in Computer Science, for double-booking checks
+--   admin@steady.test      admin
+--   counselor@steady.test  counselor, assigned to Computer Science
+--   student@steady.test    student in Computer Science
+--   student2@steady.test   student in Computer Science, for double-booking checks
 
 -- ---------------------------------------------------------------------------
 -- Role permissions
@@ -69,19 +69,19 @@ insert into public.organization (
   day_of_week, start_office_hour, end_office_hour
 ) values (
   '33333333-3333-3333-3333-000000000001',
-  'Guidance and Counseling Services',
-  'GCS',
+  'Guidance and Counseling Office',
+  'GCO',
   'guidance@steady.test',
   '+639171234567',
-  'Room 1, Bldg 02, Science Complex',
+  'Room 101, Student Services Building',
   '{false,true,true,true,true,true,false}',
   '08:00',
   '17:00'
 ) on conflict do nothing;
 
 insert into public.organization_contact (platform, contact_detail) values
-  ('facebook', 'https://facebook.com/university.gcs'),
-  ('email', 'gcs@university.test'),
+  ('facebook', 'https://facebook.com/steady.guidance'),
+  ('email', 'guidance@steady.test'),
   ('phone', '+63 917 123 4567')
 on conflict do nothing;
 
@@ -107,10 +107,10 @@ select
   '{}'::jsonb,
   '', '', '', ''
 from (values
-  ('44444444-4444-4444-4444-000000000001'::uuid, 'admin@gcs.test'),
-  ('44444444-4444-4444-4444-000000000002'::uuid, 'counselor@gcs.test'),
-  ('44444444-4444-4444-4444-000000000003'::uuid, 'student@gcs.test'),
-  ('44444444-4444-4444-4444-000000000004'::uuid, 'student2@gcs.test')
+  ('44444444-4444-4444-4444-000000000001'::uuid, 'admin@steady.test'),
+  ('44444444-4444-4444-4444-000000000002'::uuid, 'counselor@steady.test'),
+  ('44444444-4444-4444-4444-000000000003'::uuid, 'student@steady.test'),
+  ('44444444-4444-4444-4444-000000000004'::uuid, 'student2@steady.test')
 ) as u(id, email)
 on conflict (id) do nothing;
 
@@ -126,7 +126,7 @@ select
   'email',
   now(), now(), now()
 from auth.users u
-where u.email in ('admin@gcs.test', 'counselor@gcs.test', 'student@gcs.test', 'student2@gcs.test')
+where u.email in ('admin@steady.test', 'counselor@steady.test', 'student@steady.test', 'student2@steady.test')
   and not exists (
     select 1 from auth.identities i
     where i.user_id = u.id and i.provider = 'email'
@@ -148,7 +148,7 @@ insert into public.admin (
 ) values (
   '55555555-5555-5555-5555-000000000001',
   '44444444-4444-4444-4444-000000000001',
-  'gcsadmin', 'admin@gcs.test', 'Grace', 'Mendoza', '09171234567', 2020000001
+  'steadyadmin', 'admin@steady.test', 'Grace', 'Mendoza', '09171234567', 2020000001
 ) on conflict do nothing;
 
 insert into public.counselor (
@@ -157,7 +157,7 @@ insert into public.counselor (
 ) values (
   '66666666-6666-6666-6666-000000000001',
   '44444444-4444-4444-4444-000000000002',
-  'mcruz', 'counselor@gcs.test', 'Maria', 'Cruz', '09179876543', 2020000002,
+  'mcruz', 'counselor@steady.test', 'Maria', 'Cruz', '09179876543', 2020000002,
   true, '{false,true,true,true,true,true,false}', '08:00', '17:00'
 ) on conflict do nothing;
 
@@ -182,13 +182,13 @@ insert into public.student (
 ) values
   ('88888888-8888-8888-8888-000000000001',
    '44444444-4444-4444-4444-000000000003',
-   'jdelacruz', 'student@gcs.test', 'Juan', 'Santos', 'Dela Cruz',
+   'jdelacruz', 'student@steady.test', 'Juan', 'Santos', 'Dela Cruz',
    '09171112222', 'male', 20, 2021001234, 3,
    '77777777-7777-7777-7777-000000000001',
    '11111111-1111-1111-1111-000000000005'),
   ('88888888-8888-8888-8888-000000000002',
    '44444444-4444-4444-4444-000000000004',
-   'aramos', 'student2@gcs.test', 'Ana', null, 'Ramos',
+   'aramos', 'student2@steady.test', 'Ana', null, 'Ramos',
    '09173334444', 'female', 19, 2021001235, 2,
    '77777777-7777-7777-7777-000000000001',
    '11111111-1111-1111-1111-000000000003')

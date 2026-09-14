@@ -15,7 +15,7 @@ import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { IconBadge } from "@/components/app/icon-badge";
 import { createClient } from "@/utils/supabase/server";
 import { formatEventRange } from "@/lib/format";
-import { CAMPUS_ADDRESS, campusMapsUrl } from "@/lib/organization/address";
+import { CAMPUS_ADDRESS } from "@/lib/organization/address";
 import hero from "@/assets/hero.jpg";
 import { AboutMosaic } from "./_components/about-mosaic";
 import { SectionIntro } from "./_components/section-intro";
@@ -142,16 +142,6 @@ export default async function HomePage() {
                   </p>
                 )}
               </address>
-              <Button variant="outline" asChild>
-                <a
-                  href={campusMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open in Google Maps
-                  <ArrowUpRight aria-hidden />
-                </a>
-              </Button>
             </div>
           </div>
         </div>

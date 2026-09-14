@@ -57,7 +57,7 @@ for (const [folder, target] of Object.entries(TARGETS)) {
 
   const urls = [];
   for (const file of files) {
-    const publicId = `gcs-seed/${folder}/${path.parse(file).name}`;
+    const publicId = `steady-seed/${folder}/${path.parse(file).name}`;
     const result = await cloudinary.uploader.upload(
       path.join(imagesDir, folder, file),
       {
