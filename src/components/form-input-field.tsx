@@ -19,6 +19,7 @@ export function FormInputField<TValue = string>({
   label,
   placeholder,
   description,
+  optional = false,
   type = "text",
   autoComplete,
   inputMode,
@@ -28,6 +29,11 @@ export function FormInputField<TValue = string>({
   label: string;
   placeholder?: string;
   description?: ReactNode;
+  /**
+   * Shows "Optional" beside the label. It used to be a description under the input,
+   * which made the field taller than its neighbours and threw grid rows out of line.
+   */
+  optional?: boolean;
   type?: string;
   autoComplete?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
@@ -37,7 +43,14 @@ export function FormInputField<TValue = string>({
 
   return (
     <Field data-invalid={invalid} className={className}>
-      <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      {optional ? (
+        <div className="flex items-baseline justify-between gap-2">
+          <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+          <span className="text-muted-foreground text-xs">Optional</span>
+        </div>
+      ) : (
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      )}
       <Input
         id={field.name}
         name={field.name}

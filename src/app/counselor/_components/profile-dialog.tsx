@@ -97,7 +97,7 @@ export default function ProfileDialog({
                   field={field}
                   label="Phone"
                   type="tel"
-                  description="Optional"
+                  optional
                 />
               )}
             </form.Field>

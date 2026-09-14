@@ -101,11 +101,7 @@ export default function ProfileDialog({
               </form.Field>
               <form.Field name="middle_name">
                 {(field) => (
-                  <FormInputField
-                    field={field}
-                    label="Middle name"
-                    description="Optional"
-                  />
+                  <FormInputField field={field} label="Middle name" optional />
                 )}
               </form.Field>
               <form.Field name="last_name">
@@ -128,7 +124,7 @@ export default function ProfileDialog({
                     field={field}
                     label="Phone"
                     type="tel"
-                    description="Optional"
+                    optional
                   />
                 )}
               </form.Field>

@@ -170,7 +170,7 @@ export default function SignUpForm() {
                   <FormInputField
                     field={field}
                     label="Middle name"
-                    description="Optional"
+                    optional
                     autoComplete="additional-name"
                   />
                 )}
@@ -216,7 +216,7 @@ export default function SignUpForm() {
                     type="tel"
                     autoComplete="tel"
                     placeholder="09171234567"
-                    description="Optional"
+                    optional
                   />
                 )}
               </form.Field>
@@ -343,7 +343,7 @@ export default function SignUpForm() {
                             <FormInputField
                               field={field}
                               label="Middle name"
-                              description="Optional"
+                              optional
                             />
                           )}
                         </form.Field>

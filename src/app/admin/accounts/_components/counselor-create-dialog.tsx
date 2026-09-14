@@ -108,12 +108,7 @@ export default function CounselorCreateDialog({
               </form.Field>
               <form.Field name="phone">
                 {(f) => (
-                  <FormInputField
-                    field={f}
-                    label="Phone"
-                    type="tel"
-                    description="Optional"
-                  />
+                  <FormInputField field={f} label="Phone" type="tel" optional />
                 )}
               </form.Field>
             </div>

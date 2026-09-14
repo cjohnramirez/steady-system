@@ -122,7 +122,7 @@ export default function ContactsDialog({
                           <FormInputField
                             field={field}
                             label="Middle name"
-                            description="Optional"
+                            optional
                           />
                         )}
                       </form.Field>
