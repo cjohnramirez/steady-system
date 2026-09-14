@@ -76,10 +76,14 @@ export function NotificationBell({ userId }: { userId: string }) {
       </PopoverTrigger>
       <PopoverContent
         align="end"
+        // On a phone the popover is as wide as the screen less a 16px margin each
+        // side, and collision padding holds that margin, so it sits centred under
+        // the navbar. From sm up it is 24rem, aligned to the bell.
+        collisionPadding={16}
         // overflow-hidden clips the tinted unread rows to the rounded corners.
         // The popover is capped at the space left below the bell, and only the
         // list scrolls, so the header stays put and nothing is cut off.
-        className="flex max-h-[min(32rem,calc(var(--radix-popover-content-available-height)-1rem))] w-[min(24rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl p-0"
+        className="flex max-h-[min(32rem,calc(var(--radix-popover-content-available-height)-1rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl p-0 sm:w-96"
       >
         <div className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
           <h2 className="font-medium">Notifications</h2>
@@ -264,7 +268,7 @@ function NotificationRow({
         loading={removing}
         // Hover-only hid the button from touch screens entirely; there it stays
         // visible, and anywhere it shows while the row has keyboard focus.
-        className="absolute top-2 right-1 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 data-[loading]:opacity-100 [@media(pointer:coarse)]:opacity-100"
+        className="absolute top-2 right-1 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 data-loading:opacity-100 pointer-coarse:opacity-100"
         onClick={onRemove}
       >
         <X />
