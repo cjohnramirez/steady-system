@@ -33,6 +33,12 @@ import { SearchInput } from "@/components/app/search-input";
 import { cn } from "@/lib/utils";
 import { DataTablePagination } from "./pagination";
 
+/**
+ * Every row is the same height whether or not it holds a button. With padding
+ * alone, rows with an action button (32px) came out taller than text-only rows.
+ */
+const ROW_HEIGHT = "h-14";
+
 type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -169,9 +175,9 @@ export function DataTable<TData, TValue>({
               Array.from(
                 { length: Math.min(pagination.pageSize, 8) },
                 (_, index) => (
-                  <TableRow key={index}>
+                  <TableRow key={index} className={ROW_HEIGHT}>
                     {table.getVisibleLeafColumns().map((column) => (
-                      <TableCell key={column.id} className="p-3">
+                      <TableCell key={column.id} className="px-3 py-2">
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
                     ))}
@@ -185,10 +191,10 @@ export function DataTable<TData, TValue>({
                   onClick={
                     onRowClick ? () => onRowClick(row.original) : undefined
                   }
-                  className={cn(onRowClick && "cursor-pointer")}
+                  className={cn(ROW_HEIGHT, onRowClick && "cursor-pointer")}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-3">
+                    <TableCell key={cell.id} className="px-3 py-2">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
