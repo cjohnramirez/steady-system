@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, BellOff, CalendarClock, Megaphone, X } from "lucide-react";
+import {
+  Bell,
+  BellOff,
+  BellRing,
+  CalendarClock,
+  Megaphone,
+  Smartphone,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/app/error-state";
+import { useDeviceNotifications } from "@/hooks/use-device-notifications";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { Notification } from "@/lib/notifications/queries";
 import { cn } from "@/lib/utils";
@@ -31,16 +40,13 @@ function useMinuteTick() {
   }, []);
 }
 
-export function NotificationBell({
-  userId,
-  footer,
-}: {
-  userId: string;
-  /** Extra row under the list, e.g. the device-notifications prompt. */
-  footer?: ReactNode;
-}) {
+export function NotificationBell({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
-  const { feed, markRead, markAllRead, remove } = useNotifications(userId);
+  const device = useDeviceNotifications();
+  const { feed, markRead, markAllRead, remove } = useNotifications(userId, {
+    // In a background tab, a system notification replaces the toast.
+    onArrive: device.show,
+  });
   const unread = feed.data?.unread ?? 0;
   const items = feed.data?.items ?? [];
   useMinuteTick();
@@ -129,10 +135,66 @@ export function NotificationBell({
           </div>
         )}
 
-        {footer && <div className="shrink-0 border-t">{footer}</div>}
+        <DeviceNotificationsRow device={device} />
       </PopoverContent>
     </Popover>
   );
+}
+
+/** Offers device notifications, or explains why they aren't available. */
+function DeviceNotificationsRow({
+  device,
+}: {
+  device: ReturnType<typeof useDeviceNotifications>;
+}) {
+  const row =
+    "text-muted-foreground flex shrink-0 items-center gap-3 border-t px-4 py-3 text-xs";
+
+  if (device.permission === "default") {
+    return (
+      <div className={row}>
+        <BellRing aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
+        <p className="min-w-0 flex-1">
+          Get device notifications while Steady is open.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          loading={device.requesting}
+          onClick={() => void device.enable()}
+        >
+          Turn on
+        </Button>
+      </div>
+    );
+  }
+  if (device.permission === "denied") {
+    return (
+      <p className={row}>
+        <BellOff aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
+        Device notifications are blocked. Allow them in your browser&apos;s site
+        settings.
+      </p>
+    );
+  }
+  if (device.permission === "granted") {
+    return (
+      <p className={row}>
+        <BellRing aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
+        Device notifications are on while Steady is open.
+      </p>
+    );
+  }
+  if (device.needsHomeScreen) {
+    return (
+      <p className={row}>
+        <Smartphone aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
+        On iPhone or iPad, add Steady to your Home Screen (Share, then Add to
+        Home Screen) to get notifications.
+      </p>
+    );
+  }
+  return null;
 }
 
 function NotificationRow({

@@ -36,6 +36,8 @@ export const metadata: Metadata = {
   },
   description: BRAND.description,
   applicationName: BRAND.name,
+  // Home-screen app on iPhone and iPad, which is what enables notifications there.
+  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "default" },
   keywords: [
     "Guidance",
     "Counseling",
