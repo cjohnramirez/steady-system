@@ -71,7 +71,7 @@ insert into public.organization (
   '33333333-3333-3333-3333-000000000001',
   'Guidance and Counseling Services',
   'GCS',
-  'gcs@university.test',
+  'guidance@steady.test',
   '+639171234567',
   'Room 1, Bldg 02, Science Complex',
   '{false,true,true,true,true,true,false}',

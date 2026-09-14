@@ -3,6 +3,7 @@ import { Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
 import { BrandMark } from "@/components/app/brand-mark";
 import { createClient } from "@/utils/supabase/server";
 import { formatClockTime, strToTitleCase } from "@/lib/format";
+import { BRAND } from "@/lib/brand";
 import { CAMPUS_ADDRESS } from "@/lib/organization/address";
 import type { NavBar } from "@/app/home/_lib/nav-data";
 
@@ -11,9 +12,9 @@ const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 /**
  * Site footer, rendered on the server.
  *
- * Fixed: it was a client component purely to fetch office details, prefixed a
- * literal "0" to the phone number, and fell back to /about and /services, which
- * never existed.
+ * Brand and description, section links, and the office contact details from the
+ * organization table; below them a bar with the copyright, the early-access note
+ * and the legal links.
  */
 export default async function Footer({
   navBarObj = [],
@@ -43,36 +44,7 @@ export default async function Footer({
       <div className="m-auto grid max-w-[1600px] gap-10 px-4 py-12 md:grid-cols-[2fr_1fr_1.5fr] md:px-8 md:py-16">
         <div className="max-w-sm space-y-4">
           <BrandMark />
-          <p className="text-muted-foreground">
-            Dedicated to the holistic development of every student through
-            support, counseling and care.
-          </p>
-          <ul className="flex flex-wrap gap-x-4 gap-y-2">
-            <li>
-              <Link
-                href="/misc/privacy-policy"
-                className="underline-offset-4 hover:underline"
-              >
-                Privacy policy
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/misc/terms"
-                className="underline-offset-4 hover:underline"
-              >
-                Terms
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/misc/meet-the-developers"
-                className="underline-offset-4 hover:underline"
-              >
-                Meet the developers
-              </Link>
-            </li>
-          </ul>
+          <p className="text-muted-foreground">{BRAND.description}</p>
         </div>
 
         {navBarObj.length > 0 && (
@@ -162,6 +134,50 @@ export default async function Footer({
             </ul>
           </address>
         )}
+      </div>
+
+      <div className="border-t">
+        <div className="text-muted-foreground m-auto flex max-w-[1600px] flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between md:px-8">
+          <div className="space-y-1">
+            <p>
+              © {new Date().getFullYear()} {BRAND.name}. Built by{" "}
+              <Link
+                href="/misc/meet-the-developers"
+                className="hover:text-foreground underline underline-offset-4"
+              >
+                CodeBridge
+              </Link>
+              .
+            </p>
+            <p className="text-xs">
+              Early access: content is sample data, and {BRAND.name} isn&apos;t
+              affiliated with any university.
+            </p>
+          </div>
+          <ul className="flex flex-wrap gap-x-5 gap-y-2">
+            <li>
+              <Link
+                href="/misc/privacy-policy"
+                className="hover:text-foreground"
+              >
+                Privacy policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/misc/terms" className="hover:text-foreground">
+                Terms and informed consent
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/misc/meet-the-developers"
+                className="hover:text-foreground"
+              >
+                Meet the developers
+              </Link>
+            </li>
+          </ul>
+        </div>
       </div>
     </footer>
   );
