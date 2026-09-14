@@ -7,6 +7,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
 import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toErrorMessage } from "@/lib/result";
@@ -42,8 +43,17 @@ export default function Providers({
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
-    </QueryClientProvider>
+    // The theme is a class on <html> ("light", "dark"), defaulting to the device
+    // setting. next-themes sets it before paint, so there is no flash.
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

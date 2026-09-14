@@ -38,6 +38,7 @@ import {
 import { BrandMark } from "@/components/app/brand-mark";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useViewer } from "@/components/viewer-provider";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { ROLE_HOME, ROLE_LOGIN } from "@/lib/auth/roles";
@@ -113,6 +114,7 @@ export default function NavigationBar({
         )}
 
         <div className="flex items-center gap-2 justify-self-end">
+          <ThemeToggle />
           {viewer ? (
             <>
               <NotificationBell userId={viewer.userId} />

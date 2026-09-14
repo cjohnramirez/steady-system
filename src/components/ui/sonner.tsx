@@ -7,13 +7,17 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  const { resolvedTheme } = useTheme();
+
   return (
     <Sonner
-      // The site has no dark theme yet. "system" rendered dark toasts on a light page.
-      theme="light"
+      // Follow the site's theme, not the device's, so a light choice on a dark
+      // device doesn't get dark toasts.
+      theme={resolvedTheme === "dark" ? "dark" : "light"}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,

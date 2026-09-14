@@ -20,7 +20,10 @@ const geistMono = Geist_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fafafa",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#141210" },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -63,7 +66,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    // next-themes adds the theme class before hydration; without this React warns
+    // that the server-rendered <html> attributes differ.
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-background min-h-dvh font-sans text-sm antialiased`}
       >

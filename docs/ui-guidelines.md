@@ -48,8 +48,12 @@ Colours live in `src/app/globals.css`. `--brand` (`oklch(0.56 0.13 60)`) gives
 4.84:1 against white text; the old amber gave about 2:1. Check any new colour pair with
 `node scripts/contrast.mjs "<L C H>" "<L C H>"` and keep text at 4.5:1 or more.
 
-Dark mode is not enabled, but because everything uses tokens it can be added by
-filling in the `.dark` block.
+Dark mode follows the device by default and can be switched with `ThemeToggle` in the
+navigation (next-themes puts a `dark` class on `<html>`). The `.dark` block
+redefines every token, so components need no `dark:` classes. The exceptions are
+text in brand colour (use `dark:text-brand-light`, since amber on a dark card is below
+4.5:1) and anything drawn with fixed colours, which must not exist outside
+`BRAND_HEX`.
 
 ## 3. Typography
 

@@ -27,6 +27,7 @@ import {
 import { BrandMark } from "@/components/app/brand-mark";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { NotificationBell } from "@/components/notification-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useSignedInViewer } from "@/components/viewer-provider";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { pathHasPrefix } from "@/lib/auth/roles";
@@ -88,6 +89,7 @@ export default function NavigationBar() {
             </DropdownMenu>
           </div>
           <div className="flex items-center gap-1">
+            <ThemeToggle />
             <NotificationBell userId={viewer.userId} />
             <DropdownMenu modal={false}>
               <Tooltip>

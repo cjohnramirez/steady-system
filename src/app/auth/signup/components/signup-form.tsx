@@ -426,7 +426,7 @@ export default function SignUpForm() {
                         I have read and accept the{" "}
                         <button
                           type="button"
-                          className="text-primary underline underline-offset-4"
+                          className="text-primary dark:text-brand-light underline underline-offset-4"
                           onClick={() => setConsentOpen(true)}
                         >
                           informed consent form
