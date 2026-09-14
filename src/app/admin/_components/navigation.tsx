@@ -119,6 +119,12 @@ export default function NavigationBar() {
                     <ArrowUpRight aria-hidden className="ml-auto" />
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/misc/terms">
+                    Terms and informed consent
+                    <ArrowUpRight aria-hidden className="ml-auto" />
+                  </Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

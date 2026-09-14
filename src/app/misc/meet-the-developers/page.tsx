@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Mail } from "lucide-react";
+import { CodeBridgeLogo } from "@/components/app/codebridge-logo";
 import { UserAvatar } from "@/components/app/user-avatar";
 
 export const metadata: Metadata = { title: "Meet the developers" };
@@ -68,13 +68,7 @@ export default function MeetTheDevelopers() {
           </h1>
           <p className="text-muted-foreground">The team behind Steady.</p>
         </div>
-        <Image
-          src="/codebridge-icon.png"
-          alt="CodeBridge"
-          width={120}
-          height={75}
-          className="h-auto w-24 object-contain"
-        />
+        <CodeBridgeLogo className="shrink-0" />
       </header>
       <ul className="grid gap-6 p-6 sm:grid-cols-2 md:p-10">
         {teamMembers.map((member) => (

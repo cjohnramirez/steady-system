@@ -429,7 +429,7 @@ export default function SignUpForm() {
                           className="text-primary dark:text-brand-light underline underline-offset-4"
                           onClick={() => setConsentOpen(true)}
                         >
-                          informed consent form
+                          terms and informed consent
                         </button>
                         .
                       </label>

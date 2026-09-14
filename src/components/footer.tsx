@@ -58,6 +58,14 @@ export default async function Footer({
             </li>
             <li>
               <Link
+                href="/misc/terms"
+                className="underline-offset-4 hover:underline"
+              >
+                Terms
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/misc/meet-the-developers"
                 className="underline-offset-4 hover:underline"
               >

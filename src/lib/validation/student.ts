@@ -83,7 +83,10 @@ export const signupSchema = z.object({
   email: z.email("Enter a valid email address"),
   password: passwordSchema,
   contact_person: contactPersonsSchema,
-  consent: z.literal(true, "Please read and accept the consent form"),
+  consent: z.literal(
+    true,
+    "Please read and accept the terms and informed consent",
+  ),
 });
 
 export type SignupInput = z.input<typeof signupSchema>;

@@ -1,102 +1,146 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import { Clock, Mail } from "lucide-react";
+import Link from "next/link";
+import { LegalSection } from "@/components/legal/legal-section";
+import { BRAND } from "@/lib/brand";
+import { LegalPage } from "../_components/legal-page";
 
 export const metadata: Metadata = { title: "Privacy policy" };
 
+/**
+ * Written against what the app actually stores. The previous text described
+ * features the site never had (Google Calendar reminders, "Notify Me" emails,
+ * Mailgun), so update it whenever a new kind of data is collected.
+ */
 export default function PrivacyPolicy() {
   return (
-    <article className="bg-card w-full overflow-hidden rounded-3xl border md:rounded-4xl">
-      <header className="flex flex-col-reverse gap-6 border-b p-6 sm:flex-row sm:items-center sm:justify-between md:p-10">
-        <div className="max-w-2xl space-y-3">
-          <h1 className="text-4xl tracking-tight md:text-5xl">
-            Privacy policy
-          </h1>
-          <p className="text-muted-foreground">
-            How we collect, use and protect your information when you use this
-            website. By using the site, you agree to the practices described
-            here.
-          </p>
-        </div>
-        <Image
-          src="/codebridge-icon.png"
-          alt="CodeBridge"
-          width={120}
-          height={75}
-          className="h-auto w-24 object-contain"
-        />
-      </header>
-      <div className="max-w-3xl space-y-4 p-6 leading-relaxed md:p-10">
+    <LegalPage
+      title="Privacy policy"
+      summary={`What ${BRAND.name} collects, who can see it, and the choices you have. ${BRAND.name} is in early access and its content is sample data.`}
+    >
+      <LegalSection title="What we collect">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong className="font-medium">Your account:</strong> name,
+            username, email address and password. Passwords are stored hashed by
+            our sign-in provider, so nobody can read them.
+          </li>
+          <li>
+            <strong className="font-medium">Your student profile:</strong> phone
+            number, gender, age, college, department, year level, university ID
+            and an optional profile photo.
+          </li>
+          <li>
+            <strong className="font-medium">Emergency contacts:</strong> the
+            names and phone numbers of the people you list.
+          </li>
+          <li>
+            <strong className="font-medium">Counseling activity:</strong>{" "}
+            appointment times, the reason you choose, each appointment&apos;s
+            status, and notes your counselor adds.
+          </li>
+          <li>
+            <strong className="font-medium">Mood check-ins:</strong> the mood
+            you last selected, used to suggest articles and playlists.
+          </li>
+          <li>
+            <strong className="font-medium">Notifications</strong> about your
+            appointments, and when you last used the site.
+          </li>
+          <li>
+            <strong className="font-medium">Usage totals:</strong> daily counts
+            of visits and sign-ins. These are totals only and are not linked to
+            you.
+          </li>
+        </ul>
+      </LegalSection>
+
+      <LegalSection title="How we use it">
         <p>
-          We collect information that you voluntarily provide when interacting
-          with our website, such as through contact forms, account settings,
-          email notifications (“Notify Me”), or event sign-ups. This may include
-          your name, email address, contact information, and any messages or
-          details you submit. In addition, we may automatically collect certain
-          information about your device and usage, including your device type,
-          browser type, IP address, pages visited, and general usage patterns,
-          which help us maintain security and improve the site&apos;s
-          functionality.
+          To run your account, match you with the counselor for your department,
+          schedule and manage appointments, notify you when an appointment
+          changes, suggest resources for how you feel, keep the service secure,
+          and understand overall usage. We do not sell, rent or trade your
+          information, and we do not use it for advertising.
         </p>
+      </LegalSection>
+
+      <LegalSection title="Who can see it">
+        <ul className="list-disc space-y-2 pl-5">
+          <li>You can see and edit your own profile and contacts.</li>
+          <li>
+            The counselor assigned to your department can see your profile,
+            emergency contacts and your appointments with them.
+          </li>
+          <li>
+            Guidance office administrators can manage accounts and see
+            appointment records to run the office.
+          </li>
+          <li>
+            Nobody else. These limits are enforced by access rules in the
+            database, not only by the pages you see.
+          </li>
+        </ul>
         <p>
-          Our website may also integrate with third-party services such as
-          Google Calendar (for event reminders), Vercel (hosting and logs),
-          Supabase (database and authentication), and email providers (e.g.,
-          Mailgun or Resend). These services may collect basic usage data when
-          you interact with them. We use the information we collect to provide
-          and maintain site functionality, send notifications you have
-          subscribed to, improve your experience, maintain security, and respond
-          to support requests. We do not sell, trade, or rent your personal
-          information.
-        </p>
-        <p>
-          Our site may use cookies or similar technologies to maintain sessions,
-          improve performance, and analyze traffic, though you may choose to
-          disable cookies in your browser. We take appropriate steps to protect
-          your personal information, including using secure connections (HTTPS),
-          implementing access controls, and limiting data collection to what is
-          necessary for the service. However, no system is fully secure, and we
-          cannot guarantee absolute security.
-        </p>
-        <p>
-          We only share your information with service providers necessary for
-          website operations, analytics tools, or email/calendar integrations,
-          and only when you opt in. Your personal information will never be
-          shared for marketing purposes. Our website is intended for general
-          audiences and does not knowingly collect information from children
-          under 13. If any personal information from children is collected,
-          please contact us so that it can be removed.
-        </p>
-        <p>
-          Our website may contain links to external sites, and we are not
-          responsible for their content, privacy practices, or any information
-          you provide to them. We recommend reviewing their policies before
-          interacting with these external sites.
-        </p>
-        <p>
-          You have the right to request updates or corrections to your
-          information, delete your personal data or account, and unsubscribe
-          from email notifications. Please contact us to exercise these rights.
-        </p>
-        <p>
-          We may update this Privacy Policy from time to time, and any changes
-          will be posted on this page with a revised “Last Updated” date.
-        </p>
-        <p>For any questions about this privacy policy, contact us:</p>
-        <div className="flex flex-wrap gap-3">
-          <a
-            className="hover:bg-muted flex items-center gap-2 rounded-full border px-4 py-2"
-            href="mailto:codebridge.llc@gmail.com"
+          Counselors may still need to share information in the situations
+          described in the{" "}
+          <Link
+            href="/misc/terms"
+            className="text-primary dark:text-brand-light underline underline-offset-4"
           >
-            <Mail aria-hidden strokeWidth={1.5} className="size-4" />
-            codebridge.llc@gmail.com
-          </a>
-          <p className="text-muted-foreground flex items-center gap-2 rounded-full border px-4 py-2">
-            <Clock aria-hidden strokeWidth={1.5} className="size-4" />
-            Last updated November 27, 2025
-          </p>
-        </div>
-      </div>
-    </article>
+            terms and informed consent
+          </Link>
+          .
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Service providers">
+        <p>
+          {BRAND.name} relies on Supabase for its database, sign-in and live
+          notifications, Vercel for hosting, and Cloudinary for storing images.
+          They process data only to provide those services to us.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Cookies and local storage">
+        <p>
+          We use cookies to keep you signed in, and your browser&apos;s local
+          storage to remember your theme and to count a visit once per day. We
+          use no advertising or third-party tracking cookies. Blocking cookies
+          will sign you out.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Security and retention">
+        <p>
+          Data travels over HTTPS, access is limited by role, and we collect
+          only what the service needs. No system is completely secure, so we
+          cannot guarantee absolute security. We keep your information while
+          your account is active and delete it when you ask, unless a record
+          must be kept for safety or legal reasons.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Your rights">
+        <p>
+          Under the Data Privacy Act of 2012 (Republic Act No. 10173), you can
+          ask to access, correct, download or delete your data, object to how it
+          is used, and file a complaint with the National Privacy Commission.
+          You can update most profile details yourself; for anything else, email
+          us.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Students under 18">
+        <p>
+          If you are under 18, ask a parent or guardian before creating an
+          account. Parents and guardians have a legal right to information about
+          counseling with a minor.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Changes">
+        <p>We will post any changes on this page and update the date below.</p>
+      </LegalSection>
+    </LegalPage>
   );
 }
