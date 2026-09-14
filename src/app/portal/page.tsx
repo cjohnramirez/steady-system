@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Megaphone, Music } from "lucide-react";
 import { IconBadge } from "@/components/app/icon-badge";
@@ -6,7 +7,6 @@ import { createClient } from "@/utils/supabase/server";
 import { getViewer } from "@/lib/auth/get-viewer";
 import { fetchMoodByName } from "@/lib/content/queries";
 import { formatEventRange, strToTitleCase } from "@/lib/format";
-import { TileImage } from "@/components/content/tile-image";
 import AnnouncementSection from "./_components/announcement-section";
 import ArticleSection from "./_components/article-section";
 import PlaylistSection from "./_components/playlist-section";
@@ -159,11 +159,13 @@ function FeatureCard({
       href={href}
       className={`group bg-card focus-visible:ring-ring/50 relative flex min-h-72 flex-col justify-between overflow-hidden rounded-3xl border p-4 outline-none focus-visible:ring-[3px] md:min-h-96 ${className}`}
     >
-      <TileImage
-        src={image}
+      <Image
+        src={image || "/placeholder.png"}
+        alt=""
+        fill
         priority={priority}
         sizes="(min-width: 1024px) 60vw, 100vw"
-        className="transition-[opacity,transform] group-hover:scale-[1.02]"
+        className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
       />
       <span className="bg-card/95 relative w-fit rounded-full border px-3 py-1 text-xs">
         {eyebrow}

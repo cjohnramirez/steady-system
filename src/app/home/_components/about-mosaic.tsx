@@ -1,7 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Compass, type LucideIcon } from "lucide-react";
 import { IconBadge } from "@/components/app/icon-badge";
-import { TileImage } from "@/components/content/tile-image";
 import { cn } from "@/lib/utils";
 
 type PhotoTile = {
@@ -115,10 +115,12 @@ export function AboutMosaic({
               tile.className,
             )}
           >
-            <TileImage
-              src={tile.image}
+            <Image
+              src={tile.image || "/placeholder.png"}
+              alt=""
+              fill
               sizes={tile.sizes}
-              className="transition-[opacity,transform] group-hover:scale-[1.02]"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
             <span className="bg-card/95 relative w-fit rounded-full px-3 py-1 text-xs backdrop-blur">
               {tile.label}

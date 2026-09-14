@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Contact, Phone, UserPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ErrorState } from "@/components/app/error-state";
 import { SectionCard } from "@/components/app/section-card";
 import { DetailList } from "@/components/app/detail-list";
 import { UserAvatar } from "@/components/app/user-avatar";
@@ -72,8 +71,7 @@ export default function ProfileSection({ className }: { className?: string }) {
               <Skeleton className="h-5 w-32" />
             ) : (
               <p className={counselor ? "" : "text-muted-foreground"}>
-                {counselor ??
-                  (student.isError ? "Unavailable" : "Not assigned yet")}
+                {counselor ?? "Not assigned yet"}
               </p>
             )}
           </div>
@@ -88,34 +86,26 @@ export default function ProfileSection({ className }: { className?: string }) {
           </Button>
         </div>
 
-        {student.isError ? (
-          <ErrorState
-            title="Your profile couldn't be loaded"
-            onRetry={() => student.refetch()}
-            className="flex-1"
-          />
-        ) : (
-          <DetailList
-            className="flex-1"
-            isLoading={student.isLoading}
-            items={[
-              { label: "Email", value: s?.email },
-              { label: "Phone", value: s?.phone },
-              { label: "College", value: s?.college_name },
-              { label: "Department", value: s?.department },
-              {
-                label: "Year level",
-                value: s?.year_level ? `Year ${s.year_level}` : null,
-              },
-              { label: "University ID", value: s?.university_id },
-              {
-                label: "Gender",
-                value: s?.gender ? strToTitleCase(s.gender) : null,
-              },
-              { label: "Age", value: s?.age },
-            ]}
-          />
-        )}
+        <DetailList
+          className="flex-1"
+          isLoading={student.isLoading}
+          items={[
+            { label: "Email", value: s?.email },
+            { label: "Phone", value: s?.phone },
+            { label: "College", value: s?.college_name },
+            { label: "Department", value: s?.department },
+            {
+              label: "Year level",
+              value: s?.year_level ? `Year ${s.year_level}` : null,
+            },
+            { label: "University ID", value: s?.university_id },
+            {
+              label: "Gender",
+              value: s?.gender ? strToTitleCase(s.gender) : null,
+            },
+            { label: "Age", value: s?.age },
+          ]}
+        />
       </div>
 
       <section
@@ -147,12 +137,6 @@ export default function ProfileSection({ className }: { className?: string }) {
             <Skeleton className="h-16 rounded-xl" />
             <Skeleton className="h-16 rounded-xl" />
           </div>
-        ) : contacts.isError ? (
-          <ErrorState
-            title="Contacts couldn't be loaded"
-            onRetry={() => contacts.refetch()}
-            className="p-6"
-          />
         ) : contacts.data && contacts.data.length > 0 ? (
           <ul className="grid gap-3 sm:grid-cols-2">
             {contacts.data.map((contact) => {

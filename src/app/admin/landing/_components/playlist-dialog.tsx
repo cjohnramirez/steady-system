@@ -98,8 +98,6 @@ export default function PlaylistDialog({
                 <FormSelectField
                   field={f}
                   label="Best for students feeling"
-                  isLoading={moods.isLoading}
-                  isError={moods.isError}
                   options={(moods.data ?? []).map((m) => ({
                     value: m.id,
                     label: strToTitleCase(m.name),

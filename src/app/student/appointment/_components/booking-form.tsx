@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { EmptyState } from "@/components/app/empty-state";
-import { ErrorState } from "@/components/app/error-state";
 import { SectionCard } from "@/components/app/section-card";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { useSignedInViewer } from "@/components/viewer-provider";
@@ -95,16 +95,6 @@ export default function BookingForm({
         <Skeleton className="h-72 rounded-2xl" />
         <Skeleton className="h-72 rounded-2xl" />
       </div>
-    );
-  }
-
-  if (student.isError || counselors.isError) {
-    return (
-      <ErrorState
-        title="Booking couldn't be loaded"
-        description="Your details or your counselor couldn't be loaded. Check your connection and try again."
-        onRetry={() => Promise.all([student.refetch(), counselors.refetch()])}
-      />
     );
   }
 
@@ -325,7 +315,8 @@ export default function BookingForm({
           >
             Cancel
           </Button>
-          <Button type="submit" loading={isPending}>
+          <Button type="submit" disabled={isPending}>
+            {isPending && <Spinner />}
             Request appointment
           </Button>
         </div>

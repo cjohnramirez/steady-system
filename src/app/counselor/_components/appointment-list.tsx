@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/app/empty-state";
-import { ErrorState } from "@/components/app/error-state";
 import { PaginationControls } from "@/components/app/pagination-controls";
 import { SearchInput } from "@/components/app/search-input";
 import { SectionCard } from "@/components/app/section-card";
@@ -26,7 +25,6 @@ import {
   type AppointmentStatus,
 } from "@/lib/appointments/status";
 import { queryKeys } from "@/lib/query-keys";
-import { cn } from "@/lib/utils";
 import AppointmentCard from "./appointment-card";
 
 const PAGE_SIZE = 5;
@@ -103,22 +101,11 @@ export default function AppointmentList() {
         className="sm:max-w-none"
       />
 
-      <div
-        className={cn(
-          "flex flex-col gap-3 transition-opacity",
-          appointments.isFetching && !appointments.isLoading && "opacity-60",
-        )}
-        aria-busy={appointments.isFetching}
-      >
+      <div className="flex flex-col gap-3" aria-busy={appointments.isFetching}>
         {appointments.isLoading ? (
           Array.from({ length: 3 }, (_, index) => (
             <Skeleton key={index} className="h-36 rounded-xl" />
           ))
-        ) : appointments.isError ? (
-          <ErrorState
-            title="Appointments couldn't be loaded"
-            onRetry={() => appointments.refetch()}
-          />
         ) : rows.length === 0 ? (
           <EmptyState
             icon={CalendarCheck}

@@ -51,9 +51,6 @@ export default function AnnouncementSection() {
       searchLabel="Search announcements"
       items={query.data?.data ?? []}
       isLoading={query.isLoading}
-      isFetching={query.isFetching && !query.isLoading}
-      isError={query.isError}
-      onRetry={() => query.refetch()}
       total={query.data?.count ?? 0}
       page={page}
       pageSize={PAGE_SIZE}

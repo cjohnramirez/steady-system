@@ -36,7 +36,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { BrandMark } from "@/components/app/brand-mark";
-import { LinkPending } from "@/components/app/link-pending";
 import { EarlyAccessNotice } from "@/components/app/early-access-notice";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { NotificationBell } from "@/components/notification-bell";
@@ -161,16 +160,10 @@ export default function NavigationBar({
           ) : (
             <div className="hidden items-center gap-2 md:flex">
               <Button variant="outline" asChild>
-                <Link href={ROLE_LOGIN.student}>
-                  <LinkPending />
-                  Log in
-                </Link>
+                <Link href={ROLE_LOGIN.student}>Log in</Link>
               </Button>
               <Button asChild>
-                <Link href="/student/appointment">
-                  <LinkPending />
-                  Book an appointment
-                </Link>
+                <Link href="/student/appointment">Book an appointment</Link>
               </Button>
             </div>
           )}
@@ -250,9 +243,7 @@ export default function NavigationBar({
                         asChild
                       >
                         <Link href={ROLE_HOME[viewer.role]}>
-                          <LinkPending>
-                            <LayoutDashboard aria-hidden />
-                          </LinkPending>
+                          <LayoutDashboard aria-hidden />
                           {ROLE_CTA[viewer.role]}
                         </Link>
                       </Button>
@@ -273,9 +264,7 @@ export default function NavigationBar({
                         asChild
                       >
                         <Link href="/student/appointment">
-                          <LinkPending>
-                            <CalendarCheck aria-hidden />
-                          </LinkPending>
+                          <CalendarCheck aria-hidden />
                           Book an appointment
                         </Link>
                       </Button>
@@ -285,9 +274,7 @@ export default function NavigationBar({
                         asChild
                       >
                         <Link href={ROLE_LOGIN.student}>
-                          <LinkPending>
-                            <LogIn aria-hidden />
-                          </LinkPending>
+                          <LogIn aria-hidden />
                           Log in
                         </Link>
                       </Button>

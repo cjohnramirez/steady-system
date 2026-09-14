@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CalendarPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LinkPending } from "@/components/app/link-pending";
 import { PageHeader } from "@/components/app/page-header";
 import { guardPage } from "@/lib/auth/session";
 import ProfileSection from "./_components/profile-section";
@@ -24,9 +23,7 @@ export default async function StudentPage() {
         actions={
           <Button asChild>
             <Link href="/student/appointment">
-              <LinkPending>
-                <CalendarPlus aria-hidden />
-              </LinkPending>
+              <CalendarPlus aria-hidden />
               Book an appointment
             </Link>
           </Button>

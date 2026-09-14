@@ -23,7 +23,7 @@ export default function AppointmentCard({
   appointment: AppointmentRow;
 }) {
   const [dialog, setDialog] = useState<"details" | "reschedule" | null>(null);
-  const { decide } = useAppointmentDecision();
+  const { decide, isPending } = useAppointmentDecision();
   const id = appointment.id!;
   const student =
     `${appointment.first_student_name ?? ""} ${appointment.last_student_name ?? ""}`.trim();
@@ -53,17 +53,26 @@ export default function AppointmentCard({
             <Button
               variant="outline"
               size="sm"
+              disabled={isPending}
               onClick={() => decide(id, "rejected")}
             >
               Decline
             </Button>
-            <Button size="sm" onClick={() => decide(id, "approved")}>
+            <Button
+              size="sm"
+              disabled={isPending}
+              onClick={() => decide(id, "approved")}
+            >
               Accept
             </Button>
           </>
         )}
         {appointment.status === "approved" && !isUpcoming && (
-          <Button size="sm" onClick={() => decide(id, "completed")}>
+          <Button
+            size="sm"
+            disabled={isPending}
+            onClick={() => decide(id, "completed")}
+          >
             Mark completed
           </Button>
         )}

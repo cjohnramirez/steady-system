@@ -16,6 +16,7 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import FormPasswordField from "@/components/form-password-field";
 import { FormSelectField } from "@/components/form-select-field";
@@ -235,9 +236,9 @@ export default function SignUpForm() {
                   <FormSelectField
                     field={field}
                     label="College"
-                    isLoading={colleges.isLoading}
-                    isError={colleges.isError}
-                    placeholder="Select a college"
+                    placeholder={
+                      colleges.isLoading ? "Loading…" : "Select a college"
+                    }
                     options={(colleges.data ?? []).map((college) => ({
                       value: college.id,
                       label: college.full_name || college.abbreviation,
@@ -250,9 +251,6 @@ export default function SignUpForm() {
                   <FormSelectField
                     field={field}
                     label="Department"
-                    isLoading={departments.isLoading}
-                    isError={departments.isError}
-                    emptyLabel="No departments in this college yet"
                     disabled={!collegeId}
                     placeholder={
                       collegeId
@@ -292,8 +290,6 @@ export default function SignUpForm() {
                 <FormSelectField
                   field={field}
                   label="How are you feeling lately?"
-                  isLoading={moods.isLoading}
-                  isError={moods.isError}
                   description="We use this to suggest articles and playlists. You can change it any time."
                   options={(moods.data ?? []).map((mood) => ({
                     value: mood.id,
@@ -446,7 +442,8 @@ export default function SignUpForm() {
           </FieldSet>
 
           <div className="flex flex-col gap-4">
-            <Button type="submit" size="lg" loading={isSubmitting}>
+            <Button type="submit" size="lg" disabled={isSubmitting}>
+              {isSubmitting && <Spinner />}
               {isSubmitting ? "Creating your account…" : "Create account"}
             </Button>
             <p className="text-muted-foreground text-center">
