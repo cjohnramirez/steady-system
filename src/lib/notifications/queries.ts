@@ -9,7 +9,7 @@ export type NotificationFeed = {
   unread: number;
 };
 
-const FEED_SIZE = 20;
+import { FEED_SIZE } from "./feed";
 
 /**
  * The latest notifications plus a separate unread count.

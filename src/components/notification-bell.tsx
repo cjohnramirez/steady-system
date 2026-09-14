@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Bell, BellOff, CalendarClock, Megaphone, X } from "lucide-react";
@@ -10,6 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/app/error-state";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { Notification } from "@/lib/notifications/queries";
 import { cn } from "@/lib/utils";
@@ -20,16 +22,34 @@ const ICONS = {
   system: Bell,
 } as const;
 
-export function NotificationBell({ userId }: { userId: string }) {
+/** Re-renders every minute so "2 minutes ago" doesn't freeze while the page is open. */
+function useMinuteTick() {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+}
+
+export function NotificationBell({
+  userId,
+  footer,
+}: {
+  userId: string;
+  /** Extra row under the list, e.g. the device-notifications prompt. */
+  footer?: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
   const { feed, markRead, markAllRead, remove } = useNotifications(userId);
   const unread = feed.data?.unread ?? 0;
   const items = feed.data?.items ?? [];
+  useMinuteTick();
 
   const label =
     unread > 0 ? `Notifications, ${unread} unread` : "Notifications";
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -62,7 +82,7 @@ export function NotificationBell({ userId }: { userId: string }) {
               variant="outline"
               size="sm"
               onClick={() => markAllRead.mutate()}
-              disabled={markAllRead.isPending}
+              loading={markAllRead.isPending}
             >
               Mark all as read
             </Button>
@@ -70,15 +90,17 @@ export function NotificationBell({ userId }: { userId: string }) {
         </div>
 
         {feed.isLoading ? (
-          <div className="space-y-3 p-4">
+          <div className="space-y-3 p-4" aria-busy>
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-14 w-full" />
             ))}
           </div>
         ) : feed.isError ? (
-          <p className="text-muted-foreground p-6 text-center">
-            Notifications could not be loaded.
-          </p>
+          <ErrorState
+            title="Notifications couldn't be loaded"
+            onRetry={() => feed.refetch()}
+            className="m-4 border-none p-6"
+          />
         ) : items.length === 0 ? (
           <div className="text-muted-foreground flex flex-col items-center gap-2 p-8 text-center">
             <BellOff aria-hidden strokeWidth={1.25} className="size-8" />
@@ -93,13 +115,21 @@ export function NotificationBell({ userId }: { userId: string }) {
                 <NotificationRow
                   key={item.id}
                   item={item}
-                  onOpen={() => !item.read_at && markRead.mutate(item.id)}
+                  removing={remove.isPending && remove.variables === item.id}
+                  onOpen={() => {
+                    if (!item.read_at) markRead.mutate(item.id);
+                    // Opening a notification moves on; the popover used to stay
+                    // open on top of the page it had just navigated to.
+                    if (item.link) setOpen(false);
+                  }}
                   onRemove={() => remove.mutate(item.id)}
                 />
               ))}
             </ul>
           </div>
         )}
+
+        {footer && <div className="shrink-0 border-t">{footer}</div>}
       </PopoverContent>
     </Popover>
   );
@@ -107,10 +137,12 @@ export function NotificationBell({ userId }: { userId: string }) {
 
 function NotificationRow({
   item,
+  removing,
   onOpen,
   onRemove,
 }: {
   item: Notification;
+  removing: boolean;
   onOpen: () => void;
   onRemove: () => void;
 }) {
@@ -153,7 +185,7 @@ function NotificationRow({
   );
 
   return (
-    <li className="group relative">
+    <li className={cn("group relative", removing && "opacity-60")}>
       {item.link ? (
         <Link href={item.link} className={rowClass} onClick={onOpen}>
           {body}
@@ -167,7 +199,10 @@ function NotificationRow({
         variant="ghost"
         size="icon-sm"
         aria-label={`Remove notification: ${item.title}`}
-        className="absolute top-2 right-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+        loading={removing}
+        // Hover-only hid the button from touch screens entirely; there it stays
+        // visible, and anywhere it shows while the row has keyboard focus.
+        className="absolute top-2 right-1 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 data-[loading]:opacity-100 [@media(pointer:coarse)]:opacity-100"
         onClick={onRemove}
       >
         <X />

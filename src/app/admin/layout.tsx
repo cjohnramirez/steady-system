@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { MonitorSmartphone } from "lucide-react";
 import NavigationBar from "./_components/navigation";
+import { LiveUpdates } from "@/components/live-updates";
 import { ViewerProvider } from "@/components/viewer-provider";
 import { guardPage } from "@/lib/auth/session";
 import { BRAND } from "@/lib/brand";
@@ -25,6 +26,7 @@ export default async function AdminLayout({
   return (
     <ViewerProvider viewer={viewer}>
       <NavigationBar />
+      <LiveUpdates />
       {/* The admin console is built for desktop. Below lg it says so instead of
           rendering tables and charts that cannot fit. */}
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-6 py-16 text-center lg:hidden">
