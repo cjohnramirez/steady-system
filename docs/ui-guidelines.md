@@ -95,6 +95,9 @@ of the old inconsistencies.
 | A card with title, description, actions | `SectionCard`                                     | `components/app/section-card`             |
 | Label/value pairs                       | `DetailList`                                      | `components/app/detail-list`              |
 | Nothing to show                         | `EmptyState`                                      | `components/app/empty-state`              |
+| Something failed to load                | `ErrorState`                                      | `components/app/error-state`              |
+| Photo inside a tile                     | `TileImage`                                       | `components/content/tile-image`           |
+| Link button that navigates              | `LinkPending` inside the `<Link>`                 | `components/app/link-pending`             |
 | Informational note or warning           | `InfoCallout`                                     | `components/app/info-callout`             |
 | Circle icon beside a title              | `IconBadge`                                       | `components/app/icon-badge`               |
 | Person photo or initials                | `UserAvatar`                                      | `components/app/user-avatar`              |
@@ -142,7 +145,16 @@ meaning isn't obvious).
 - Validate with a zod schema from `src/lib/validation`, and use the **same schema** in
   the server action. Limits must match the database constraints.
 - Validate on submit (and on blur for longer forms). Don't validate on every keystroke.
-- Submit buttons show a `Spinner` and are disabled while `isSubmitting`.
+- Anything that runs an action uses `<Button loading={isPending}>`: it disables the
+  button, sets `aria-busy` and swaps the leading icon for a spinner. Don't hand-roll
+  `{isPending && <Spinner />}`.
+- A `<Link>` styled as a button shows navigation with `LinkPending`
+  (`components/app/link-pending`), wrapping its icon:
+  `<LinkPending><CalendarPlus /></LinkPending>`.
+- Confirmations pass the work as `action`:
+  `confirm({ title, description, action: () => cancel(id) })`. The dialog keeps its
+  confirm button spinning and closes when the action settles. Report errors from inside
+  the action with a toast.
 - A dialog form: give the `<form>` an `id` and the footer button `form={id}`
   (`useId()` or a constant). Never guess the id.
 - Every dialog has `DialogTitle` **and** `DialogDescription`. Keep the default close
@@ -155,12 +167,47 @@ meaning isn't obvious).
 
 ## 8. Loading, empty and error states
 
-- Every route segment with data has a `loading.tsx` shaped like the page.
-- Lists show skeletons while loading, `EmptyState` when empty, and keep the previous
-  page visible while paging (`placeholderData: keepPreviousData`).
-- Failed loads toast automatically (see `QueryCache` in `app/providers.tsx`).
+Every piece of data has three states besides "loaded", and each must look different.
+A failed load must never look like an empty list or a zero.
+
+| State   | Show                                                                  |
+| ------- | --------------------------------------------------------------------- |
+| Loading | Skeletons in the shape of the content, same grid classes as the page  |
+| Empty   | `EmptyState` with what's missing and, where possible, the next action |
+| Error   | `ErrorState` (`components/app/error-state`) with `onRetry={refetch}`  |
+
+- **Routes:** every route segment that fetches on the server has a `loading.tsx`
+  shaped like the page (`home`, `portal`, `student`, `student/appointment`, …).
+- **Tables:** pass `isLoading`, `isFetching`, `isError`/`errorTitle`/`onRetry`,
+  `empty`, and `isFiltered`/`onClearFilters` to `DataTable`. Empty and error states
+  render below the scrolling table, so they fit a phone screen.
+- **Grids:** `ContentGrid` takes the same `isFetching`/`isError`/`onRetry`. While
+  refetching over previous data, lists dim (`opacity-60`) instead of flashing to
+  skeletons.
+- **Images in tiles:** use `TileImage` (`components/content/tile-image`), which pulses
+  until the photo loads and falls back to the placeholder.
+- **Selects fed by the database:** `FormSelectField` `isLoading`, `isError` and
+  `emptyLabel`.
+- **Numbers:** a stat whose query failed shows "–", never 0.
 - Mutations surface the server's message (`result.error`), not a generic sentence.
 - Full-page problems use `StatusScreen` (`not-found.tsx`, `error.tsx`, `/error`).
+- Check every new state at 390 px and 768 px, in light and dark.
+
+## 8a. Live updates and notifications
+
+- **Realtime:** subscribe through `useRealtimeChannel` (`hooks/use-realtime-channel`),
+  never `supabase.channel()` directly.
+  - It gives each mount its own channel; a reused topic silently stops receiving
+    events after a remount.
+  - It waits for the session before joining.
+  - It retries on errors and calls `onReady` to catch up after reconnecting.
+- **Appointment lists:** `LiveUpdates` (mounted in the student, counselor and admin
+  layouts) refreshes appointment lists, slots and the dashboard when appointments
+  change. Don't add per-page appointment subscriptions.
+- **Notifications:** only database triggers create them.
+  - The bell (`NotificationBell`) keeps them in sync across tabs.
+  - When permission is granted and the tab is in the background, it shows device
+    notifications through `public/sw.js`.
 
 ## 9. Responsive rules
 

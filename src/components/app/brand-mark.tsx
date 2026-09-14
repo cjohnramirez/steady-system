@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPending } from "@/components/app/link-pending";
 import { SteadyMark } from "@/components/app/steady-mark";
 import { BRAND } from "@/lib/brand";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,10 @@ export function BrandMark({
         className,
       )}
     >
-      <SteadyMark />
+      {/* While home loads, a spinner stands in for the mark. */}
+      <LinkPending className="text-brand size-9 p-2">
+        <SteadyMark />
+      </LinkPending>
       <span className="text-lg font-medium tracking-tight">{BRAND.name}</span>
     </Link>
   );

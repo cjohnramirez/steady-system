@@ -59,23 +59,24 @@ export function useContentEditor({
 
   async function remove(title: string) {
     if (!id) return;
-    const ok = await confirm({
+    const contentId = id;
+    await confirm({
       title: `Delete "${title}"?`,
       description: `It will disappear from the portal and home page. This can't be undone.`,
       confirmLabel: "Delete",
       destructive: true,
+      action: async () => {
+        const result = await deleteContent(table, contentId);
+        if (!result.ok) {
+          toast.error(result.error);
+          return;
+        }
+        await image.commit("");
+        await queryClient.invalidateQueries({ queryKey });
+        toast.success(`${noun} deleted.`);
+        onClose();
+      },
     });
-    if (!ok) return;
-
-    const result = await deleteContent(table, id);
-    if (!result.ok) {
-      toast.error(result.error);
-      return;
-    }
-    await image.commit("");
-    await queryClient.invalidateQueries({ queryKey });
-    toast.success(`${noun} deleted.`);
-    onClose();
   }
 
   return { image, submit, remove };

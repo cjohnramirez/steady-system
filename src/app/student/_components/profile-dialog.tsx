@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import { FormSelectField } from "@/components/form-select-field";
 import { InfoCallout } from "@/components/app/info-callout";
@@ -174,8 +173,7 @@ export default function ProfileDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} disabled={isSubmitting}>
-            {isSubmitting && <Spinner />}
+          <Button type="submit" form={formId} loading={isSubmitting}>
             Save changes
           </Button>
         </DialogFooter>

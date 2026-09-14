@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { TileImage } from "./tile-image";
 
 export type ContentMeta = { icon: LucideIcon; label: string };
 
@@ -38,12 +38,10 @@ export function ContentCard({
   const body = (
     <>
       <div className="bg-muted relative aspect-[16/10] overflow-hidden rounded-xl">
-        <Image
-          src={image || "/placeholder.png"}
-          alt=""
-          fill
+        <TileImage
+          src={image}
           sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          className="transition-[opacity,transform] group-hover:scale-[1.02]"
         />
         {eyebrow && (
           <span className="bg-card/95 absolute top-3 left-3 rounded-full border px-2.5 py-0.5 text-xs">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CalendarX } from "lucide-react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type {
   ColumnDef,
@@ -157,6 +158,21 @@ export default function AppointmentsView() {
         data={appointments.data?.data ?? []}
         rowCount={appointments.data?.count ?? 0}
         isLoading={appointments.isLoading}
+        isFetching={appointments.isFetching}
+        isError={appointments.isError}
+        errorTitle="Appointments couldn't be loaded"
+        onRetry={() => appointments.refetch()}
+        empty={{
+          title: "No appointments yet",
+          description: "Requests show up here as soon as students book.",
+          icon: CalendarX,
+        }}
+        isFiltered={status !== ALL || debouncedSearch.trim() !== ""}
+        onClearFilters={() => {
+          setStatus(ALL);
+          setSearch("");
+          setPagination((current) => ({ ...current, pageIndex: 0 }));
+        }}
         pagination={pagination}
         onPaginationChange={setPagination}
         sorting={sorting}

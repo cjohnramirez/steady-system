@@ -12,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { DetailList } from "@/components/app/detail-list";
 import { StatusBadge } from "@/components/app/status-badge";
@@ -119,8 +118,8 @@ export function AppointmentDetailsDialog({
             <Button
               onClick={saveNotes}
               disabled={isPending || notes === (appointment.notes ?? "")}
+              loading={isPending}
             >
-              {isPending && <Spinner />}
               Save notes
             </Button>
           )}
