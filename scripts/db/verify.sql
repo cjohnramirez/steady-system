@@ -130,6 +130,111 @@ begin
 end;
 $$;
 
+-- Appointment changes notify everyone involved except whoever made the change.
+-- Each block acts as a seeded user through JWT claims; the claims and every write
+-- roll back with the subtransaction.
+do $$
+declare
+  v_appt uuid; v_student uuid; v_counselor uuid;
+  v_s int; v_c int; v_detail text;
+begin
+  begin
+    select a.id, s.user_id, c.user_id into v_appt, v_student, v_counselor
+    from appointment a
+    join student s on s.id = a.student_id
+    join counselor c on c.id = a.counselor_id
+    where a.status in ('pending', 'approved') and a.scheduled_at > now()
+    limit 1;
+
+    perform set_config('request.jwt.claims', jsonb_build_object(
+      'sub', '44444444-4444-4444-4444-000000000001', 'role', 'authenticated')::text, true);
+    update appointment set status = 'cancelled' where id = v_appt;
+
+    select count(*) filter (where user_id = v_student), count(*) filter (where user_id = v_counselor)
+      into v_s, v_c
+    from notification
+    where title = 'Appointment cancelled' and created_at >= now();
+    raise exception 'rollback-check' using errcode = 'P0100';
+  exception
+    when sqlstate 'P0100' then v_detail := format('student %s, counselor %s', v_s, v_c);
+    when others then v_detail := sqlerrm;
+  end;
+  insert into verify_results values
+    ('an admin cancelling notifies the student and the counselor', v_s = 1 and v_c = 1, v_detail);
+end;
+$$;
+
+do $$
+declare
+  v_appt uuid; v_counselor uuid;
+  v_s int; v_c int; v_detail text;
+begin
+  begin
+    select a.id, c.user_id into v_appt, v_counselor
+    from appointment a
+    join student s on s.id = a.student_id
+    join counselor c on c.id = a.counselor_id
+    where s.user_id = '44444444-4444-4444-4444-000000000003'
+      and a.status in ('pending', 'approved') and a.scheduled_at > now()
+    limit 1;
+
+    perform set_config('request.jwt.claims', jsonb_build_object(
+      'sub', '44444444-4444-4444-4444-000000000003', 'role', 'authenticated')::text, true);
+    update appointment set status = 'cancelled' where id = v_appt;
+
+    select count(*) filter (where user_id = '44444444-4444-4444-4444-000000000003'),
+           count(*) filter (where user_id = v_counselor)
+      into v_s, v_c
+    from notification
+    where title = 'Appointment cancelled' and created_at >= now();
+    raise exception 'rollback-check' using errcode = 'P0100';
+  exception
+    when sqlstate 'P0100' then v_detail := format('student %s, counselor %s', v_s, v_c);
+    when others then v_detail := sqlerrm;
+  end;
+  insert into verify_results values
+    ('a student cancelling notifies only the counselor', v_s = 0 and v_c = 1, v_detail);
+end;
+$$;
+
+do $$
+declare
+  v_appt uuid; v_counselor_id uuid; v_student uuid; v_slot timestamptz;
+  v_moved int; v_total int; v_detail text;
+begin
+  begin
+    select a.id, a.counselor_id, s.user_id into v_appt, v_counselor_id, v_student
+    from appointment a join student s on s.id = a.student_id
+    where a.status = 'pending' and a.scheduled_at > now()
+    limit 1;
+
+    select slot into v_slot
+    from generate_series(1, 21) as d,
+         lateral get_available_slots(v_counselor_id, current_date + d) as slot
+    where slot > now()
+    limit 1;
+    if v_slot is null then
+      raise exception 'no free slot to move the appointment to';
+    end if;
+
+    perform set_config('request.jwt.claims', jsonb_build_object(
+      'sub', '44444444-4444-4444-4444-000000000001', 'role', 'authenticated')::text, true);
+    update appointment set status = 'approved', scheduled_at = v_slot where id = v_appt;
+
+    select count(*) filter (where title = 'Appointment moved and confirmed'), count(*)
+      into v_moved, v_total
+    from notification
+    where user_id = v_student and created_at >= now();
+    raise exception 'rollback-check' using errcode = 'P0100';
+  exception
+    when sqlstate 'P0100' then v_detail := format('%s combined of %s for the student', v_moved, v_total);
+    when others then v_detail := sqlerrm;
+  end;
+  insert into verify_results values
+    ('confirming at a new time sends one combined message', v_moved = 1 and v_total = 1, v_detail);
+end;
+$$;
+
 select pg_temp.run_check('signed-out visitors cannot bump the login counter', 'anon',
   $q$select increment_daily_login()$q$, 'refused');
 
