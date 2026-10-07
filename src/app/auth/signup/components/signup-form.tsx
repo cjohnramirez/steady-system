@@ -142,6 +142,9 @@ export default function SignUpForm() {
         onOpenChange={setConsentOpen}
         onAccept={() => {
           form.setFieldValue("consent", true);
+          // The form validates on blur, which a checkbox never fires: without
+          // re-validating, the "please accept" error stays after accepting.
+          void form.validateField("consent", "blur");
           setConsentOpen(false);
         }}
       />
@@ -416,9 +419,10 @@ export default function SignUpForm() {
                     <Checkbox
                       id={field.name}
                       checked={field.state.value === true}
-                      onCheckedChange={(checked) =>
-                        field.handleChange((checked === true) as true)
-                      }
+                      onCheckedChange={(checked) => {
+                        field.handleChange((checked === true) as true);
+                        field.handleBlur();
+                      }}
                       aria-invalid={invalid}
                     />
                     <div className="space-y-1">
