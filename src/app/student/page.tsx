@@ -1,55 +1,102 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { CalendarPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { LinkPending } from "@/components/app/link-pending";
-import { PageHeader } from "@/components/app/page-header";
 import { guardPage } from "@/lib/auth/session";
 import { createClient } from "@/utils/supabase/server";
-import { ActionPlanCard } from "@/components/student/action-plan-card";
-import ProfileSection from "./_components/profile-section";
-import MoodCard from "./_components/mood-card";
-import QuickLinks from "./_components/quick-links";
-import StudentAppointmentSection from "./_components/appointment-section";
+import { formatAppointmentDate, formatEventRange } from "@/lib/format";
+import { PageTransition } from "@/components/motion/primitives";
+import { StudentDashboardView } from "./_components/student-dashboard-view";
 
 export const metadata: Metadata = { title: "My dashboard" };
 
 export default async function StudentPage() {
-  // Cached per request, so this reuses the layout's lookup.
   const viewer = await guardPage("student");
   const supabase = await createClient();
-  const { data: actionItems } = await supabase
-    .from("action_item")
-    .select("id, title, is_completed, due_date")
-    .eq("student_id", viewer.profileId)
-    .order("created_at", { ascending: false })
-    .limit(8);
+
+  const [
+    { data: actionItems },
+    { data: nextAppointment },
+    { data: nextEvent },
+    { data: latestArticle },
+  ] = await Promise.all([
+    supabase
+      .from("action_item")
+      .select("id, title, is_completed, due_date")
+      .eq("student_id", viewer.profileId)
+      .order("created_at", { ascending: false })
+      .limit(6),
+    supabase
+      .from("appointment_with_details")
+      .select(
+        "id, first_counselor_name, last_counselor_name, scheduled_at, status",
+      )
+      .eq("student_id", viewer.profileId)
+      .in("status", ["approved", "pending"])
+      .order("scheduled_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("announcement")
+      .select(
+        "id, title, description, start_date, end_date, location, announcement_image",
+      )
+      .order("start_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("article")
+      .select("id, title, author_name, content, link, article_image")
+      .order("added_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  const upcomingSession =
+    nextAppointment?.id && nextAppointment.scheduled_at
+      ? {
+          id: nextAppointment.id,
+          counselorName:
+            `${nextAppointment.first_counselor_name ?? ""} ${nextAppointment.last_counselor_name ?? ""}`.trim() ||
+            "Your Counselor",
+          officeRoom: "Guidance Center, West Hall",
+          scheduledLabel: formatAppointmentDate(nextAppointment.scheduled_at),
+          durationMinutes: 45,
+        }
+      : null;
+
+  const featuredEvent = nextEvent
+    ? {
+        id: nextEvent.id,
+        title: nextEvent.title,
+        description: nextEvent.description,
+        dateLabel: formatEventRange(nextEvent.start_date, nextEvent.end_date),
+        location: nextEvent.location,
+        imageUrl: nextEvent.announcement_image || null,
+      }
+    : null;
+
+  const featuredArticle = latestArticle
+    ? {
+        id: latestArticle.id,
+        title: latestArticle.title,
+        author: latestArticle.author_name,
+        mood: viewer.emotionalStatus,
+        readMinutes: 5,
+        summary: latestArticle.content,
+        body: latestArticle.content.split(/\n{2,}/).filter(Boolean),
+        url: latestArticle.link || null,
+        imageUrl: latestArticle.article_image || null,
+      }
+    : null;
 
   return (
-    <div className="flex flex-col gap-6 md:gap-8">
-      <PageHeader
-        title={`Welcome, ${viewer.firstName}`}
-        description="Your profile, how you're feeling and your appointments, in one place."
-        actions={
-          <Button asChild>
-            <Link href="/student/appointment">
-              <LinkPending>
-                <CalendarPlus aria-hidden />
-              </LinkPending>
-              Book an appointment
-            </Link>
-          </Button>
-        }
+    <PageTransition>
+      <StudentDashboardView
+        firstName={viewer.firstName}
+        initialMood={viewer.emotionalStatus}
+        upcomingSession={upcomingSession}
+        initialActionItems={actionItems ?? []}
+        featuredEvent={featuredEvent}
+        featuredArticle={featuredArticle}
       />
-      <div className="grid gap-4 md:gap-6 xl:grid-cols-3">
-        <div className="flex flex-col gap-4 md:gap-6">
-          <MoodCard />
-          <QuickLinks />
-        </div>
-        <ProfileSection className="xl:col-span-2" />
-      </div>
-      <ActionPlanCard initialItems={actionItems ?? []} />
-      <StudentAppointmentSection />
-    </div>
+    </PageTransition>
   );
 }

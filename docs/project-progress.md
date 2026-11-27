@@ -68,8 +68,15 @@
 - [x] Upgraded `/student/appointment` (`booking-form.tsx`) to the 4-step `Stepper` wizard with `ReasonTile` grid and `CounselorDetailsDialog`.
 - [x] Upgraded `LoginTabs` (`src/app/auth/login/[role]/login-tabs.tsx`) to Figma's pill role switcher.
 
+### Milestone 8 — Figma 1:1 Full-Page Layouts & Admin RA 11036 Audit Ledger (Complete)
+
+- [x] Rebuilt **Student Dashboard** (`/student`, Figma `678:19256`) with peeking mascots hero, upcoming session bar, 2-column action plan grid, 4×2 expressive mood check-in cards, 4-7-8 breathing banner, and curated portal cards.
+- [x] Rebuilt **Counselor Daily Checking** (`/counselor`, Figma `678:17237`) with 3-column KPI strip (`Waiting | Upcoming | Completed`), chronological full-width session cards, live `SessionCard` integration, and `DossierDialog` triggers.
+- [x] Rebuilt **Counselor Analytics** (`/counselor/analytics`, Figma `678:17952`) with 3 KPI cards, horizontal `Top Student Concern Categories` bars, and vertical `Department Caseload Split` bars.
+- [x] Rebuilt **Admin Appointment Audit** (`/admin/appointments`, Figma `678:21461`) wired directly to `admin_appointment_audit` (`STU-••••XXXX`), with 5-tab `PillTabs`, custom Figma `Select`, `AuditMetadataDialog` (`687:1222`), and real CSV export.
+
 ---
 
 ## Upcoming Milestones
 
-- [ ] **Milestone 8 — Admin Audit View, Analytics & Full Responsive QA:** Wire `/admin/appointments` to `admin_appointment_audit` view with CSV export, add Counselor Analytics charts (`/counselor/analytics`), and verify `390px` / `768px` / `1440px` across Light & Dark modes.
+- [ ] **Milestone 9 — Public Landing, Portal & Auth Pages 1:1 with Figma + Final Production Release (`dev` → `main`)**: Align `/home` (`678:15853`), `/portal` (`678:16414`), and `/auth/*` (`678:16931`) to Figma, run responsive `390px`/`768px`/`1440px` Light/Dark QA, and promote `dev` → `main`.
