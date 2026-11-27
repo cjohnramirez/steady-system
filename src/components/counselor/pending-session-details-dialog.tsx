@@ -40,9 +40,9 @@ export function PendingSessionDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[588px]">
-        {/* Header Band (Figma 678:18366) */}
-        <div className="border-border border-b p-5 pr-12 text-left">
+      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[588px]">
+        {/* Static Header Band (Figma 678:18366) */}
+        <div className="border-border shrink-0 border-b p-5 pr-12 text-left">
           <DialogTitle className="text-[15px] font-medium">
             Pending Session Details
           </DialogTitle>
@@ -51,13 +51,13 @@ export function PendingSessionDetailsDialog({
           </DialogDescription>
         </div>
 
-        {/* White Body (Figma 678:18372) */}
-        <div className="space-y-5 p-5 text-left">
+        {/* Scrollable White Center Body (Figma 678:18372) */}
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 text-left">
           {/* Student + Scheduled At Card (Figma 678:18373) */}
           <div className="bg-card border-border shadow-steady-card flex flex-wrap items-center gap-6 rounded-[20px] border p-5">
             <UserAvatar
               name={session.studentName}
-              className="bg-positive text-positive-foreground size-[51px] shrink-0 rounded-[10px]"
+              className="size-[51px] shrink-0 rounded-[10px]"
             />
             <div className="flex flex-1 flex-wrap items-center justify-between gap-4">
               <div className="space-y-0.5">
@@ -110,8 +110,8 @@ export function PendingSessionDetailsDialog({
           </div>
         </div>
 
-        {/* Gray Footer Band (Figma 678:18403) */}
-        <div className="bg-muted/60 border-border flex flex-wrap items-center justify-between gap-3 border-t p-5">
+        {/* Static Gray Footer Band (Figma 678:18403) */}
+        <div className="bg-muted/60 border-border flex shrink-0 flex-wrap items-center justify-between gap-3 border-t p-5">
           <div className="flex items-center gap-2.5">
             <Button
               type="button"

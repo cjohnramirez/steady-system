@@ -23,9 +23,9 @@ export function CrisisSupportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[588px]">
-        {/* Header band (Figma 678:18315) */}
-        <div className="border-border flex items-start gap-5 border-b p-5 pr-12">
+      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[588px]">
+        {/* Static Header band (Figma 678:18315) */}
+        <div className="border-border flex shrink-0 items-start gap-5 border-b p-5 pr-12">
           <div className="bg-destructive/15 text-destructive flex size-[59px] shrink-0 items-center justify-center rounded-[14px]">
             <AlertTriangle className="size-7" aria-hidden />
           </div>
@@ -42,8 +42,8 @@ export function CrisisSupportDialog({
           </div>
         </div>
 
-        {/* 3 Horizontal Action Rows (Figma 678:18323 / 18334 / 18345) */}
-        <div className="divide-border/60 divide-y">
+        {/* Scrollable 3 Horizontal Action Rows (Figma 678:18323 / 18334 / 18345) */}
+        <div className="divide-border/60 min-h-0 flex-1 divide-y overflow-y-auto">
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-7">
             <div className="min-w-0 flex-1 space-y-1">
               <p className="text-[15px] font-medium">
@@ -99,8 +99,8 @@ export function CrisisSupportDialog({
           </div>
         </div>
 
-        {/* Footer band (Figma 678:18357) */}
-        <div className="bg-muted/60 border-border flex items-center justify-end border-t p-5">
+        {/* Static Footer band (Figma 678:18357) */}
+        <div className="bg-muted/60 border-border flex shrink-0 items-center justify-end border-t p-5">
           <Button
             type="button"
             variant="outline"
