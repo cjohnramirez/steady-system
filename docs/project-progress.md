@@ -41,6 +41,12 @@
 - [x] Created `/student/wellness` hub, wired live `ActionPlanCard` into `/student`, connected `DossierDialog` into `/counselor/students`, and wired live `updateDutyStatus` in the counselor sidebar.
 - [x] Exposed all new components on `/dev/components` and made `/dev/components` publicly accessible (no login required).
 
+### Milestone 5.5 — Figma 1:1 Layout Alignment Pass (Complete)
+
+- [x] Pulled exact Figma design context + screenshots for `CrisisDialog`, `WarmReferralDialog`, `DossierDialog`, `CounselorDetailsDialog`, `ArticleReaderDialog`, `BreathingDialog` (Default & Active), and `SessionCard` (Pending & Active SOAP/Action Plan).
+- [x] Realigned all 7 components to match Figma's exact 3-band dialog anatomy, hairline dividers, nested tray `SessionCard`, full-bleed blue `BreathingPacerDialog`, and interactive weekly calendar in `CounselorDetailsDialog`.
+- [x] Updated `/dev/components` for side-by-side visual verification.
+
 ---
 
 ## Upcoming Milestones

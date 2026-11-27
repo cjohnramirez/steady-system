@@ -1,12 +1,10 @@
 "use client";
 
-import { BookOpen, Clock, ExternalLink, Wind } from "lucide-react";
+import { Calendar, Eye, PenLine } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,13 +18,15 @@ export interface WellnessArticle {
   summary: string;
   body?: string[];
   url?: string | null;
+  imageUrl?: string | null;
+  lastReadLabel?: string;
+  writtenAgoLabel?: string;
 }
 
 export function ArticleReaderDialog({
   open,
   onOpenChange,
   article,
-  onOpenBreathing,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,62 +40,80 @@ export function ArticleReaderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader className="space-y-2 text-left">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-brand-subtle text-brand-subtle-foreground inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium">
-              <BookOpen className="size-3.5" />
-              {article.mood
-                ? `For when you feel ${article.mood}`
-                : "Wellness Reading"}
-            </span>
-            <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-              <Clock className="size-3.5" />
-              {article.readMinutes ?? 4} min read
-            </span>
-          </div>
-          <DialogTitle className="text-xl leading-snug">
+      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[640px]">
+        {/* Gray Header Band (Figma 688:1258) */}
+        <div className="bg-muted/60 border-border shrink-0 space-y-2 border-b p-5 pr-12 text-left">
+          <DialogTitle className="text-[20px] leading-snug font-medium">
             {article.title}
           </DialogTitle>
-          <DialogDescription>By {article.author}</DialogDescription>
-        </DialogHeader>
-
-        <article className="space-y-4 py-1 text-sm leading-7">
-          {paragraphs.map((para, index) => (
-            <p key={index} className="text-foreground/90">
-              {para}
-            </p>
-          ))}
-        </article>
-
-        <DialogFooter className="flex-wrap gap-2 sm:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {onOpenBreathing && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  onOpenChange(false);
-                  onOpenBreathing();
-                }}
-              >
-                <Wind className="text-primary size-4" />
-                Try 4-7-8 Breathing
-              </Button>
+          <DialogDescription className="sr-only">
+            Article written by {article.author}
+          </DialogDescription>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {article.mood && (
+              <span className="bg-card border-border shadow-steady-card inline-flex items-center justify-center rounded-[35px] border px-3.5 py-2 text-[14px]">
+                {article.mood}
+              </span>
             )}
-            {article.url && (
-              <Button variant="outline" size="sm" asChild>
-                <a href={article.url} target="_blank" rel="noopener noreferrer">
-                  Open full source
-                  <ExternalLink className="size-3.5" />
-                </a>
-              </Button>
-            )}
+            <span className="bg-card border-border shadow-steady-card inline-flex items-center gap-2 rounded-[35px] border px-3.5 py-2 text-[14px]">
+              <PenLine className="size-3.5 shrink-0" />
+              <span>Written by {article.author}</span>
+            </span>
           </div>
-          <Button variant="positive" onClick={() => onOpenChange(false)}>
-            Done reading
+        </div>
+
+        {/* Scrollable White Body (Figma 688:1263) */}
+        <div className="bg-card flex-1 overflow-y-auto p-5">
+          <div className="space-y-5">
+            {/* Cover Banner (Figma 702:27984, 217px rounded-[19px]) */}
+            <div className="bg-brand-subtle relative h-[217px] w-full overflow-hidden rounded-[19px]">
+              {article.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={article.imageUrl}
+                  alt={article.title}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <div className="from-primary/20 via-brand-subtle to-positive/15 flex size-full items-end bg-gradient-to-br p-5">
+                  <span className="bg-card/85 text-foreground rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm">
+                    {article.mood ?? "Steady Wellness Reading"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Meta Stack (Figma 702:27966) */}
+            <div className="text-muted-foreground space-y-1.5 text-[14px]">
+              <p className="flex items-center gap-2.5">
+                <Eye className="size-4 shrink-0" />
+                <span>{article.lastReadLabel ?? "Last Read Today"}</span>
+              </p>
+              <p className="flex items-center gap-2.5">
+                <Calendar className="size-4 shrink-0" />
+                <span>{article.writtenAgoLabel ?? "Curated by UGCS"}</span>
+              </p>
+            </div>
+
+            {/* Paragraphs (Figma 702:27979) */}
+            <article className="text-foreground space-y-4 text-[15px] leading-[1.5]">
+              {paragraphs.map((para, index) => (
+                <p key={index}>{para}</p>
+              ))}
+            </article>
+          </div>
+        </div>
+
+        {/* Gray Footer Band (Figma 688:1266) */}
+        <div className="bg-muted/60 border-border flex shrink-0 items-center justify-end border-t px-6 py-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
