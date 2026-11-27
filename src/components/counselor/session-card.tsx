@@ -181,7 +181,7 @@ export function SessionCard({
         <div className="flex flex-wrap items-center gap-5">
           <UserAvatar
             name={session.studentName}
-            className="bg-positive text-positive-foreground size-[51px] shrink-0 rounded-[10px]"
+            className="size-[51px] shrink-0 rounded-[10px]"
           />
           <div className="flex flex-wrap items-center gap-x-10 gap-y-2 text-[15px]">
             <div>

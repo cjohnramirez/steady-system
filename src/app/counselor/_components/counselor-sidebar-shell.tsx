@@ -15,6 +15,15 @@ import {
   type SidebarNavGroupDef,
 } from "@/components/app/role-sidebar";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 import { updateDutyStatus } from "@/lib/actions/clinical";
 import type { DUTY_STATUSES } from "@/lib/validation/clinical";
@@ -110,29 +119,42 @@ export function CounselorSidebarShell({
         groups={COUNSELOR_GROUPS}
         privacyLabel="Enable Desk Privacy"
         topSlot={
-          <div className="bg-card border-border shadow-steady-card flex items-center gap-2.5 rounded-[25px] border px-3.5 py-2">
-            <span
-              aria-hidden
-              className={`size-2.5 shrink-0 rounded-full ${currentDuty.dot}`}
-            />
-            <select
+          <Select
+            value={duty}
+            disabled={isPending}
+            onValueChange={(value) =>
+              handleDutyChange(value as (typeof DUTY_STATUSES)[number])
+            }
+          >
+            <SelectTrigger
               aria-label="Counselor duty status"
-              value={duty}
-              disabled={isPending}
-              onChange={(e) =>
-                handleDutyChange(
-                  e.target.value as (typeof DUTY_STATUSES)[number],
-                )
-              }
-              className="w-full cursor-pointer bg-transparent text-sm outline-none disabled:opacity-60"
+              className="w-full"
             >
-              {DUTY_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
+              <span className="flex items-center gap-2.5 truncate">
+                <span
+                  aria-hidden
+                  className={`size-2.5 shrink-0 rounded-full ${currentDuty.dot}`}
+                />
+                <SelectValue />
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Duty Status</SelectLabel>
+                {DUTY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    <span className="flex items-center gap-2.5">
+                      <span
+                        aria-hidden
+                        className={`size-2.5 shrink-0 rounded-full ${opt.dot}`}
+                      />
+                      <span>{opt.label}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         }
         footerSlot={
           <Button
