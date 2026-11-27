@@ -17,6 +17,8 @@ import { LinkPending } from "@/components/app/link-pending";
 import { createClient } from "@/utils/supabase/server";
 import { formatEventRange } from "@/lib/format";
 import { CAMPUS_ADDRESS } from "@/lib/organization/address";
+import { BRAND } from "@/lib/brand";
+import { clientEnv } from "@/lib/env/client";
 import hero from "@/assets/hero.jpg";
 import { AboutMosaic } from "./_components/about-mosaic";
 import { TileImage } from "@/components/content/tile-image";
@@ -97,8 +99,22 @@ export default async function HomePage() {
       .limit(3),
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: BRAND.name,
+    description: BRAND.description,
+    url: clientEnv.NEXT_PUBLIC_APP_URL,
+    applicationCategory: "EducationalApplication",
+    operatingSystem: "Web",
+  };
+
   return (
     <div className="flex flex-col gap-24 pb-24 md:gap-32">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section
         id="home"
