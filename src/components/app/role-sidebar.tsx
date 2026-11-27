@@ -114,7 +114,7 @@ export function RoleSidebarShell({
           {groups.map((group) => (
             <div key={group.title} className="flex flex-col gap-2.5">
               {!isCompact && (
-                <p className="text-muted-foreground px-3 text-xs font-medium tracking-wide uppercase">
+                <p className="text-muted-foreground px-3 text-[15px] font-normal">
                   {group.title}
                 </p>
               )}
@@ -145,6 +145,7 @@ export function RoleSidebarShell({
                         )}
                         <Icon
                           aria-hidden
+                          strokeWidth={1.5}
                           className="relative z-10 size-4 shrink-0"
                         />
                         {!isCompact && (

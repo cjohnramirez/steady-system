@@ -1,37 +1,22 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import {
-  BookOpen,
-  CalendarDays,
-  CalendarPlus,
-  ClipboardList,
-  Home,
-  ShieldAlert,
-  UserCircle,
-  Wind,
-} from "lucide-react";
-import dynamic from "next/dynamic";
+import type { ReactNode } from "react";
+import { BookOpen, CalendarPlus, ClipboardList, Home } from "lucide-react";
 import {
   RoleSidebarShell,
   type SidebarNavGroupDef,
 } from "@/components/app/role-sidebar";
-import { Button } from "@/components/ui/button";
-import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 
-const BreathingPacerDialog = dynamic(
-  () =>
-    import("@/components/student/breathing-pacer-dialog").then(
-      (mod) => mod.BreathingPacerDialog,
-    ),
-  { ssr: false },
-);
-
+/**
+ * Strictly matches Figma Student Sidebar (678:19256 / 482:892):
+ * Personal Space -> Dashboard, Book a Session, My Appointments
+ * Self-Care and Resources -> Wellness and Audio
+ */
 const STUDENT_GROUPS: readonly SidebarNavGroupDef[] = [
   {
     title: "Personal Space",
     items: [
-      { href: "/student", label: "Sanctuary Home", icon: Home, exact: true },
+      { href: "/student", label: "Dashboard", icon: Home, exact: true },
       {
         href: "/student/appointment",
         label: "Book a Session",
@@ -45,15 +30,13 @@ const STUDENT_GROUPS: readonly SidebarNavGroupDef[] = [
     ],
   },
   {
-    title: "Self-Care & Resources",
+    title: "Self-Care and Resources",
     items: [
-      { href: "/student/wellness", label: "Wellness & Audio", icon: BookOpen },
       {
-        href: "/student/profile",
-        label: "Profile & Contacts",
-        icon: UserCircle,
+        href: "/student/wellness",
+        label: "Wellness and Audio",
+        icon: BookOpen,
       },
-      { href: "/portal", label: "Public Portal", icon: CalendarDays },
     ],
   },
 ];
@@ -71,54 +54,17 @@ export function StudentSidebarShell({
   userAvatar?: string | null;
   children: ReactNode;
 }) {
-  const [breathingOpen, setBreathingOpen] = useState(false);
-  const [crisisOpen, setCrisisOpen] = useState(false);
-
   return (
-    <>
-      <RoleSidebarShell
-        roleLabel="Student"
-        userId={userId}
-        userName={userName}
-        userSubtitle={userSubtitle}
-        userAvatar={userAvatar}
-        groups={STUDENT_GROUPS}
-        privacyLabel="Enable Campus Privacy"
-        footerSlot={
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => setBreathingOpen(true)}
-            >
-              <Wind className="text-primary size-4" />
-              4-7-8 Breathing Pacer
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="w-full justify-start"
-              onClick={() => setCrisisOpen(true)}
-            >
-              <ShieldAlert className="size-4" />
-              Immediate Help
-            </Button>
-          </div>
-        }
-      >
-        {children}
-      </RoleSidebarShell>
-
-      <BreathingPacerDialog
-        open={breathingOpen}
-        onOpenChange={setBreathingOpen}
-      />
-      <CrisisSupportDialog
-        open={crisisOpen}
-        onOpenChange={setCrisisOpen}
-        role="student"
-      />
-    </>
+    <RoleSidebarShell
+      roleLabel="Student"
+      userId={userId}
+      userName={userName}
+      userSubtitle={userSubtitle}
+      userAvatar={userAvatar}
+      groups={STUDENT_GROUPS}
+      privacyLabel="Enable Campus Privacy"
+    >
+      {children}
+    </RoleSidebarShell>
   );
 }

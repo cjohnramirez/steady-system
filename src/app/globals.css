@@ -71,6 +71,7 @@
  */
 :root {
   --radius: 1.25rem; /* 20px card/dialog base */
+  --radius-label: 1.1875rem; /* 19px universal pill label */
 
   /* Brand & Action Palette — swap these 4 lines to change the entire app palette */
   --brand: #2b7fff;
@@ -86,6 +87,16 @@
   --destructive-foreground: #ffffff;
   --warning: #ff6900;
   --warning-foreground: #ffffff;
+
+  /* Emotion Mascot Orbs (Figma 678:19349–19440) */
+  --emotion-anxious: #ffb86a;
+  --emotion-overwhelmed: #ff6467;
+  --emotion-exhausted: #2b7fff;
+  --emotion-stressed: #00bba7;
+  --emotion-calm: #00bc7d;
+  --emotion-hopeful: #8e51ff;
+  --emotion-lonely: #fb64b6;
+  --emotion-reflective: #7f22fe;
 
   /* Neutrals */
   --background: #f3f4f6;
@@ -219,6 +230,25 @@
 
 .shadow-steady-pill {
   box-shadow: var(--shadow-steady-pill);
+}
+
+/* Figma 756:1562 — Subtle dot grid with vertical white/card linear gradient fade */
+.bg-steady-dot-grid {
+  background-color: var(--card);
+  background-image:
+    linear-gradient(
+      180deg,
+      var(--card) 0%,
+      color-mix(in srgb, var(--card) 0%, transparent) 100%
+    ),
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--foreground) 14%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    100% 100%,
+    18px 18px;
 }
 
 .shadow-steady-card {

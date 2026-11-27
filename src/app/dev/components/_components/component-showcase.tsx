@@ -31,7 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/app/section-card";
-import { SteadyMascot } from "@/components/app/steady-mascot";
+import {
+  SteadyMascot,
+  type MascotEmotion,
+} from "@/components/app/steady-mascot";
+import { SteadyLabel } from "@/components/app/steady-label";
+import { CircleArrowButton } from "@/components/app/circle-arrow-button";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { StatusBadge, UrgencyBadge } from "@/components/app/status-badge";
 import { PillTabs } from "@/components/app/pill-tabs";
@@ -173,6 +178,61 @@ export function ComponentShowcase() {
             </div>
           </SectionCard>
         </div>
+
+        {/* Tier 0b: Universal Labels, Circle Arrow & 8 Emotion Mascots */}
+        <SectionCard
+          title="0b. Steady Labels (678:19314), Circle Arrow (678:19489) & Emotion Mascots"
+          description="Non-interactive pill labels (no hover animation), universal 1.5px stroke icons, and all 8 Figma emotion mascots on the dot-grid gradient surface."
+          className="bg-steady-dot-grid"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <SteadyLabel size="md" progress={25}>
+              25% Complete
+            </SteadyLabel>
+            <SteadyLabel icon={BookOpen}>Featured Article</SteadyLabel>
+            <SteadyLabel icon={UserCheck}>Written By Dr. Lee</SteadyLabel>
+            <SteadyLabel variant="brand">Currently Selected Calm</SteadyLabel>
+            <SteadyLabel variant="positive">Confirmed</SteadyLabel>
+            <SteadyLabel variant="warning">Waiting</SteadyLabel>
+            <CircleArrowButton
+              href="/dev/components"
+              ariaLabel="Open Preview"
+            />
+          </div>
+
+          <div className="grid gap-3 pt-2 sm:grid-cols-4 lg:grid-cols-8">
+            {(
+              [
+                "anxious",
+                "overwhelmed",
+                "exhausted",
+                "stressed",
+                "calm",
+                "hopeful",
+                "lonely",
+                "reflective",
+              ] as Exclude<MascotEmotion, "default">[]
+            ).map((emotion) => (
+              <div
+                key={emotion}
+                className="bg-steady-dot-grid border-border shadow-steady-card flex flex-col items-center gap-2 rounded-[16px] border p-3"
+              >
+                <div className="size-[88px]">
+                  <SteadyMascot
+                    variant="orb"
+                    emotion={emotion}
+                    blink={false}
+                    proximityRadius={180}
+                    aria-label={`${emotion} Mascot`}
+                  />
+                </div>
+                <span className="text-xs font-medium capitalize">
+                  {emotion}
+                </span>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
 
         {/* Tier 1: Buttons */}
         <SectionCard

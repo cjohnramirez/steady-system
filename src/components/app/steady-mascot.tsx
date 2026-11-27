@@ -4,33 +4,253 @@ import { useEffect, useId, useRef, useState } from "react";
 import { m, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+export type MascotEmotion =
+  | "default"
+  | "anxious"
+  | "overwhelmed"
+  | "exhausted"
+  | "stressed"
+  | "calm"
+  | "hopeful"
+  | "lonely"
+  | "reflective";
+
+export type MascotEyeAnchor = "tl" | "tr" | "bl" | "br" | "center";
+
 export interface SteadyMascotProps {
-  /** Color tone: default brand blue (#2b7fff) matching Figma 678:17585. */
+  /** Color tone when emotion is "default" (brand blue #2b7fff by default). */
   tone?: "blue" | "emerald";
+  /** Emotion expression & color matching Figma 678:19349–19440. */
+  emotion?: MascotEmotion;
+  /** "avatar" renders inside a colored square frame; "orb" renders the circular mascot orb directly. */
+  variant?: "avatar" | "orb";
+  /** Places the eyes in one of the 4 quadrants (tl, tr, bl, br) or center. */
+  eyeAnchor?: MascotEyeAnchor;
   /** Cursor tracking activation radius in px. Set 0 to disable. */
   proximityRadius?: number;
-  /** Enable natural blinking animation. */
+  /** Enable natural blinking (automatically disabled for non-default emotions). */
   blink?: boolean;
   className?: string;
   "aria-label"?: string;
 }
 
+const EYE_ANCHOR_OFFSET: Record<MascotEyeAnchor, { x: number; y: number }> = {
+  tr: { x: 0, y: 0 },
+  tl: { x: -13, y: 0 },
+  bl: { x: -13, y: 12 },
+  br: { x: 0, y: 12 },
+  center: { x: -6.5, y: 6 },
+};
+
+const EMOTION_FILL: Record<Exclude<MascotEmotion, "default">, string> = {
+  anxious: "var(--emotion-anxious)",
+  overwhelmed: "var(--emotion-overwhelmed)",
+  exhausted: "var(--emotion-exhausted)",
+  stressed: "var(--emotion-stressed)",
+  calm: "var(--emotion-calm)",
+  hopeful: "var(--emotion-hopeful)",
+  lonely: "var(--emotion-lonely)",
+  reflective: "var(--emotion-reflective)",
+};
+
+function renderEmotionEyes(emotion: MascotEmotion) {
+  switch (emotion) {
+    case "anxious":
+      return (
+        <>
+          <rect
+            x="16.5"
+            y="18"
+            width="4.6"
+            height="12.5"
+            rx="2.3"
+            transform="rotate(20 18.8 24.2)"
+            fill="white"
+          />
+          <rect
+            x="27.5"
+            y="18"
+            width="4.6"
+            height="12.5"
+            rx="2.3"
+            transform="rotate(-18 29.8 24.2)"
+            fill="white"
+          />
+        </>
+      );
+    case "overwhelmed":
+      return (
+        <>
+          <rect
+            x="15.5"
+            y="20"
+            width="10.5"
+            height="4.8"
+            rx="2.4"
+            transform="rotate(34 20.7 22.4)"
+            fill="white"
+          />
+          <rect
+            x="27.5"
+            y="20"
+            width="10.5"
+            height="4.8"
+            rx="2.4"
+            transform="rotate(-34 32.7 22.4)"
+            fill="white"
+          />
+        </>
+      );
+    case "exhausted":
+      return (
+        <>
+          <rect
+            x="14.5"
+            y="24"
+            width="10.5"
+            height="3.4"
+            rx="1.7"
+            transform="rotate(18 19.7 25.7)"
+            fill="white"
+          />
+          <rect
+            x="27"
+            y="27"
+            width="10.5"
+            height="3.4"
+            rx="1.7"
+            transform="rotate(18 32.2 28.7)"
+            fill="white"
+          />
+        </>
+      );
+    case "stressed":
+      return (
+        <>
+          <rect
+            x="17"
+            y="21"
+            width="4.8"
+            height="12"
+            rx="2.4"
+            transform="rotate(-24 19.4 27)"
+            fill="white"
+          />
+          <rect
+            x="28"
+            y="21"
+            width="4.8"
+            height="12"
+            rx="2.4"
+            transform="rotate(24 30.4 27)"
+            fill="white"
+          />
+        </>
+      );
+    case "calm":
+      return (
+        <>
+          <path
+            d="M15 27.5C15 23.5 23.5 23.5 23.5 27.5"
+            stroke="white"
+            strokeWidth="4.2"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M28.5 27.5C28.5 23.5 37 23.5 37 27.5"
+            stroke="white"
+            strokeWidth="4.2"
+            strokeLinecap="round"
+            fill="none"
+          />
+        </>
+      );
+    case "hopeful":
+      return (
+        <>
+          <rect
+            x="17.5"
+            y="18.5"
+            width="5.6"
+            height="13.5"
+            rx="2.8"
+            transform="rotate(34 20.3 25.2)"
+            fill="white"
+          />
+          <rect
+            x="26.5"
+            y="22.5"
+            width="5.6"
+            height="13.5"
+            rx="2.8"
+            transform="rotate(34 29.3 29.2)"
+            fill="white"
+          />
+        </>
+      );
+    case "lonely":
+      return (
+        <>
+          <rect x="17" y="25" width="4.4" height="7" rx="2.2" fill="white" />
+          <rect x="24" y="25.5" width="4.4" height="7" rx="2.2" fill="white" />
+        </>
+      );
+    case "reflective":
+      return (
+        <>
+          <rect x="19" y="21" width="4.8" height="12" rx="2.4" fill="white" />
+          <rect x="33" y="21" width="4.8" height="12" rx="2.4" fill="white" />
+        </>
+      );
+    default:
+      return (
+        <>
+          <rect
+            x="26.54"
+            y="14.10"
+            width="5.06"
+            height="11.25"
+            rx="2.53"
+            transform="rotate(-9.91 26.54 14.10)"
+            fill="white"
+          />
+          <rect
+            x="34.97"
+            y="12.41"
+            width="5.06"
+            height="11.25"
+            rx="2.53"
+            transform="rotate(-9.91 34.97 12.41)"
+            fill="white"
+          />
+        </>
+      );
+  }
+}
+
 /**
- * Interactive Steady Brand Mascot (Figma 678:17585 / Frame 35).
- * Features natural eye blinking and smooth cursor-proximity eye/orb tracking.
+ * Interactive Steady Brand Mascot (Figma 678:17585 & Emotion Set 678:19349–19440).
+ * Supports 4-direction eye anchoring (tl, tr, bl, br), natural blinking (default only),
+ * and cursor-proximity tracking.
  */
 export function SteadyMascot({
   tone = "blue",
-  proximityRadius = 260,
+  emotion = "default",
+  variant = "avatar",
+  eyeAnchor,
+  proximityRadius = 240,
   blink = true,
   className,
-  "aria-label": ariaLabel = "Steady mascot",
+  "aria-label": ariaLabel = "Steady Mascot",
 }: SteadyMascotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const filterId = useId();
   const prefersReduced = useReducedMotion();
   const [gaze, setGaze] = useState({ x: 0, y: 0 });
   const [isBlinking, setIsBlinking] = useState(false);
+
+  const shouldBlink = blink && emotion === "default" && !prefersReduced;
 
   // Proximity-based cursor tracking
   useEffect(() => {
@@ -58,11 +278,8 @@ export function SteadyMascot({
           return;
         }
 
-        // Smooth strength curve: strongest near the mascot, fades to 0 at radius edge
         const strength = 1 - dist / proximityRadius;
-        const nx = (dx / dist) * strength;
-        const ny = (dy / dist) * strength;
-        setGaze({ x: nx, y: ny });
+        setGaze({ x: (dx / dist) * strength, y: (dy / dist) * strength });
       });
     }
 
@@ -79,9 +296,9 @@ export function SteadyMascot({
     };
   }, [prefersReduced, proximityRadius]);
 
-  // Natural periodic blinking
+  // Natural periodic blinking (default mascot only)
   useEffect(() => {
-    if (prefersReduced || !blink) return;
+    if (!shouldBlink) return;
 
     let openTimer = 0;
     let nextTimer = 0;
@@ -102,9 +319,32 @@ export function SteadyMascot({
       window.clearTimeout(nextTimer);
       window.clearTimeout(openTimer);
     };
-  }, [prefersReduced, blink]);
+  }, [shouldBlink]);
 
-  const orbFill = tone === "emerald" ? "#34d399" : "#51a2ff";
+  const isOrb = variant === "orb";
+
+  const orbFill =
+    emotion !== "default"
+      ? EMOTION_FILL[emotion]
+      : isOrb
+        ? tone === "emerald"
+          ? "var(--positive)"
+          : "var(--brand)"
+        : tone === "emerald"
+          ? "#34d399"
+          : "#51a2ff";
+
+  const resolvedAnchor: MascotEyeAnchor =
+    eyeAnchor ?? (emotion === "default" ? "tr" : "center");
+  const baseEye =
+    emotion === "default"
+      ? EYE_ANCHOR_OFFSET[resolvedAnchor]
+      : resolvedAnchor === "center"
+        ? { x: 0, y: 0 }
+        : {
+            x: resolvedAnchor.includes("l") ? -6 : 6,
+            y: resolvedAnchor.includes("t") ? -6 : 6,
+          };
 
   return (
     <div
@@ -112,29 +352,38 @@ export function SteadyMascot({
       role="img"
       aria-label={ariaLabel}
       className={cn(
-        "relative flex size-full items-center justify-center overflow-hidden select-none",
-        tone === "emerald" ? "bg-positive" : "bg-primary",
+        "relative flex size-full items-center justify-center select-none",
+        isOrb
+          ? "overflow-visible"
+          : cn(
+              "overflow-hidden",
+              tone === "emerald" ? "bg-positive" : "bg-primary",
+            ),
         className,
       )}
     >
       <m.svg
-        viewBox="0 0 53.16 53.16"
-        className="pointer-events-none absolute top-[4%] -left-[32%] size-[134%]"
+        viewBox={isOrb ? "-5 -5 63.16 63.16" : "0 0 53.16 53.16"}
+        overflow="visible"
+        className={cn(
+          "pointer-events-none",
+          isOrb ? "size-full" : "absolute top-[2%] -left-[34%] size-[144%]",
+        )}
         animate={{
-          x: gaze.x * 3.5,
-          y: gaze.y * 3.5,
-          rotate: -24.73 + gaze.x * 4,
+          x: gaze.x * (isOrb ? 2 : 1.5),
+          y: gaze.y * (isOrb ? 2 : 1.5),
+          rotate: isOrb ? gaze.x * 2.5 : -24.73 + gaze.x * 2.5,
         }}
         transition={{ type: "spring", stiffness: 260, damping: 24, mass: 0.6 }}
       >
         <defs>
           <filter
             id={filterId}
-            x="0"
-            y="0"
-            width="57.16"
-            height="57.16"
-            filterUnits="userSpaceOnUse"
+            x="-20%"
+            y="-20%"
+            width="140%"
+            height="140%"
+            filterUnits="objectBoundingBox"
             colorInterpolationFilters="sRGB"
           >
             <feFlood floodOpacity="0" result="BackgroundImageFix" />
@@ -169,38 +418,25 @@ export function SteadyMascot({
           <circle cx="26.58" cy="26.58" r="26.58" fill={orbFill} />
         </g>
 
-        {/* Eyes group: subtle parallax + natural blink */}
         <m.g
           animate={{
-            x: gaze.x * 4.5,
-            y: gaze.y * 4.5,
+            x: baseEye.x + gaze.x * 4,
+            y: baseEye.y + gaze.y * 4,
             scaleY: isBlinking ? 0.1 : 1,
           }}
-          style={{ transformOrigin: "33px 19px" }}
+          style={{
+            transformOrigin:
+              emotion === "default"
+                ? `${33 + baseEye.x}px ${19 + baseEye.y}px`
+                : `${26 + baseEye.x}px ${25 + baseEye.y}px`,
+          }}
           transition={
             isBlinking
               ? { duration: 0.08, ease: "easeInOut" }
               : { type: "spring", stiffness: 320, damping: 22 }
           }
         >
-          <rect
-            x="26.54"
-            y="14.10"
-            width="5.06"
-            height="11.25"
-            rx="2.53"
-            transform="rotate(-9.91 26.54 14.10)"
-            fill="white"
-          />
-          <rect
-            x="34.97"
-            y="12.41"
-            width="5.06"
-            height="11.25"
-            rx="2.53"
-            transform="rotate(-9.91 34.97 12.41)"
-            fill="white"
-          />
+          {renderEmotionEyes(emotion)}
         </m.g>
       </m.svg>
     </div>

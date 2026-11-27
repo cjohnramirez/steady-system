@@ -35,7 +35,7 @@ export function PillTabs<T extends string>({
       role="tablist"
       aria-label={ariaLabel}
       className={cn(
-        "bg-card border-border shadow-steady-card inline-flex max-w-full flex-wrap items-center gap-1 rounded-[30px] border p-1",
+        "bg-card border-border shadow-steady-card inline-flex min-h-12 max-w-full flex-wrap items-center gap-1 rounded-[30px] border p-1",
         className,
       )}
     >
@@ -49,7 +49,7 @@ export function PillTabs<T extends string>({
             aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={cn(
-              "focus-visible:ring-ring/50 relative inline-flex cursor-pointer items-center gap-2 rounded-[30px] px-4 py-2 text-sm font-medium transition-colors outline-none focus-visible:ring-2",
+              "focus-visible:ring-ring/50 relative inline-flex h-10 cursor-pointer items-center gap-2 rounded-[25px] px-4 text-[14px] font-medium transition-colors outline-none focus-visible:ring-2",
               active
                 ? "text-primary-foreground"
                 : "text-foreground hover:text-primary",
