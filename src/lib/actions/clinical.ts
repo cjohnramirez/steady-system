@@ -9,9 +9,11 @@ import {
   actionItemCreateSchema,
   clinicalNoteUpsertSchema,
   DUTY_STATUSES,
+  manualBookingSchema,
   warmReferralCreateSchema,
   type ActionItemCreateInput,
   type ClinicalNoteUpsertInput,
+  type ManualBookingInput,
   type WarmReferralCreateInput,
 } from "@/lib/validation/clinical";
 
@@ -197,6 +199,40 @@ export async function updateDutyStatus(
 
     revalidatePath("/counselor");
     return ok({ duty_status: parsed });
+  } catch (err) {
+    return fail(toErrorMessage(err));
+  }
+}
+
+export async function createManualBooking(
+  input: ManualBookingInput,
+): Promise<Result<{ id: string }>> {
+  try {
+    const { supabase, counselorId } = await requireCounselorProfileId();
+    const parsed = manualBookingSchema.parse(input);
+
+    const { data, error } = await supabase
+      .from("appointment")
+      .insert({
+        student_id: parsed.student_id,
+        counselor_id: counselorId,
+        scheduled_at: parsed.scheduled_at,
+        duration_minutes: parsed.duration_minutes,
+        urgency: parsed.urgency,
+        reason: parsed.reason,
+        status: "approved",
+        created_by_role: "counselor",
+      })
+      .select("id")
+      .single();
+
+    if (error) return fail(toErrorMessage(error));
+
+    revalidatePath("/counselor");
+    revalidatePath("/counselor/appointments");
+    revalidatePath("/student");
+    revalidatePath("/student/appointments");
+    return ok({ id: data.id });
   } catch (err) {
     return fail(toErrorMessage(err));
   }

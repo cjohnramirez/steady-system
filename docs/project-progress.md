@@ -47,10 +47,17 @@
 - [x] Realigned all 7 components to match Figma's exact 3-band dialog anatomy, hairline dividers, nested tray `SessionCard`, full-bleed blue `BreathingPacerDialog`, and interactive weekly calendar in `CounselorDetailsDialog`.
 - [x] Updated `/dev/components` for side-by-side visual verification.
 
+### Milestone 6 — Counselor Proposed Booking, Session Details & Confirm Dialogs (Complete)
+
+- [x] Added RLS-enforced `createManualBooking` server action in `src/lib/actions/clinical.ts`.
+- [x] Built `ProposedBookingDialog` (`678:18530`) and `PendingSessionDetailsDialog` (`678:18365`) 1:1 with Figma.
+- [x] Aligned `ConfirmDialog` to Figma `ApproveDialog` (`678:19057`) & `DeclineDialog` (`678:19078`).
+- [x] Wired live `ProposeBookingTrigger` into `/counselor` and exposed both new dialogs on `/dev/components`.
+
 ---
 
 ## Upcoming Milestones
 
-- [ ] **Milestone 6 — Counselor Daily Horizon & Live Session Wiring:** Connect `SessionCard` SOAP/SAP form, live timer, and `WarmReferralDialog` directly to `saveClinicalNote` and `createWarmReferral` on `/counselor`, plus manual/proposed booking modal on `/counselor/appointments`.
-- [ ] **Milestone 7 — Student 4-Step Booking Wizard & Auth Polish:** Upgrade `/student/appointment` to the 4-step `Stepper` wizard with `CounselorDetailsDialog`, and polish `/auth/login/[role]` & `/auth/signup/student` with animated transitions.
+- [ ] **Milestone 6.5 — Brand Logos & Animated Mascot (Deliberation Required):** Extract exact Figma logos and mascot SVG/artwork, add to `/dev/components`, and deliberate deeply on mascot animations (idle breathing/bobbing, mood-reactive expressions, hover interactions, reduced-motion fallbacks).
+- [ ] **Milestone 7 — Student 4-Step Booking Wizard & Auth Polish:** Upgrade `/student/appointment` to the 4-step `Stepper` wizard with `CounselorDetailsDialog` & `ReasonTile`, and polish `/auth/login/[role]` & `/auth/signup/student` 1:1 with Figma.
 - [ ] **Milestone 8 — Admin Audit View, Analytics & Full Responsive QA:** Wire `/admin/appointments` to `admin_appointment_audit` view with CSV export, add Counselor Analytics charts (`/counselor/analytics`), and verify `390px` / `768px` / `1440px` across Light & Dark modes.
