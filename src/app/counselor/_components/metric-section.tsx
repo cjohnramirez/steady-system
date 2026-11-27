@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/app/section-card";
 import { useSignedInViewer } from "@/components/viewer-provider";
 import { createClient } from "@/utils/supabase/client";
@@ -31,7 +32,22 @@ export default function MetricSection() {
   ];
 
   return (
-    <SectionCard title="At a glance">
+    <SectionCard
+      title="At a glance"
+      description={counts.isError ? "Counts couldn't be loaded." : undefined}
+      actions={
+        counts.isError && (
+          <Button
+            variant="outline"
+            size="sm"
+            loading={counts.isFetching}
+            onClick={() => void counts.refetch()}
+          >
+            Try again
+          </Button>
+        )
+      }
+    >
       <dl className="grid grid-cols-2 gap-3">
         {items.map((item) => (
           <div key={item.label} className="rounded-xl border p-4">
@@ -39,6 +55,13 @@ export default function MetricSection() {
             <dd className="mt-1 text-3xl tracking-tight tabular-nums">
               {counts.isLoading ? (
                 <Skeleton className="h-9 w-12" />
+              ) : counts.isError ? (
+                <span
+                  className="text-muted-foreground"
+                  aria-label="Unavailable"
+                >
+                  –
+                </span>
               ) : (
                 (item.value ?? 0)
               )}

@@ -19,7 +19,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FormSelectField } from "@/components/form-select-field";
@@ -187,8 +186,7 @@ export default function AvailabilityDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} disabled={isSubmitting}>
-            {isSubmitting && <Spinner />}
+          <Button type="submit" form={formId} loading={isSubmitting}>
             Save availability
           </Button>
         </DialogFooter>

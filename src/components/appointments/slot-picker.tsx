@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
-import { CalendarX } from "lucide-react";
+import { CalendarX, TriangleAlert } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { createClient } from "@/utils/supabase/client";
@@ -96,6 +97,26 @@ export function SlotPicker({
             {Array.from({ length: 6 }, (_, index) => (
               <Skeleton key={index} className="h-9" />
             ))}
+          </div>
+        ) : slots.isError ? (
+          <div className="text-muted-foreground flex flex-wrap items-center gap-3 rounded-xl border border-dashed p-4">
+            <TriangleAlert
+              aria-hidden
+              strokeWidth={1.25}
+              className="size-5 shrink-0"
+            />
+            <p className="min-w-0 flex-1">
+              Times for this day couldn&apos;t be loaded.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              loading={slots.isFetching}
+              onClick={() => void slots.refetch()}
+            >
+              Try again
+            </Button>
           </div>
         ) : options.length === 0 ? (
           <div className="text-muted-foreground flex items-center gap-3 rounded-xl border border-dashed p-4">

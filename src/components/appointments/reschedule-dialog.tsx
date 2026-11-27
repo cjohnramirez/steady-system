@@ -13,7 +13,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/utils/supabase/client";
 import { rescheduleAppointment } from "@/lib/appointments/actions";
 import type { AppointmentRow } from "@/lib/appointments/queries";
@@ -106,8 +105,11 @@ export function RescheduleDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={save} disabled={!slot || unchanged || isPending}>
-            {isPending && <Spinner />}
+          <Button
+            loading={isPending}
+            onClick={save}
+            disabled={!slot || unchanged || isPending}
+          >
             Move appointment
           </Button>
         </DialogFooter>

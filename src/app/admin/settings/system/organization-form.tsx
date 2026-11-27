@@ -11,7 +11,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FormInputField } from "@/components/form-input-field";
 import { FormSelectField } from "@/components/form-select-field";
@@ -150,8 +149,7 @@ export default function OrganizationForm({
             </form.Field>
           </div>
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Spinner />}
+            <Button type="submit" loading={isSubmitting}>
               Save office details
             </Button>
           </div>

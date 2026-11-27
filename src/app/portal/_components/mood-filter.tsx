@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/utils/supabase/client";
 import { fetchEmotionalStatuses } from "@/lib/reference/queries";
 import { strToTitleCase } from "@/lib/format";
@@ -34,8 +35,20 @@ export function MoodFilter({
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="bg-card w-full sm:w-44" aria-label={label}>
-        <SelectValue />
+      <SelectTrigger
+        className="bg-card w-full sm:w-44"
+        aria-label={label}
+        aria-busy={moods.isLoading || undefined}
+      >
+        {/* A preselected mood has no label until the moods arrive. */}
+        {moods.isLoading && value !== ALL_MOODS ? (
+          <span className="text-muted-foreground flex items-center gap-2">
+            <Spinner aria-hidden />
+            Loading…
+          </span>
+        ) : (
+          <SelectValue />
+        )}
       </SelectTrigger>
       <SelectContent>
         <SelectItem value={ALL_MOODS}>Any mood</SelectItem>

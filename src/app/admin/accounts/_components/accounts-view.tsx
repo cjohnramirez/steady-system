@@ -7,7 +7,13 @@ import type {
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import { Download, MoreHorizontal, Plus } from "lucide-react";
+import {
+  Download,
+  GraduationCap,
+  MoreHorizontal,
+  Plus,
+  UserRound,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -240,6 +246,11 @@ export default function AccountsView() {
     onSortingChange: setSorting,
     search,
     onSearchChange: setSearch,
+    isFiltered: debouncedSearch.trim() !== "",
+    onClearFilters: () => {
+      setSearch("");
+      setPagination((current) => ({ ...current, pageIndex: 0 }));
+    },
     toolbar: (
       <Tabs
         value={tab}
@@ -288,6 +299,15 @@ export default function AccountsView() {
             data={students.data?.data ?? []}
             rowCount={students.data?.count ?? 0}
             isLoading={students.isLoading}
+            isFetching={students.isFetching}
+            isError={students.isError}
+            errorTitle="Students couldn't be loaded"
+            onRetry={() => students.refetch()}
+            empty={{
+              title: "No students yet",
+              description: "Students appear here once they create an account.",
+              icon: GraduationCap,
+            }}
             onRowClick={(row) => setOpen({ kind: "student", row })}
           />
         ) : (
@@ -298,6 +318,21 @@ export default function AccountsView() {
             data={counselors.data?.data ?? []}
             rowCount={counselors.data?.count ?? 0}
             isLoading={counselors.isLoading}
+            isFetching={counselors.isFetching}
+            isError={counselors.isError}
+            errorTitle="Counselors couldn't be loaded"
+            onRetry={() => counselors.refetch()}
+            empty={{
+              title: "No counselors yet",
+              description: "Add a counselor so students can book appointments.",
+              icon: UserRound,
+              action: (
+                <Button size="sm" onClick={() => setOpen({ kind: "create" })}>
+                  <Plus aria-hidden />
+                  Add counselor
+                </Button>
+              ),
+            }}
             onRowClick={(row) => setOpen({ kind: "counselor", row })}
           />
         )}

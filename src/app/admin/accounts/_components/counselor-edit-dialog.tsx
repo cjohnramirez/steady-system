@@ -18,7 +18,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { FormInputField } from "@/components/form-input-field";
 import type { Tables } from "@/types/supabase";
@@ -127,8 +126,7 @@ export default function CounselorEditDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} disabled={isSubmitting}>
-            {isSubmitting && <Spinner />}
+          <Button type="submit" form={formId} loading={isSubmitting}>
             Save changes
           </Button>
         </DialogFooter>

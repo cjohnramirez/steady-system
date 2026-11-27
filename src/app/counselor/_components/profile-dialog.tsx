@@ -14,7 +14,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
-import { Spinner } from "@/components/ui/spinner";
 import { FormInputField } from "@/components/form-input-field";
 import type { Tables } from "@/types/supabase";
 import { updateOwnCounselorProfile } from "@/lib/counselors/actions";
@@ -107,8 +106,7 @@ export default function ProfileDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="submit" form={formId} disabled={isSubmitting}>
-            {isSubmitting && <Spinner />}
+          <Button type="submit" form={formId} loading={isSubmitting}>
             Save changes
           </Button>
         </DialogFooter>

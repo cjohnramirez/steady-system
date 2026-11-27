@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import NavigationBar from "@/components/navigation";
+import { LiveUpdates } from "@/components/live-updates";
 import { ViewerProvider } from "@/components/viewer-provider";
 import { guardPage } from "@/lib/auth/session";
+import { StudentSidebarShell } from "./_components/student-sidebar-shell";
 
 export default async function StudentLayout({
   children,
@@ -9,13 +10,24 @@ export default async function StudentLayout({
   children: ReactNode;
 }) {
   const viewer = await guardPage("student");
+  const fullName =
+    `${viewer.firstName} ${viewer.lastName}`.trim() || viewer.userName;
 
   return (
     <ViewerProvider viewer={viewer}>
-      <NavigationBar />
-      <main className="m-auto max-w-[1600px] px-4 py-6 md:px-8 md:py-10">
+      <LiveUpdates />
+      <StudentSidebarShell
+        userId={viewer.userId}
+        userName={fullName}
+        userSubtitle={
+          viewer.emotionalStatus
+            ? `Mood: ${viewer.emotionalStatus}`
+            : "Student Account"
+        }
+        userAvatar={viewer.avatar}
+      >
         {children}
-      </main>
+      </StudentSidebarShell>
     </ViewerProvider>
   );
 }

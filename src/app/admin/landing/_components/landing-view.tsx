@@ -94,6 +94,9 @@ function AnnouncementManager() {
         searchLabel="Search announcements"
         items={query.data?.data ?? []}
         isLoading={query.isLoading}
+        isFetching={query.isFetching && !query.isLoading}
+        isError={query.isError}
+        onRetry={() => query.refetch()}
         total={query.data?.count ?? 0}
         page={list.page}
         pageSize={PAGE_SIZE}
@@ -144,6 +147,9 @@ function ArticleManager() {
         searchLabel="Search articles"
         items={query.data?.data ?? []}
         isLoading={query.isLoading}
+        isFetching={query.isFetching && !query.isLoading}
+        isError={query.isError}
+        onRetry={() => query.refetch()}
         total={query.data?.count ?? 0}
         page={list.page}
         pageSize={PAGE_SIZE}
@@ -194,6 +200,9 @@ function PlaylistManager() {
         searchLabel="Search playlists"
         items={query.data?.data ?? []}
         isLoading={query.isLoading}
+        isFetching={query.isFetching && !query.isLoading}
+        isError={query.isError}
+        onRetry={() => query.refetch()}
         total={query.data?.count ?? 0}
         page={list.page}
         pageSize={PAGE_SIZE}

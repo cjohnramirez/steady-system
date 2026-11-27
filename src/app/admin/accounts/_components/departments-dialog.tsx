@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 import { setCounselorDepartments } from "@/lib/counselors/actions";
@@ -150,8 +149,11 @@ export default function DepartmentsDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={save} disabled={isPending || departments.isLoading}>
-            {isPending && <Spinner />}
+          <Button
+            loading={isPending}
+            onClick={save}
+            disabled={departments.isLoading}
+          >
             Save departments
           </Button>
         </DialogFooter>
