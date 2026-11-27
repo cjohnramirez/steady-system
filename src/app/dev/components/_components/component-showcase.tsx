@@ -254,17 +254,21 @@ export function ComponentShowcase() {
 
         {/* Tier 2: Counselor SessionCard */}
         <SessionCard
+          previewOnly
           session={{
             id: "demo-apt-1",
             studentId: "demo-stu-1",
             studentName: "Gabriel Cruz",
-            studentUniversityId: "2023-789-4560",
+            studentUniversityId: "2023 789 4560",
             courseAndYear: "BS Civil Engineering, 3rd Year",
-            scheduledLabel: "1:00 PM – 1:50 PM",
+            scheduledLabel: "1:00 PM - 1:50 PM",
             reason:
-              "Feeling overwhelmed by hydraulics and steel design lab deadlines this week.",
+              "I feel like I'm drowning in hydraulics and steel design. During group problem sets, I just sit there nodding while my brain goes numb. I skipped lunch for three days because I can't stomach food.",
             status: "approved",
             urgency: "high",
+            emergencyContactName: "Sophie Carter (Sister)",
+            emergencyContactPhone: "0917 987 6543",
+            durationMinutes: 30,
           }}
           onOpenCrisis={() => setCrisisOpen(true)}
           onOpenReferral={() => setReferralOpen(true)}
@@ -278,22 +282,25 @@ export function ComponentShowcase() {
       <CrisisSupportDialog
         open={crisisOpen}
         onOpenChange={setCrisisOpen}
-        role="student"
+        role="counselor"
       />
       <WarmReferralDialog
+        previewOnly
         open={referralOpen}
         onOpenChange={setReferralOpen}
         studentId="11111111-1111-1111-1111-111111111111"
         studentName="Marcus Vance"
-        studentMeta="2023-304-9124 • BS CompEng, 3rd Year"
+        studentMeta="2024-338-5519 | BSCE, 3rd Year"
         counselors={[
           {
             id: "22222222-2222-2222-2222-222222222222",
             name: "Dr. Clara Mendoza, RGC",
+            specialty: "Clinical Psychologist",
           },
           {
             id: "33333333-3333-3333-3333-333333333333",
             name: "Dr. Luis Ramos, RGC",
+            specialty: "Academic Counselor",
           },
         ]}
       />
@@ -302,30 +309,33 @@ export function ComponentShowcase() {
         onOpenChange={setCounselorOpen}
         counselor={{
           id: "22222222-2222-2222-2222-222222222222",
-          name: "Dr. Clara Mendoza, RGC",
+          name: "Maria dela Cruz",
+          roleTitle: "Lead Counselor, RGC",
           department: "College of Engineering & Architecture",
-          email: "clara.mendoza@steady.edu",
-          officeRoom: "Guidance Center, Room 204",
+          email: "maria.delacruz@steady.edu",
+          officeRoom: "West Hall Room 204",
           dutyStatus: "available",
-          officeHours: "Mon – Fri, 8:00 AM – 5:00 PM",
-          bio: "Registered Guidance Counselor specializing in academic stress, burnout recovery, and transition coaching for engineering students.",
+          officeHours: "08:30 AM – 05:00 PM",
+          availableWeekdays: [2, 3, 5, 6],
+          bio: "Licensed Guidance Counselor working primarily with engineering and science undergraduates. Specializes in situational panic, academic burnout recovery, first-generation student adjustment, and high-stakes family pressure.",
         }}
       />
       <ArticleReaderDialog
         open={articleOpen}
         onOpenChange={setArticleOpen}
-        onOpenBreathing={() => setBreathingOpen(true)}
         article={{
           id: "demo-art-1",
-          title: "Resetting Exam Overwhelm in Five Minutes",
-          author: "Dr. Clara Mendoza, RGC",
-          mood: "Anxious",
-          readMinutes: 3,
+          title: "Understanding Academic Burnout",
+          author: "Clara Wren",
+          mood: "Stressed",
+          lastReadLabel: "Last Read Aug 28, 2026",
+          writtenAgoLabel: "Written 7 months ago",
           summary:
-            "Short physiological resets lower cortisol faster than pushing through fatigue.",
+            "Academic burnout is more than feeling tired during midterms or finals week.",
           body: [
-            "When deadlines pile up, your nervous system treats an overflowing syllabus like a physical threat. Trying to force concentration while your heart rate is elevated usually backfires.",
-            "Before opening your notes, take three slow 4-7-8 breathing cycles and write down just one concrete 20-minute task. Momentum follows regulation, not the other way around.",
+            "Academic burnout is more than feeling tired during midterms or finals week; it is a state of chronic physical, emotional, and mental exhaustion caused by prolonged academic pressure. Unlike everyday stress—which typically fades once a major exam or deadline passes—burnout leaves students feeling persistently drained, detached from their coursework, and doubtful of their own capabilities even after taking a weekend off.",
+            "Early warning signs often show up as difficulty concentrating during lectures, procrastination on routine tasks, disrupted sleep, and growing cynicism toward classes or group projects. In a university setting, burnout is frequently driven by overlapping deadlines, perfectionism, and trying to balance heavy coursework with extracurricular or personal obligations without setting sustainable boundaries.",
+            "Recovering from academic burnout starts with recognizing those signals early and scaling back non-essential commitments to restore baseline energy. Breaking large assignments into smaller daily milestones, protecting regular sleep hours, and scheduling true screen-free breaks help rebuild focus gradually.",
           ],
         }}
       />
@@ -337,38 +347,17 @@ export function ComponentShowcase() {
           id: "11111111-1111-1111-1111-111111111111",
           name: "Marcus Vance",
           email: "marcus.vance@steady.edu",
-          universityId: "2023-304-9124",
-          department: "BS Computer Engineering",
+          universityId: "2024-219-7731",
+          department: "BSCE",
           yearLevel: 3,
-          emotionalStatus: "Anxious",
-          actionItems: [
-            {
-              id: "d-1",
-              title: "Complete 3 breathing resets before midterms",
-              is_completed: true,
-              due_date: "2026-12-01",
-            },
-            {
-              id: "d-2",
-              title: "Share revised study schedule at next check-in",
-              is_completed: false,
-              due_date: "2026-12-06",
-            },
-          ],
-          recentSessions: [
-            {
-              id: "s-1",
-              dateLabel: "Nov 21, 2026 • 1:00 PM",
-              status: "completed",
-              reason: "Midterm burnout and sleep schedule disruption",
-            },
-            {
-              id: "s-2",
-              dateLabel: "Dec 04, 2026 • 2:00 PM",
-              status: "approved",
-              reason: "Follow-up on study pacing and sleep log",
-            },
-          ],
+          emotionalStatus: "Lonely",
+          emergencyContactName: "Elena Vance (Mother)",
+          emergencyContactPhone: "0917 555 0192",
+          primaryReason: "Midterm Panic & Chronic Sleep Debt",
+          previousNoteSummary:
+            "Responds well to somatic breathwork. Monitoring recovery from OS midterm exam crunch.",
+          completedSessions: 4,
+          totalSessions: 12,
         }}
       />
     </div>

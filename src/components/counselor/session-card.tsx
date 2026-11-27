@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Clock, Play, ShieldAlert, Square, UserPlus } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import {
+  Check,
+  Clock,
+  Plus,
+  ShieldAlert,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { StatusBadge, UrgencyBadge } from "@/components/app/status-badge";
-import { PillTabs } from "@/components/app/pill-tabs";
+import { UserAvatar } from "@/components/app/user-avatar";
+import { saveClinicalNote } from "@/lib/actions/clinical";
+import { cn } from "@/lib/utils";
 
 export interface SessionCardData {
   id: string;
@@ -16,218 +23,366 @@ export interface SessionCardData {
   courseAndYear: string;
   scheduledLabel: string;
   reason: string;
-  status: "pending" | "approved" | "completed" | "cancelled" | "rejected";
-  urgency: "low" | "medium" | "high";
-  emergencyContact?: string;
+  status: string;
+  urgency?: "low" | "medium" | "high";
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  durationMinutes?: number;
 }
 
-/**
- * Compound Counselor Session Card matching Figma `Session Card` (`380:278`)
- * supporting Pending, Active SOAP, Active SAP, and Completed states with a live timer.
- */
+function formatTimer(seconds: number) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
 export function SessionCard({
   session,
-  onSaveNote,
-  onComplete,
+  previewOnly = false,
   onOpenCrisis,
   onOpenReferral,
+  onComplete,
 }: {
   session: SessionCardData;
-  onSaveNote?: (payload: {
-    appointmentId: string;
-    format: "soap" | "sap";
-    content: Record<string, string>;
-  }) => Promise<void>;
-  onComplete?: (appointmentId: string) => Promise<void>;
+  previewOnly?: boolean;
   onOpenCrisis?: () => void;
   onOpenReferral?: () => void;
+  onComplete?: (payload: {
+    format: "soap" | "sap";
+    content: Record<string, string>;
+  }) => Promise<void> | void;
 }) {
-  const [inSession, setInSession] = useState(session.status === "approved");
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const [noteFormat, setNoteFormat] = useState<"soap" | "sap">("soap");
+  const [stage, setStage] = useState<"pending" | "active" | "completed">(
+    session.status === "completed" ? "completed" : "pending",
+  );
+  const [elapsed, setElapsed] = useState(0);
+  const [activeTab, setActiveTab] = useState<"soap" | "action_plan">("soap");
   const [soap, setSoap] = useState({
     subjective: "",
     objective: "",
     assessment: "",
     plan: "",
   });
-  const [sap, setSap] = useState({
-    situation: "",
-    action: "",
-    plan: "",
-  });
-  const [saving, setSaving] = useState(false);
+  const [actionSteps, setActionSteps] = useState<string[]>([
+    "15-minute unplugged walk before dinner",
+  ]);
+  const [newStep, setNewStep] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const durationSec = (session.durationMinutes ?? 30) * 60;
 
   useEffect(() => {
-    if (!inSession || session.status === "completed") return;
-    const id = window.setInterval(() => setElapsedSec((s) => s + 1), 1000);
+    if (stage !== "active") return;
+    const id = window.setInterval(() => setElapsed((s) => s + 1), 1000);
     return () => window.clearInterval(id);
-  }, [inSession, session.status]);
+  }, [stage]);
 
-  const mins = String(Math.floor(elapsedSec / 60)).padStart(2, "0");
-  const secs = String(elapsedSec % 60).padStart(2, "0");
+  function handleComplete() {
+    startTransition(async () => {
+      if (!previewOnly) {
+        const res = await saveClinicalNote({
+          appointment_id: session.id,
+          format: "soap",
+          content: soap,
+        });
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+      }
+      await onComplete?.({ format: "soap", content: soap });
+      setStage("completed");
+      toast.success("Session completed and SOAP notes filed");
+    });
+  }
 
-  const handleSave = async () => {
-    if (!onSaveNote) return;
-    setSaving(true);
-    try {
-      await onSaveNote({
-        appointmentId: session.id,
-        format: noteFormat,
-        content: noteFormat === "soap" ? soap : sap,
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+  function handleAddStep() {
+    const trimmed = newStep.trim();
+    if (!trimmed) return;
+    setActionSteps((prev) => [...prev, trimmed]);
+    setNewStep("");
+  }
+
+  const isActive = stage === "active";
+  const isCompleted = stage === "completed";
 
   return (
-    <article className="bg-card border-border shadow-steady-card flex flex-col gap-5 rounded-[20px] border p-5 md:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0 space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="privacy-sensitive text-base font-medium">
-              {session.studentName}
-            </h3>
-            <StatusBadge status={session.status} />
-            <UrgencyBadge urgency={session.urgency} />
-          </div>
-          <p className="text-muted-foreground privacy-sensitive text-sm">
-            {session.studentUniversityId} • {session.courseAndYear} •{" "}
-            {session.scheduledLabel}
-          </p>
+    /* Outer Nested Tray (Figma 380:276 Pending / 380:277 Active) */
+    <div
+      className={cn(
+        "border-border shadow-steady-card relative flex flex-col overflow-hidden rounded-[20px] border p-[2px] transition-colors",
+        isActive ? "bg-positive/15" : "bg-muted",
+      )}
+    >
+      {/* Top Status Strip (Figma 313:191 / 374:1181) */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 text-[15px]">
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden
+            className={cn(
+              "size-3 rounded-full",
+              isActive
+                ? "bg-positive animate-pulse"
+                : isCompleted
+                  ? "bg-primary"
+                  : "bg-warning",
+            )}
+          />
+          <span>
+            {isActive
+              ? "In Room Active Session"
+              : isCompleted
+                ? "Completed Session"
+                : "Pending Session"}
+          </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {session.status !== "completed" && (
-            <div className="bg-muted border-border inline-flex items-center gap-2 rounded-[25px] border px-3.5 py-1.5 font-mono text-sm tabular-nums">
-              <Clock className="text-primary size-4" />
-              <span>
-                {mins}:{secs}
-              </span>
-            </div>
-          )}
+        <div className="flex items-center gap-2.5">
+          <span className="text-foreground/80">Time Remaining</span>
+          <span
+            className={cn(
+              "rounded-[10px] px-3.5 py-1 text-[14px] tabular-nums",
+              isActive
+                ? "bg-positive/25 text-foreground"
+                : "bg-border/70 text-foreground",
+            )}
+          >
+            {isActive
+              ? `${formatTimer(elapsed)} / ${formatTimer(durationSec)}`
+              : isCompleted
+                ? formatTimer(elapsed)
+                : "Not Started"}
+          </span>
+        </div>
+      </div>
+
+      {/* Inner White Card (Figma 313:199 / 374:1189) */}
+      <div className="bg-card border-border flex flex-col gap-5 rounded-[19px] border p-5">
+        {/* Time Row */}
+        <div className="flex items-center justify-between gap-2 text-[15px]">
+          <span className="flex items-center gap-2.5">
+            <Clock className="size-3.5 shrink-0" />
+            <span>{session.scheduledLabel}</span>
+          </span>
           {onOpenReferral && (
-            <Button variant="outline" size="sm" onClick={onOpenReferral}>
-              <UserPlus className="size-4" />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onOpenReferral}
+            >
+              <UserPlus className="size-3.5" />
               Warm Referral
             </Button>
           )}
-          {onOpenCrisis && (
-            <Button variant="destructive" size="sm" onClick={onOpenCrisis}>
-              <ShieldAlert className="size-4" />
-              Crisis Protocol
+        </div>
+
+        {/* 3-Column Student Row (Figma 313:204) */}
+        <div className="flex flex-wrap items-center gap-5">
+          <UserAvatar
+            name={session.studentName}
+            className="bg-positive text-positive-foreground size-[51px] shrink-0 rounded-[10px]"
+          />
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-2 text-[15px]">
+            <div>
+              <p className="font-medium">Student Name</p>
+              <p className="text-foreground/80 privacy-sensitive">
+                {session.studentName}
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">Student ID</p>
+              <p className="text-foreground/80 privacy-sensitive">
+                {session.studentUniversityId}
+              </p>
+            </div>
+            <div>
+              <p className="font-medium">Course and Year</p>
+              <p className="text-foreground/80">{session.courseAndYear}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Concern Card (Figma 313:220) */}
+        <div className="bg-card border-border shadow-steady-card rounded-[20px] border p-5">
+          <div className="flex flex-col gap-2 text-[15px] sm:flex-row sm:items-start">
+            <p className="w-[102px] shrink-0 font-medium">Concern</p>
+            <p className="text-foreground/90 privacy-sensitive flex-1 leading-relaxed">
+              &ldquo;{session.reason}&rdquo;
+            </p>
+          </div>
+        </div>
+
+        {/* Nested Emerald Clinical Notes / Action Plan Tray when Active (Figma 374:1214) */}
+        {isActive && (
+          <div className="bg-positive/15 border-border flex flex-col overflow-hidden rounded-[20px] border p-[2px]">
+            <div className="p-2.5">
+              <div className="bg-card shadow-steady-card inline-flex flex-wrap items-center gap-1 rounded-[30px] p-1.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("soap")}
+                  className={cn(
+                    "rounded-[32px] px-5 py-2.5 text-[14px] transition-colors",
+                    activeTab === "soap"
+                      ? "bg-positive text-positive-foreground shadow-steady-pill"
+                      : "text-foreground hover:bg-muted",
+                  )}
+                >
+                  Confidential Clinical SOAP Notes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("action_plan")}
+                  className={cn(
+                    "rounded-[32px] px-5 py-2.5 text-[14px] transition-colors",
+                    activeTab === "action_plan"
+                      ? "bg-positive text-positive-foreground shadow-steady-pill"
+                      : "text-foreground hover:bg-muted",
+                  )}
+                >
+                  Shared Action Plan (Student Portal)
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-card border-border space-y-3.5 rounded-[19px] border p-5">
+              {activeTab === "soap" ? (
+                <>
+                  <p className="text-muted-foreground text-[14px]">
+                    Only you can view this.
+                  </p>
+                  <div className="space-y-2.5">
+                    {(
+                      [
+                        ["subjective", "Subjective"],
+                        ["objective", "Objective"],
+                        ["assessment", "Assessment"],
+                        ["plan", "Plan"],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <div
+                        key={key}
+                        className="bg-card border-border shadow-steady-card rounded-[20px] border p-4"
+                      >
+                        <label
+                          htmlFor={`soap-${session.id}-${key}`}
+                          className="text-muted-foreground mb-1 block text-[14px]"
+                        >
+                          {label}
+                        </label>
+                        <textarea
+                          id={`soap-${session.id}-${key}`}
+                          rows={2}
+                          value={soap[key]}
+                          onChange={(e) =>
+                            setSoap((prev) => ({
+                              ...prev,
+                              [key]: e.target.value,
+                            }))
+                          }
+                          placeholder={`Document ${label.toLowerCase()} observations...`}
+                          className="w-full resize-y bg-transparent text-[15px] outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-muted-foreground text-[14px]">
+                    Shared with the student on their Sanctuary Dashboard.
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newStep}
+                      onChange={(e) => setNewStep(e.target.value)}
+                      placeholder="Add a gentle post-session step..."
+                      className="bg-card border-border shadow-steady-card flex-1 rounded-[20px] border px-4 py-2.5 text-[15px] outline-none"
+                    />
+                    <Button type="button" size="sm" onClick={handleAddStep}>
+                      <Plus className="size-4" />
+                      Add
+                    </Button>
+                  </div>
+                  <ul className="space-y-2">
+                    {actionSteps.map((step, i) => (
+                      <li
+                        key={`${step}-${i}`}
+                        className="border-border flex items-center justify-between gap-2 rounded-[16px] border px-4 py-3 text-[15px]"
+                      >
+                        <span>{step}</span>
+                        <button
+                          type="button"
+                          aria-label="Remove step"
+                          onClick={() =>
+                            setActionSteps((prev) =>
+                              prev.filter((_, idx) => idx !== i),
+                            )
+                          }
+                          className="text-destructive hover:opacity-80"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Emergency Contact Row (Figma 313:224) */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-[15px]">
+          <span className="font-medium">Emergency Contact</span>
+          <div className="text-foreground/80 privacy-sensitive flex flex-wrap items-center gap-2.5">
+            <span>
+              {session.emergencyContactName ?? "Sophie Carter (Sister)"}
+            </span>
+            <span aria-hidden className="bg-border inline-block h-4 w-px" />
+            <span>{session.emergencyContactPhone ?? "0917 987 6543"}</span>
+          </div>
+        </div>
+
+        {/* Footer Actions Row (Figma 313:227 / 374:1246) */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Button type="button" variant="destructive" onClick={onOpenCrisis}>
+            <ShieldAlert className="size-4" />
+            Crisis Protocol
+          </Button>
+
+          {stage === "pending" && (
+            <Button
+              type="button"
+              variant="positive"
+              onClick={() => setStage("active")}
+            >
+              Begin Session
+            </Button>
+          )}
+          {stage === "active" && (
+            <Button
+              type="button"
+              variant="positive"
+              loading={isPending}
+              onClick={handleComplete}
+            >
+              <Check className="size-4" />
+              Complete and File Session
+            </Button>
+          )}
+          {stage === "completed" && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStage("pending")}
+            >
+              Reset Preview
             </Button>
           )}
         </div>
       </div>
-
-      <div className="bg-muted border-border rounded-[16px] border p-4 text-sm">
-        <p className="text-muted-foreground text-xs font-medium uppercase">
-          Presenting Concern
-        </p>
-        <p className="privacy-sensitive mt-1">
-          {session.reason || "General consultation"}
-        </p>
-      </div>
-
-      {session.status !== "completed" && (
-        <div className="flex flex-col gap-4 border-t pt-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <PillTabs
-              ariaLabel="Clinical note format"
-              value={noteFormat}
-              onChange={setNoteFormat}
-              options={[
-                { value: "soap", label: "SOAP Notes" },
-                { value: "sap", label: "SAP Notes" },
-              ]}
-            />
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInSession((v) => !v)}
-              >
-                {inSession ? (
-                  <>
-                    <Square className="size-3.5" />
-                    Pause Timer
-                  </>
-                ) : (
-                  <>
-                    <Play className="size-3.5" />
-                    Start Timer
-                  </>
-                )}
-              </Button>
-              <Button
-                variant="positive"
-                size="sm"
-                loading={saving}
-                onClick={handleSave}
-              >
-                Save Clinical Notes
-              </Button>
-              {onComplete && (
-                <Button size="sm" onClick={() => void onComplete(session.id)}>
-                  Complete Session
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {noteFormat === "soap" ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              {(["subjective", "objective", "assessment", "plan"] as const).map(
-                (key) => (
-                  <div key={key} className="space-y-1.5">
-                    <Label
-                      htmlFor={`${session.id}-${key}`}
-                      className="capitalize"
-                    >
-                      {key}
-                    </Label>
-                    <Textarea
-                      id={`${session.id}-${key}`}
-                      rows={3}
-                      value={soap[key]}
-                      onChange={(e) =>
-                        setSoap((prev) => ({ ...prev, [key]: e.target.value }))
-                      }
-                      placeholder={`Document ${key} observations...`}
-                      className="privacy-sensitive rounded-[16px]"
-                    />
-                  </div>
-                ),
-              )}
-            </div>
-          ) : (
-            <div className="grid gap-3 md:grid-cols-3">
-              {(["situation", "action", "plan"] as const).map((key) => (
-                <div key={key} className="space-y-1.5">
-                  <Label
-                    htmlFor={`${session.id}-sap-${key}`}
-                    className="capitalize"
-                  >
-                    {key}
-                  </Label>
-                  <Textarea
-                    id={`${session.id}-sap-${key}`}
-                    rows={4}
-                    value={sap[key]}
-                    onChange={(e) =>
-                      setSap((prev) => ({ ...prev, [key]: e.target.value }))
-                    }
-                    placeholder={`Document ${key}...`}
-                    className="privacy-sensitive rounded-[16px]"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </article>
+    </div>
   );
 }
