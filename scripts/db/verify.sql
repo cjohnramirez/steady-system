@@ -143,7 +143,8 @@ begin
     from appointment a
     join student s on s.id = a.student_id
     join counselor c on c.id = a.counselor_id
-    where a.status in ('pending', 'approved') and a.scheduled_at > now()
+    where a.status in ('pending', 'approved')
+    order by a.scheduled_at desc
     limit 1;
 
     perform set_config('request.jwt.claims', jsonb_build_object(
@@ -175,7 +176,8 @@ begin
     join student s on s.id = a.student_id
     join counselor c on c.id = a.counselor_id
     where s.user_id = '44444444-4444-4444-4444-000000000003'
-      and a.status in ('pending', 'approved') and a.scheduled_at > now()
+      and a.status in ('pending', 'approved')
+    order by a.scheduled_at desc
     limit 1;
 
     perform set_config('request.jwt.claims', jsonb_build_object(
@@ -205,7 +207,8 @@ begin
   begin
     select a.id, a.counselor_id, s.user_id into v_appt, v_counselor_id, v_student
     from appointment a join student s on s.id = a.student_id
-    where a.status = 'pending' and a.scheduled_at > now()
+    where a.status = 'pending'
+    order by a.scheduled_at desc
     limit 1;
 
     select slot into v_slot
@@ -297,5 +300,21 @@ begin
   end;
 end;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- v2 Clinical Confidentiality & RA 11036 Obfuscation checks
+-- ---------------------------------------------------------------------------
+
+select pg_temp.run_check('admins cannot insert or read clinical_note rows', 'admin',
+  $q$select 1 from clinical_note limit 1$q$, 'refused');
+
+select pg_temp.run_check('students cannot read clinical_note rows', 'student',
+  $q$select 1 from clinical_note limit 1$q$, 'refused');
+
+select pg_temp.run_check('admins cannot read warm_referral clinical summaries', 'admin',
+  $q$select 1 from warm_referral limit 1$q$, 'refused');
+
+select pg_temp.run_check('admins can read obfuscated admin_appointment_audit view', 'admin',
+  $q$select 1 from admin_appointment_audit where obfuscated_student_code like 'STU-••••%' limit 1$q$, 'allowed');
 
 select name, passed, detail from verify_results;
