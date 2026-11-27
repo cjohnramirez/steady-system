@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { BRAND } from "@/lib/brand";
@@ -8,27 +8,29 @@ import { Toaster } from "@/components/ui/sonner";
 import TrackHomePage from "@/components/tracker";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#141210" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f4f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1120" },
   ],
 };
 
 export const metadata: Metadata = {
-  // From the environment, so moving to a new domain needs no code change.
   metadataBase: new URL(clientEnv.NEXT_PUBLIC_APP_URL),
   title: {
     default: `${BRAND.name} | ${BRAND.tagline}`,
@@ -36,20 +38,19 @@ export const metadata: Metadata = {
   },
   description: BRAND.description,
   applicationName: BRAND.name,
-  // Home-screen app on iPhone and iPad, which is what enables notifications there.
   appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "default" },
   keywords: [
     "Guidance",
     "Counseling",
     "University",
     "Student Support",
+    "Mental Health",
     "Workshops",
     "Announcements",
   ],
   verification: {
     google: "YW8hRYwXwmkr7hv5hBSVypGhAUlXzyz4hUmphqjMf-A",
   },
-  // The card image comes from opengraph-image.tsx.
   openGraph: {
     title: `${BRAND.name} | ${BRAND.tagline}`,
     description: BRAND.description,
@@ -70,11 +71,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // next-themes adds the theme class before hydration; without this React warns
-    // that the server-rendered <html> attributes differ.
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} bg-background min-h-dvh font-sans text-sm antialiased`}
+        className={`${instrumentSans.variable} ${geistMono.variable} bg-background min-h-dvh font-sans text-[15px] antialiased`}
       >
         <Providers>
           {children}
