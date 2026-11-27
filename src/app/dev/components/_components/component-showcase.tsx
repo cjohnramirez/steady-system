@@ -3,10 +3,14 @@
 import { useState } from "react";
 import {
   BookOpen,
+  Brain,
   CalendarPlus,
   ClipboardList,
+  Compass,
   EyeOff,
   FolderOpen,
+  GraduationCap,
+  HeartHandshake,
   ShieldAlert,
   UserCheck,
   UserPlus,
@@ -38,6 +42,7 @@ import { BreathingPacerDialog } from "@/components/student/breathing-pacer-dialo
 import { ActionPlanCard } from "@/components/student/action-plan-card";
 import { CounselorDetailsDialog } from "@/components/student/counselor-details-dialog";
 import { ArticleReaderDialog } from "@/components/student/article-reader-dialog";
+import { ReasonTile } from "@/components/student/reason-tile";
 import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 import { WarmReferralDialog } from "@/components/counselor/warm-referral-dialog";
 import { DossierDialog } from "@/components/counselor/dossier-dialog";
@@ -56,6 +61,7 @@ const STEPS = [
 export function ComponentShowcase() {
   const [tab, setTab] = useState("all");
   const [statusFilter, setStatusFilter] = useState("pending");
+  const [selectedReason, setSelectedReason] = useState("academic");
   const [step, setStep] = useState(0);
   const [switchOn, setSwitchOn] = useState(true);
   const [breathingOpen, setBreathingOpen] = useState(false);
@@ -283,6 +289,54 @@ export function ComponentShowcase() {
                 </div>
               </div>
             </Stepper>
+          </div>
+        </SectionCard>
+
+        {/* Tier 2: Figma ReasonTile Grid (551:770) */}
+        <SectionCard
+          title="4b. Consultation Reason Tiles (Figma 551:770)"
+          description="Click any tile to toggle Default vs Selected (brand-blue border) state."
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                id: "academic",
+                icon: GraduationCap,
+                title: "Academic & Exam Panic",
+                description:
+                  "Assignment problems, lab anxiety, thesis deadline stress",
+              },
+              {
+                id: "mental",
+                icon: Brain,
+                title: "Burnout & Sleep Debt",
+                description:
+                  "Chronic exhaustion, trouble focusing, emotional fatigue",
+              },
+              {
+                id: "relationships",
+                icon: HeartHandshake,
+                title: "Family & Relationships",
+                description:
+                  "Family expectations, peer conflicts, feeling isolated",
+              },
+              {
+                id: "career",
+                icon: Compass,
+                title: "Career & Life Direction",
+                description:
+                  "Course doubts, shifting majors, internship pressure",
+              },
+            ].map((tile) => (
+              <ReasonTile
+                key={tile.id}
+                icon={tile.icon}
+                title={tile.title}
+                description={tile.description}
+                selected={selectedReason === tile.id}
+                onClick={() => setSelectedReason(tile.id)}
+              />
+            ))}
           </div>
         </SectionCard>
 

@@ -61,9 +61,15 @@
 - [x] Locked static headers & footers with scrollable center bodies (`flex max-h-[85vh] flex-col` + `min-h-0 flex-1 overflow-y-auto`) across all 7 dialogs.
 - [x] Exposed interactive Mascot & Custom Dropdown demos at the top of `/dev/components`.
 
+### Milestone 7 — Brand Logo Lockup, ReasonTile & 4-Step Student Booking Wizard (Complete)
+
+- [x] Updated `SteadyMark` and `BrandMark` (`src/components/app/steady-mark.tsx`, `brand-mark.tsx`) to match exact Figma Icon & Wordmark (`678:15857`).
+- [x] Built `ReasonTile` (`551:770`) and exposed it on `/dev/components`.
+- [x] Upgraded `/student/appointment` (`booking-form.tsx`) to the 4-step `Stepper` wizard with `ReasonTile` grid and `CounselorDetailsDialog`.
+- [x] Upgraded `LoginTabs` (`src/app/auth/login/[role]/login-tabs.tsx`) to Figma's pill role switcher.
+
 ---
 
 ## Upcoming Milestones
 
-- [ ] **Milestone 7 — Student 4-Step Booking Wizard & Auth Polish:** Upgrade `/student/appointment` to the 4-step `Stepper` wizard with `CounselorDetailsDialog` & `ReasonTile`, and polish `/auth/login/[role]` & `/auth/signup/student` 1:1 with Figma.
 - [ ] **Milestone 8 — Admin Audit View, Analytics & Full Responsive QA:** Wire `/admin/appointments` to `admin_appointment_audit` view with CSV export, add Counselor Analytics charts (`/counselor/analytics`), and verify `390px` / `768px` / `1440px` across Light & Dark modes.
