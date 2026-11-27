@@ -1,22 +1,45 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/app/page-header";
-import { InfoCallout } from "@/components/app/info-callout";
-import AppointmentsView from "./_components/appointments-view";
+import { guardPage } from "@/lib/auth/session";
+import { createClient } from "@/utils/supabase/server";
+import { formatAppointmentDate } from "@/lib/format";
+import { PageTransition } from "@/components/motion/primitives";
+import { AuditLedgerView } from "./_components/audit-ledger-view";
+import type { AuditRecord } from "@/components/admin/audit-metadata-dialog";
 
-export const metadata: Metadata = { title: "Appointments" };
+export const metadata: Metadata = { title: "Appointment Audit" };
 
-export default function AdminAppointmentsPage() {
+export default async function AdminAppointmentsPage() {
+  await guardPage("admin");
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("admin_appointment_audit")
+    .select(
+      "id, obfuscated_student_code, college_name, department_name, counselor_name, scheduled_at, duration_minutes, urgency, status, has_warm_referral",
+    )
+    .order("scheduled_at", { ascending: false })
+    .limit(200);
+
+  const records: AuditRecord[] = (data ?? [])
+    .filter((row): row is typeof row & { id: string } => Boolean(row.id))
+    .map((row) => ({
+      id: row.id,
+      obfuscatedStudentCode: row.obfuscated_student_code ?? "STU-••••0000",
+      college: row.college_name ?? "University College",
+      department: row.department_name ?? "Department",
+      counselorName: row.counselor_name ?? "Assigned Counselor",
+      scheduledLabel: row.scheduled_at
+        ? formatAppointmentDate(row.scheduled_at)
+        : "Unscheduled",
+      durationMinutes: row.duration_minutes ?? 45,
+      urgency: (row.urgency as AuditRecord["urgency"]) ?? "low",
+      status: row.status ?? "pending",
+      hasWarmReferral: Boolean(row.has_warm_referral),
+    }));
+
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader
-        title="Appointments"
-        description="Every booking across all counselors."
-      />
-      <InfoCallout title="Confidentiality">
-        Appointment records are protected under the Data Privacy Act. Open notes
-        only when there is an administrative need.
-      </InfoCallout>
-      <AppointmentsView />
-    </div>
+    <PageTransition>
+      <AuditLedgerView records={records} />
+    </PageTransition>
   );
 }
