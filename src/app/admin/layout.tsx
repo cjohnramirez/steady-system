@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { MonitorSmartphone } from "lucide-react";
-import NavigationBar from "./_components/navigation";
 import { LiveUpdates } from "@/components/live-updates";
 import { ViewerProvider } from "@/components/viewer-provider";
 import { guardPage } from "@/lib/auth/session";
 import { BRAND } from "@/lib/brand";
+import { AdminSidebarShell } from "./_components/admin-sidebar-shell";
 
 export const metadata: Metadata = {
   title: {
@@ -19,16 +19,13 @@ export default async function AdminLayout({
 }: {
   children: ReactNode;
 }) {
-  // Defence in depth. The proxy already gates /admin; this makes sure a matcher
-  // change or a proxy failure cannot quietly open the whole area.
   const viewer = await guardPage("admin");
+  const fullName =
+    `${viewer.firstName} ${viewer.lastName}`.trim() || viewer.userName;
 
   return (
     <ViewerProvider viewer={viewer}>
-      <NavigationBar />
       <LiveUpdates />
-      {/* The admin console is built for desktop. Below lg it says so instead of
-          rendering tables and charts that cannot fit. */}
       <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-6 py-16 text-center lg:hidden">
         <MonitorSmartphone aria-hidden strokeWidth={1} className="size-14" />
         <h1 className="text-2xl tracking-tight">Use a larger screen</h1>
@@ -37,9 +34,16 @@ export default async function AdminLayout({
           Please switch devices or widen this window.
         </p>
       </div>
-      <main className="m-auto hidden max-w-[1600px] px-8 py-10 lg:block">
-        {children}
-      </main>
+      <div className="hidden lg:block">
+        <AdminSidebarShell
+          userId={viewer.userId}
+          userName={fullName}
+          userSubtitle="Director of Guidance"
+          userAvatar={viewer.avatar}
+        >
+          {children}
+        </AdminSidebarShell>
+      </div>
     </ViewerProvider>
   );
 }

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { AnimatePresence } from "motion/react";
+import * as m from "motion/react-m";
 import {
   Bell,
   BellOff,
@@ -20,9 +22,11 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/app/error-state";
+import { PillTabs } from "@/components/app/pill-tabs";
 import { useDeviceNotifications } from "@/hooks/use-device-notifications";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { Notification } from "@/lib/notifications/queries";
+import { steadyTransitions } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const ICONS = {
@@ -42,13 +46,15 @@ function useMinuteTick() {
 
 export function NotificationBell({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"all" | "unread">("all");
   const device = useDeviceNotifications();
   const { feed, markRead, markAllRead, remove } = useNotifications(userId, {
-    // In a background tab, a system notification replaces the toast.
     onArrive: device.show,
   });
   const unread = feed.data?.unread ?? 0;
   const items = feed.data?.items ?? [];
+  const visibleItems =
+    tab === "unread" ? items.filter((n) => !n.read_at) : items;
   useMinuteTick();
 
   const label =
@@ -85,24 +91,35 @@ export function NotificationBell({ userId }: { userId: string }) {
         // list scrolls, so the header stays put and nothing is cut off.
         className="flex max-h-[min(32rem,calc(var(--radix-popover-content-available-height)-1rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl p-0 sm:w-96"
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b px-4 py-3">
-          <h2 className="font-medium">Notifications</h2>
-          {unread > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => markAllRead.mutate()}
-              loading={markAllRead.isPending}
-            >
-              Mark all as read
-            </Button>
-          )}
+        <div className="flex shrink-0 flex-col gap-3 border-b px-4 py-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="font-medium">Notifications</h2>
+            {unread > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => markAllRead.mutate()}
+                loading={markAllRead.isPending}
+              >
+                Mark all read
+              </Button>
+            )}
+          </div>
+          <PillTabs
+            ariaLabel="Filter notifications"
+            value={tab}
+            onChange={setTab}
+            options={[
+              { value: "all", label: "All", count: items.length },
+              { value: "unread", label: "Unread", count: unread },
+            ]}
+          />
         </div>
 
         {feed.isLoading ? (
           <div className="space-y-3 p-4" aria-busy>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-14 w-full" />
+              <Skeleton key={i} className="h-14 w-full rounded-[16px]" />
             ))}
           </div>
         ) : feed.isError ? (
@@ -111,30 +128,41 @@ export function NotificationBell({ userId }: { userId: string }) {
             onRetry={() => feed.refetch()}
             className="m-4 border-none p-6"
           />
-        ) : items.length === 0 ? (
+        ) : visibleItems.length === 0 ? (
           <div className="text-muted-foreground flex flex-col items-center gap-2 p-8 text-center">
             <BellOff aria-hidden strokeWidth={1.25} className="size-8" />
-            <p>You&apos;re all caught up.</p>
+            <p>
+              {tab === "unread"
+                ? "No unread notifications."
+                : "You're all caught up."}
+            </p>
           </div>
         ) : (
-          // A native scroller: max-h on a Radix ScrollArea root never limited its
-          // viewport, so long lists overflowed the popover instead of scrolling.
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
             <ul className="divide-y">
-              {items.map((item) => (
-                <NotificationRow
-                  key={item.id}
-                  item={item}
-                  removing={remove.isPending && remove.variables === item.id}
-                  onOpen={() => {
-                    if (!item.read_at) markRead.mutate(item.id);
-                    // Opening a notification moves on; the popover used to stay
-                    // open on top of the page it had just navigated to.
-                    if (item.link) setOpen(false);
-                  }}
-                  onRemove={() => remove.mutate(item.id)}
-                />
-              ))}
+              <AnimatePresence initial={false}>
+                {visibleItems.map((item) => (
+                  <m.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: 16 }}
+                    transition={steadyTransitions.smooth}
+                  >
+                    <NotificationRow
+                      item={item}
+                      removing={
+                        remove.isPending && remove.variables === item.id
+                      }
+                      onOpen={() => {
+                        if (!item.read_at) markRead.mutate(item.id);
+                        if (item.link) setOpen(false);
+                      }}
+                      onRemove={() => remove.mutate(item.id)}
+                    />
+                  </m.div>
+                ))}
+              </AnimatePresence>
             </ul>
           </div>
         )}
