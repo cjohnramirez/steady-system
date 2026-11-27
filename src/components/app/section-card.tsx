@@ -29,7 +29,7 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-2xl border p-5 md:p-8",
+        "bg-card text-card-foreground shadow-steady-card flex flex-col gap-6 rounded-[20px] border p-5 md:p-7",
         className,
       )}
       {...props}

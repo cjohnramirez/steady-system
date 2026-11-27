@@ -1,21 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CalendarX } from "lucide-react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type {
   ColumnDef,
   PaginationState,
   SortingState,
 } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SectionCard } from "@/components/app/section-card";
 import { StatusBadge } from "@/components/app/status-badge";
+import { PillTabs } from "@/components/app/pill-tabs";
 import { AppointmentDetailsDialog } from "@/components/appointments/appointment-details-dialog";
 import { DataTable, SortableHeader } from "@/app/admin/_components/data-table";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -78,21 +73,23 @@ export default function AppointmentsView() {
       {
         id: "last_student_name",
         accessorKey: "last_student_name",
-        meta: { label: "Student" },
+        meta: { label: "Student (Obfuscated)" },
         header: ({ column }) => (
-          <SortableHeader column={column} title="Student" />
+          <SortableHeader column={column} title="Student Code" />
         ),
-        cell: ({ row }) => (
-          <div>
-            <p className="font-medium">
-              {row.original.last_student_name},{" "}
-              {row.original.first_student_name}
-            </p>
-            <p className="text-muted-foreground">
-              {row.original.student_university_id}
-            </p>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const tail = String(
+            row.original.student_university_id ?? "0000",
+          ).slice(-4);
+          return (
+            <div>
+              <p className="font-mono text-sm font-medium">STU-••••{tail}</p>
+              <p className="text-muted-foreground text-xs">
+                RA 11036 Obfuscated
+              </p>
+            </div>
+          );
+        },
       },
       {
         id: "last_counselor_name",
@@ -109,9 +106,14 @@ export default function AppointmentsView() {
       {
         id: "reason",
         accessorKey: "reason",
-        meta: { label: "Reason" },
-        header: "Reason",
+        meta: { label: "Clinical Scope" },
+        header: "Clinical Scope",
         enableSorting: false,
+        cell: () => (
+          <span className="bg-brand-subtle text-brand-subtle-foreground inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium">
+            Counselor-only (RA 11036)
+          </span>
+        ),
       },
       {
         id: "status",
@@ -127,36 +129,46 @@ export default function AppointmentsView() {
   );
 
   return (
-    <SectionCard>
+    <SectionCard
+      title="University Appointments Audit"
+      description="Obfuscated ledger of counseling schedules and intake statuses (RA 11036 compliant — clinical reasons and SOAP/SAP notes are hidden)."
+    >
+      <PillTabs
+        ariaLabel="Filter appointments by status"
+        value={status}
+        onChange={(value) => {
+          setStatus(value);
+          setPagination((current) => ({ ...current, pageIndex: 0 }));
+        }}
+        options={[
+          { value: ALL, label: "All Appointments" },
+          ...APPOINTMENT_STATUSES.map((option) => ({
+            value: option,
+            label: appointmentStatusLabel(option),
+          })),
+        ]}
+      />
       <DataTable
-        toolbar={
-          <Select
-            value={status}
-            onValueChange={(value) => {
-              setStatus(value as AppointmentStatus | typeof ALL);
-              setPagination((current) => ({ ...current, pageIndex: 0 }));
-            }}
-          >
-            <SelectTrigger
-              className="bg-card w-44"
-              aria-label="Filter by status"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>All statuses</SelectItem>
-              {APPOINTMENT_STATUSES.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {appointmentStatusLabel(option)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        }
+        toolbar={null}
         columns={columns}
         data={appointments.data?.data ?? []}
         rowCount={appointments.data?.count ?? 0}
         isLoading={appointments.isLoading}
+        isFetching={appointments.isFetching}
+        isError={appointments.isError}
+        errorTitle="Appointments couldn't be loaded"
+        onRetry={() => appointments.refetch()}
+        empty={{
+          title: "No appointments yet",
+          description: "Requests show up here as soon as students book.",
+          icon: CalendarX,
+        }}
+        isFiltered={status !== ALL || debouncedSearch.trim() !== ""}
+        onClearFilters={() => {
+          setStatus(ALL);
+          setSearch("");
+          setPagination((current) => ({ ...current, pageIndex: 0 }));
+        }}
         pagination={pagination}
         onPaginationChange={setPagination}
         sorting={sorting}

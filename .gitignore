@@ -51,3 +51,6 @@ supabase/.temp/
 
 # seed placeholder photos (re-download with scripts/seed/download-images.mjs)
 scripts/seed/images/
+
+# local agent skills and rules
+.agents/

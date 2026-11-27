@@ -29,8 +29,12 @@ export function EmptyState({
   return (
     <Empty className={cn("rounded-2xl border border-dashed", className)}>
       <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Icon strokeWidth={1.25} />
+        {/* A plain icon, no grey tile, matching the bell's "all caught up" state. */}
+        <EmptyMedia
+          variant="icon"
+          className="text-muted-foreground bg-transparent"
+        >
+          <Icon strokeWidth={1.25} className="size-8" />
         </EmptyMedia>
         <EmptyTitle className="text-base">{title}</EmptyTitle>
         {description && <EmptyDescription>{description}</EmptyDescription>}

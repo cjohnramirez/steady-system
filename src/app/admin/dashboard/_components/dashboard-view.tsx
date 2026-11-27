@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ChartNoAxesColumn } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmptyState } from "@/components/app/empty-state";
+import { ErrorState } from "@/components/app/error-state";
 import { SectionCard } from "@/components/app/section-card";
 import { createClient } from "@/utils/supabase/client";
 import { fetchDashboardStats, lastDays } from "@/lib/admin/dashboard";
@@ -70,6 +73,14 @@ export default function DashboardView() {
             <dd className="mt-2 text-4xl tracking-tight tabular-nums">
               {stats.isLoading ? (
                 <Skeleton className="h-10 w-20" />
+              ) : stats.isError ? (
+                // A failed load must not read as a real zero.
+                <span
+                  className="text-muted-foreground"
+                  aria-label="Unavailable"
+                >
+                  –
+                </span>
               ) : (
                 (card.value ?? 0).toLocaleString()
               )}
@@ -84,7 +95,9 @@ export default function DashboardView() {
         description={
           stats.isLoading
             ? "Loading…"
-            : `${total.toLocaleString()} in the ${RANGES[range].toLowerCase()}`
+            : stats.isError
+              ? "Unavailable"
+              : `${total.toLocaleString()} in the ${RANGES[range].toLowerCase()}`
         }
         actions={
           <>
@@ -117,6 +130,19 @@ export default function DashboardView() {
       >
         {stats.isLoading ? (
           <Skeleton className="h-[360px] w-full rounded-xl" />
+        ) : stats.isError ? (
+          <ErrorState
+            title="The dashboard couldn't be loaded"
+            onRetry={() => stats.refetch()}
+            className="h-[360px]"
+          />
+        ) : total === 0 ? (
+          <EmptyState
+            icon={ChartNoAxesColumn}
+            title="No activity in this range"
+            description="Try a longer date range or another metric."
+            className="h-[360px]"
+          />
         ) : (
           <DashboardChart
             data={series}

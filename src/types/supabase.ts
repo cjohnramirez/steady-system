@@ -10,10 +10,96 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5";
+    PostgrestVersion: "14.17";
   };
   public: {
     Tables: {
+      action_item: {
+        Row: {
+          appointment_id: string | null;
+          counselor_id: string | null;
+          created_at: string;
+          due_date: string | null;
+          id: string;
+          is_completed: boolean;
+          student_id: string;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          appointment_id?: string | null;
+          counselor_id?: string | null;
+          created_at?: string;
+          due_date?: string | null;
+          id?: string;
+          is_completed?: boolean;
+          student_id: string;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          appointment_id?: string | null;
+          counselor_id?: string | null;
+          created_at?: string;
+          due_date?: string | null;
+          id?: string;
+          is_completed?: boolean;
+          student_id?: string;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "action_item_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "admin_appointment_audit";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_item_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "appointment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_item_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "appointment_with_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_item_counselor_id_fkey";
+            columns: ["counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_item_counselor_id_fkey";
+            columns: ["counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor_with_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_item_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "student";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "action_item_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "student_with_details";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       admin: {
         Row: {
           avatar: string;
@@ -115,37 +201,52 @@ export type Database = {
       };
       appointment: {
         Row: {
+          completed_at: string | null;
           counselor_id: string | null;
           created_at: string;
+          created_by_role: Database["public"]["Enums"]["app_role"];
+          duration_minutes: number;
           id: string;
           notes: string;
           reason: string;
           scheduled_at: string;
+          started_at: string | null;
           status: Database["public"]["Enums"]["appointment_status"];
           student_id: string | null;
           updated_at: string;
+          urgency: Database["public"]["Enums"]["urgency_level"];
         };
         Insert: {
+          completed_at?: string | null;
           counselor_id?: string | null;
           created_at?: string;
+          created_by_role?: Database["public"]["Enums"]["app_role"];
+          duration_minutes?: number;
           id?: string;
           notes?: string;
           reason?: string;
           scheduled_at: string;
+          started_at?: string | null;
           status?: Database["public"]["Enums"]["appointment_status"];
           student_id?: string | null;
           updated_at?: string;
+          urgency?: Database["public"]["Enums"]["urgency_level"];
         };
         Update: {
+          completed_at?: string | null;
           counselor_id?: string | null;
           created_at?: string;
+          created_by_role?: Database["public"]["Enums"]["app_role"];
+          duration_minutes?: number;
           id?: string;
           notes?: string;
           reason?: string;
           scheduled_at?: string;
+          started_at?: string | null;
           status?: Database["public"]["Enums"]["appointment_status"];
           student_id?: string | null;
           updated_at?: string;
+          urgency?: Database["public"]["Enums"]["urgency_level"];
         };
         Relationships: [
           {
@@ -222,6 +323,75 @@ export type Database = {
           },
         ];
       };
+      clinical_note: {
+        Row: {
+          appointment_id: string;
+          content: Json;
+          counselor_id: string;
+          created_at: string;
+          format: Database["public"]["Enums"]["note_format"];
+          id: string;
+          locked_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          appointment_id: string;
+          content?: Json;
+          counselor_id: string;
+          created_at?: string;
+          format?: Database["public"]["Enums"]["note_format"];
+          id?: string;
+          locked_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          appointment_id?: string;
+          content?: Json;
+          counselor_id?: string;
+          created_at?: string;
+          format?: Database["public"]["Enums"]["note_format"];
+          id?: string;
+          locked_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "clinical_note_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: true;
+            referencedRelation: "admin_appointment_audit";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "clinical_note_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: true;
+            referencedRelation: "appointment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "clinical_note_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: true;
+            referencedRelation: "appointment_with_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "clinical_note_counselor_id_fkey";
+            columns: ["counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "clinical_note_counselor_id_fkey";
+            columns: ["counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor_with_details";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       college: {
         Row: {
           abbreviation: string;
@@ -288,13 +458,20 @@ export type Database = {
       counselor: {
         Row: {
           avatar: string;
+          bio: string;
+          buffer_minutes: number;
+          contact_channels: Json;
           day_of_week: boolean[];
+          duty_status: Database["public"]["Enums"]["duty_status"];
           email: string;
           end_time: string;
           first_name: string;
           id: string;
           is_active: boolean | null;
           last_name: string;
+          lunch_end: string;
+          lunch_start: string;
+          office_room: string;
           phone: string;
           start_time: string;
           university_id: number;
@@ -303,13 +480,20 @@ export type Database = {
         };
         Insert: {
           avatar?: string;
+          bio?: string;
+          buffer_minutes?: number;
+          contact_channels?: Json;
           day_of_week?: boolean[];
+          duty_status?: Database["public"]["Enums"]["duty_status"];
           email: string;
           end_time?: string;
           first_name: string;
           id?: string;
           is_active?: boolean | null;
           last_name?: string;
+          lunch_end?: string;
+          lunch_start?: string;
+          office_room?: string;
           phone: string;
           start_time?: string;
           university_id: number;
@@ -318,13 +502,20 @@ export type Database = {
         };
         Update: {
           avatar?: string;
+          bio?: string;
+          buffer_minutes?: number;
+          contact_channels?: Json;
           day_of_week?: boolean[];
+          duty_status?: Database["public"]["Enums"]["duty_status"];
           email?: string;
           end_time?: string;
           first_name?: string;
           id?: string;
           is_active?: boolean | null;
           last_name?: string;
+          lunch_end?: string;
+          lunch_start?: string;
+          office_room?: string;
           phone?: string;
           start_time?: string;
           university_id?: number;
@@ -542,6 +733,7 @@ export type Database = {
         Row: {
           age: number | null;
           avatar: string;
+          consent_accepted_at: string | null;
           department_id: string;
           email: string;
           emotional_status_id: string | null;
@@ -561,6 +753,7 @@ export type Database = {
         Insert: {
           age?: number | null;
           avatar?: string;
+          consent_accepted_at?: string | null;
           department_id: string;
           email: string;
           emotional_status_id?: string | null;
@@ -580,6 +773,7 @@ export type Database = {
         Update: {
           age?: number | null;
           avatar?: string;
+          consent_accepted_at?: string | null;
           department_id?: string;
           email?: string;
           emotional_status_id?: string | null;
@@ -631,8 +825,149 @@ export type Database = {
         };
         Relationships: [];
       };
+      warm_referral: {
+        Row: {
+          appointment_id: string | null;
+          created_at: string;
+          external_clinic: string;
+          from_counselor_id: string;
+          id: string;
+          status: Database["public"]["Enums"]["referral_status"];
+          student_id: string;
+          summary: string;
+          to_counselor_id: string | null;
+          updated_at: string;
+          urgency: Database["public"]["Enums"]["urgency_level"];
+        };
+        Insert: {
+          appointment_id?: string | null;
+          created_at?: string;
+          external_clinic?: string;
+          from_counselor_id: string;
+          id?: string;
+          status?: Database["public"]["Enums"]["referral_status"];
+          student_id: string;
+          summary: string;
+          to_counselor_id?: string | null;
+          updated_at?: string;
+          urgency?: Database["public"]["Enums"]["urgency_level"];
+        };
+        Update: {
+          appointment_id?: string | null;
+          created_at?: string;
+          external_clinic?: string;
+          from_counselor_id?: string;
+          id?: string;
+          status?: Database["public"]["Enums"]["referral_status"];
+          student_id?: string;
+          summary?: string;
+          to_counselor_id?: string | null;
+          updated_at?: string;
+          urgency?: Database["public"]["Enums"]["urgency_level"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "warm_referral_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "admin_appointment_audit";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "appointment";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_appointment_id_fkey";
+            columns: ["appointment_id"];
+            isOneToOne: false;
+            referencedRelation: "appointment_with_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_from_counselor_id_fkey";
+            columns: ["from_counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_from_counselor_id_fkey";
+            columns: ["from_counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor_with_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "student";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "student_with_details";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_to_counselor_id_fkey";
+            columns: ["to_counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "warm_referral_to_counselor_id_fkey";
+            columns: ["to_counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor_with_details";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
+      admin_appointment_audit: {
+        Row: {
+          college_name: string | null;
+          counselor_id: string | null;
+          counselor_name: string | null;
+          created_at: string | null;
+          created_by_role: Database["public"]["Enums"]["app_role"] | null;
+          department_name: string | null;
+          duration_minutes: number | null;
+          has_warm_referral: boolean | null;
+          id: string | null;
+          obfuscated_student_code: string | null;
+          office_room: string | null;
+          scheduled_at: string | null;
+          status: Database["public"]["Enums"]["appointment_status"] | null;
+          updated_at: string | null;
+          urgency: Database["public"]["Enums"]["urgency_level"] | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "appointment_counselor_id_fkey";
+            columns: ["counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "appointment_counselor_id_fkey";
+            columns: ["counselor_id"];
+            isOneToOne: false;
+            referencedRelation: "counselor_with_details";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       appointment_with_details: {
         Row: {
           counselor_id: string | null;
@@ -898,7 +1233,11 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "rejected";
+      duty_status: "available" | "in_session" | "writing_notes" | "off_duty";
+      note_format: "soap" | "sap";
       notification_type: "appointment" | "announcement" | "system";
+      referral_status: "pending" | "accepted" | "declined" | "completed";
+      urgency_level: "low" | "medium" | "high";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -1091,7 +1430,11 @@ export const Constants = {
         "cancelled",
         "rejected",
       ],
+      duty_status: ["available", "in_session", "writing_notes", "off_duty"],
+      note_format: ["soap", "sap"],
       notification_type: ["appointment", "announcement", "system"],
+      referral_status: ["pending", "accepted", "declined", "completed"],
+      urgency_level: ["low", "medium", "high"],
     },
   },
 } as const;

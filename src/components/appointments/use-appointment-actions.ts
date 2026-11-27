@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransition } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useConfirm, type ConfirmOptions } from "@/hooks/use-confirm";
@@ -39,31 +38,36 @@ const COPY: Record<Decision, ConfirmOptions & { success: string }> = {
   },
 };
 
-/** Confirm, change the status, refresh every appointment list and the slot cache. */
+/**
+ * Confirm, change the status, refresh every appointment list and the slot cache.
+ * The confirm dialog shows the spinner and stays open until the lists are fresh.
+ */
 export function useAppointmentDecision() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
-  const [isPending, startTransition] = useTransition();
 
   const decide = async (id: string, decision: Decision) => {
     const { success, ...options } = COPY[decision];
-    if (!(await confirm(options))) return;
-
-    startTransition(async () => {
-      const result = await setAppointmentStatus(id, decision);
-      if (!result.ok) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success(success);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.appointments.all }),
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.availableSlots.all,
-        }),
-      ]);
+    await confirm({
+      ...options,
+      action: async () => {
+        const result = await setAppointmentStatus(id, decision);
+        if (!result.ok) {
+          toast.error(result.error);
+          return;
+        }
+        toast.success(success);
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.appointments.all,
+          }),
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.availableSlots.all,
+          }),
+        ]);
+      },
     });
   };
 
-  return { decide, isPending };
+  return { decide };
 }

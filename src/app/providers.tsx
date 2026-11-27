@@ -7,10 +7,15 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+import { LazyMotion, MotionConfig } from "motion/react";
 import { ThemeProvider } from "next-themes";
 import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PrivacyShieldProvider } from "@/components/app/privacy-shield";
 import { toErrorMessage } from "@/lib/result";
+
+const loadMotionFeatures = () =>
+  import("motion/react").then((mod) => mod.domAnimation);
 
 export default function Providers({
   children,
@@ -21,9 +26,6 @@ export default function Providers({
         defaultOptions: {
           queries: { staleTime: 60 * 1000, retry: 1 },
         },
-        // One place that tells the user a load failed, so a list that could not load
-        // is not mistaken for an empty one. Background refetch failures stay quiet
-        // when there is already data on screen.
         queryCache: new QueryCache({
           onError: (error, query) => {
             if (query.state.data !== undefined) return;
@@ -32,7 +34,6 @@ export default function Providers({
             );
           },
         }),
-        // Mutations with their own onError handle their own messages.
         mutationCache: new MutationCache({
           onError: (error, _vars, _ctx, mutation) => {
             if (mutation.options.onError) return;
@@ -43,17 +44,21 @@ export default function Providers({
   );
 
   return (
-    // The theme is a class on <html> ("light", "dark"), defaulting to the device
-    // setting. next-themes sets it before paint, so there is no flash.
     <ThemeProvider
       attribute="class"
       defaultTheme="system"
       enableSystem
       disableTransitionOnChange
     >
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
-      </QueryClientProvider>
+      <MotionConfig reducedMotion="user">
+        <LazyMotion features={loadMotionFeatures} strict>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider delayDuration={300}>
+              <PrivacyShieldProvider>{children}</PrivacyShieldProvider>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </LazyMotion>
+      </MotionConfig>
     </ThemeProvider>
   );
 }

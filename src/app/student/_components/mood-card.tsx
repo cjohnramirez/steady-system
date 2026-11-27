@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { ErrorState } from "@/components/app/error-state";
 import { SectionCard } from "@/components/app/section-card";
 import { useSignedInViewer } from "@/components/viewer-provider";
 import { createClient } from "@/utils/supabase/client";
@@ -27,6 +29,7 @@ export default function MoodCard() {
   const queryClient = useQueryClient();
   const supabase = useMemo(() => createClient(), []);
   const [isPending, startTransition] = useTransition();
+  const [choosing, setChoosing] = useState<string | null>(null);
 
   const moods = useQuery({
     queryKey: queryKeys.emotionalStatus,
@@ -39,6 +42,7 @@ export default function MoodCard() {
 
   const choose = (id: string) => {
     if (!id || id === current) return;
+    setChoosing(id);
     startTransition(async () => {
       const result = await updateOwnEmotionalStatus(id);
       if (!result.ok) {
@@ -64,6 +68,11 @@ export default function MoodCard() {
             <Skeleton key={index} className="h-9" />
           ))}
         </div>
+      ) : moods.isError ? (
+        <ErrorState
+          title="Moods couldn't be loaded"
+          onRetry={() => moods.refetch()}
+        />
       ) : (
         <ToggleGroup
           type="single"
@@ -81,6 +90,7 @@ export default function MoodCard() {
               value={mood.id}
               className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
+              {isPending && choosing === mood.id && <Spinner aria-hidden />}
               {strToTitleCase(mood.name)}
             </ToggleGroupItem>
           ))}
