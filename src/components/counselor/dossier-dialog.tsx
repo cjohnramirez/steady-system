@@ -1,34 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import {
-  Calendar,
-  Check,
-  GraduationCap,
-  Mail,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
+import Link from "next/link";
+import { CalendarPlus, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { UserAvatar } from "@/components/app/user-avatar";
-import { PillTabs } from "@/components/app/pill-tabs";
-import { StatusBadge } from "@/components/app/status-badge";
-import {
-  createActionItem,
-  deleteActionItem,
-  toggleActionItem,
-} from "@/lib/actions/clinical";
 import type { ActionPlanItem } from "@/components/student/action-plan-card";
-import { cn } from "@/lib/utils";
 
 export interface StudentDossierRecord {
   id: string;
@@ -38,6 +20,12 @@ export interface StudentDossierRecord {
   department?: string | null;
   yearLevel?: number | null;
   emotionalStatus?: string | null;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  primaryReason?: string | null;
+  previousNoteSummary?: string | null;
+  completedSessions?: number;
+  totalSessions?: number;
   actionItems?: ActionPlanItem[];
   recentSessions?: {
     id: string;
@@ -47,279 +35,153 @@ export interface StudentDossierRecord {
   }[];
 }
 
-const TABS = [
-  { value: "overview", label: "Overview" },
-  { value: "plan", label: "Action Plan" },
-  { value: "sessions", label: "Sessions" },
-] as const;
-
 export function DossierDialog({
   open,
   onOpenChange,
   student,
-  previewOnly = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   student: StudentDossierRecord | null;
   previewOnly?: boolean;
 }) {
-  const [tab, setTab] = useState<(typeof TABS)[number]["value"]>("overview");
-  const [items, setItems] = useState<ActionPlanItem[]>(
-    student?.actionItems ?? [],
-  );
-  const [newTitle, setNewTitle] = useState("");
-  const [newDue, setNewDue] = useState("");
-  const [isPending, startTransition] = useTransition();
-
   if (!student) return null;
 
-  function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    const title = newTitle.trim();
-    if (!title || !student) return;
-
-    if (previewOnly) {
-      setItems((prev) => [
-        {
-          id: `preview-${Date.now()}`,
-          title,
-          is_completed: false,
-          due_date: newDue || null,
-        },
-        ...prev,
-      ]);
-      setNewTitle("");
-      setNewDue("");
-      toast.success("Action step added (preview)");
-      return;
-    }
-
-    startTransition(async () => {
-      const res = await createActionItem({
-        student_id: student.id,
-        title,
-        due_date: newDue || undefined,
-      });
-      if (!res.ok) {
-        toast.error(res.error);
-        return;
-      }
-      setItems((prev) => [res.data, ...prev]);
-      setNewTitle("");
-      setNewDue("");
-      toast.success("Action step shared with student");
-    });
-  }
-
-  function handleToggle(item: ActionPlanItem) {
-    const next = !item.is_completed;
-    setItems((prev) =>
-      prev.map((row) =>
-        row.id === item.id ? { ...row, is_completed: next } : row,
-      ),
-    );
-    if (previewOnly) return;
-
-    startTransition(async () => {
-      const res = await toggleActionItem({ id: item.id, is_completed: next });
-      if (!res.ok) {
-        setItems((prev) =>
-          prev.map((row) =>
-            row.id === item.id
-              ? { ...row, is_completed: item.is_completed }
-              : row,
-          ),
-        );
-        toast.error(res.error);
-      }
-    });
-  }
-
-  function handleDelete(id: string) {
-    const previous = items;
-    setItems((prev) => prev.filter((row) => row.id !== id));
-    if (previewOnly) return;
-
-    startTransition(async () => {
-      const res = await deleteActionItem(id);
-      if (!res.ok) {
-        setItems(previous);
-        toast.error(res.error);
-      }
-    });
-  }
+  const total =
+    student.totalSessions ?? Math.max(student.actionItems?.length ?? 0, 1);
+  const completed =
+    student.completedSessions ??
+    student.actionItems?.filter((i) => i.is_completed).length ??
+    0;
+  const pct = Math.min(100, Math.round((completed / Math.max(total, 1)) * 100));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <div className="flex items-center gap-3.5 text-left">
-            <UserAvatar
-              name={student.name}
-              className="size-12 shrink-0 rounded-[14px]"
-            />
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="privacy-sensitive truncate">
-                {student.name}
-              </DialogTitle>
-              <DialogDescription className="privacy-sensitive truncate">
-                {student.universityId ?? "ID —"} •{" "}
-                {student.department ?? "Department"} • Year{" "}
-                {student.yearLevel ?? "—"}
-              </DialogDescription>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[577px]">
+        {/* Header (Figma 678:18090) */}
+        <div className="border-border flex items-center gap-5 border-b p-5 pr-12">
+          <UserAvatar
+            name={student.name}
+            className="bg-positive text-positive-foreground size-[51px] shrink-0 rounded-[10px]"
+          />
+          <div className="min-w-0 flex-1 space-y-0.5 text-left">
+            <DialogTitle className="privacy-sensitive truncate text-[15px] font-medium">
+              {student.name}
+            </DialogTitle>
+            <DialogDescription className="text-foreground/80 privacy-sensitive flex flex-wrap items-center gap-2.5 text-[15px]">
+              <span>{student.universityId ?? "ID —"}</span>
+              <span aria-hidden className="bg-border inline-block h-4 w-px" />
+              <span>
+                {student.department ?? "Department"}
+                {student.yearLevel ? `, Year ${student.yearLevel}` : ""}
+              </span>
+            </DialogDescription>
+          </div>
+        </div>
+
+        {/* Section 1: Emergency Contact Card + Reason & Emotion (Figma 678:18104) */}
+        <div className="border-border space-y-5 border-b p-5">
+          <div className="bg-card border-border shadow-steady-card space-y-1.5 rounded-[20px] border p-5">
+            <p className="text-[15px] font-medium">Emergency Contact on File</p>
+            <div className="text-foreground/80 privacy-sensitive flex flex-wrap items-center gap-2.5 text-[15px]">
+              <span>
+                {student.emergencyContactName ?? "No emergency contact on file"}
+              </span>
+              {student.emergencyContactPhone && (
+                <>
+                  <span
+                    aria-hidden
+                    className="bg-border inline-block h-4 w-px"
+                  />
+                  <span>{student.emergencyContactPhone}</span>
+                </>
+              )}
             </div>
           </div>
-        </DialogHeader>
 
-        <PillTabs
-          ariaLabel="Student dossier sections"
-          options={TABS}
-          value={tab}
-          onChange={setTab}
-        />
-
-        {tab === "overview" && (
-          <div className="space-y-4 pt-1">
-            <div className="bg-muted/60 border-border grid gap-3 rounded-[16px] border p-4 text-sm sm:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <Mail className="text-primary size-4 shrink-0" />
-                <span className="privacy-sensitive truncate">
-                  {student.email ?? "No email recorded"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="text-primary size-4 shrink-0" />
-                <span>
-                  {student.department ?? "Unassigned"} (Year{" "}
-                  {student.yearLevel ?? "—"})
-                </span>
-              </div>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-[15px] font-medium">
+                Primary Reason for Consultation
+              </p>
+              <p className="text-foreground/80 privacy-sensitive text-[15px]">
+                {student.primaryReason ??
+                  "General academic & wellness check-in"}
+              </p>
             </div>
-
             {student.emotionalStatus && (
-              <div className="bg-brand-subtle/60 border-border flex items-center justify-between rounded-[16px] border px-4 py-3 text-sm">
-                <span className="text-muted-foreground">
-                  Latest Mood Check-in
-                </span>
-                <span className="bg-brand-subtle text-brand-subtle-foreground rounded-full px-3 py-0.5 text-xs font-medium">
+              <div className="space-y-1.5">
+                <p className="text-[15px] font-medium">Emotion</p>
+                <span className="bg-warning/20 text-warning inline-flex items-center justify-center rounded-[35px] px-3 py-1 text-[14px] font-medium">
                   {student.emotionalStatus}
                 </span>
               </div>
             )}
           </div>
-        )}
+        </div>
 
-        {tab === "plan" && (
-          <div className="space-y-4 pt-1">
-            <form
-              onSubmit={handleAdd}
-              className="flex flex-col gap-2 sm:flex-row"
-            >
-              <Input
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Assign a gentle follow-up step..."
-                className="flex-1"
-              />
-              <Input
-                type="date"
-                aria-label="Target due date"
-                value={newDue}
-                onChange={(e) => setNewDue(e.target.value)}
-                className="sm:w-40"
-              />
-              <Button type="submit" disabled={isPending || !newTitle.trim()}>
-                <Plus className="size-4" />
-                Add
-              </Button>
-            </form>
-
-            {items.length === 0 ? (
-              <p className="text-muted-foreground py-6 text-center text-sm">
-                No action plan steps assigned yet.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {items.map((item) => (
-                  <li
-                    key={item.id}
-                    className="border-border flex items-center gap-3 rounded-[14px] border p-3"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => handleToggle(item)}
-                      aria-label={`Mark "${item.title}" ${item.is_completed ? "incomplete" : "complete"}`}
-                      className={cn(
-                        "flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
-                        item.is_completed
-                          ? "border-positive bg-positive text-positive-foreground"
-                          : "border-input bg-card",
-                      )}
-                    >
-                      {item.is_completed && <Check className="size-3.5" />}
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <p
-                        className={cn(
-                          "truncate text-sm font-medium",
-                          item.is_completed &&
-                            "text-muted-foreground line-through",
-                        )}
-                      >
-                        {item.title}
-                      </p>
-                      {item.due_date && (
-                        <p className="text-muted-foreground text-xs">
-                          Due {item.due_date}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Remove action step"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      <Trash2 className="text-destructive size-4" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            )}
+        {/* Section 2: Previous Session Notes + View Sessions (Figma 678:18120) */}
+        <div className="border-border flex flex-col gap-4 border-b p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-[300px] space-y-1">
+            <p className="text-[15px] font-medium">Previous Session Notes</p>
+            <p className="text-foreground/80 privacy-sensitive text-[15px] leading-snug">
+              {student.previousNoteSummary ??
+                "No clinical summary recorded from prior sessions yet."}
+            </p>
           </div>
-        )}
+          <Button
+            variant="outline"
+            asChild
+            onClick={() => onOpenChange(false)}
+            className="shrink-0"
+          >
+            <Link href="/counselor/appointments">
+              <ExternalLink className="size-3.5" />
+              View Sessions
+            </Link>
+          </Button>
+        </div>
 
-        {tab === "sessions" && (
-          <div className="space-y-2.5 pt-1">
-            {!student.recentSessions || student.recentSessions.length === 0 ? (
-              <p className="text-muted-foreground py-6 text-center text-sm">
-                No recent counseling sessions recorded yet.
-              </p>
-            ) : (
-              student.recentSessions.map((session) => (
-                <div
-                  key={session.id}
-                  className="border-border flex items-center justify-between gap-3 rounded-[14px] border p-3.5"
-                >
-                  <div className="min-w-0 space-y-0.5">
-                    <p className="flex items-center gap-1.5 text-sm font-medium">
-                      <Calendar className="text-primary size-3.5" />
-                      {session.dateLabel}
-                    </p>
-                    {session.reason && (
-                      <p className="text-muted-foreground privacy-sensitive truncate text-xs">
-                        {session.reason}
-                      </p>
-                    )}
-                  </div>
-                  <StatusBadge status={session.status} />
-                </div>
-              ))
-            )}
+        {/* Section 3: Session Progress (Figma 678:18129) */}
+        <div className="border-border space-y-4 border-b p-5">
+          <div className="flex items-center justify-between gap-2 text-[15px]">
+            <p className="font-medium">Session Progress</p>
+            <p className="text-foreground/80">
+              {completed} out of {total} sessions completed
+            </p>
           </div>
-        )}
+          <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+            <div
+              className="bg-positive h-full rounded-full transition-[width] duration-300"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-muted-foreground text-[14px] leading-snug">
+            A session is considered complete if its Shared Action Plan are all
+            accomplished.
+          </p>
+        </div>
+
+        {/* Gray Footer Band (Figma 678:18138) */}
+        <div className="bg-muted/60 flex items-center justify-between p-5">
+          <Button
+            variant="positive"
+            asChild
+            onClick={() => onOpenChange(false)}
+          >
+            <Link href="/counselor/appointments">
+              <CalendarPlus className="size-4" />
+              Book Slot
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Close Dossier
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
