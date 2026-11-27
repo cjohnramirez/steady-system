@@ -47,13 +47,13 @@ const STUDENT_GROUPS: readonly SidebarNavGroupDef[] = [
   {
     title: "Self-Care & Resources",
     items: [
-      { href: "/portal", label: "Wellness & Audio", icon: BookOpen },
+      { href: "/student/wellness", label: "Wellness & Audio", icon: BookOpen },
       {
         href: "/student/profile",
         label: "Profile & Contacts",
         icon: UserCircle,
       },
-      { href: "/home", label: "Public Home", icon: CalendarDays },
+      { href: "/portal", label: "Public Portal", icon: CalendarDays },
     ],
   },
 ];

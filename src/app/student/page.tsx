@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { LinkPending } from "@/components/app/link-pending";
 import { PageHeader } from "@/components/app/page-header";
 import { guardPage } from "@/lib/auth/session";
+import { createClient } from "@/utils/supabase/server";
+import { ActionPlanCard } from "@/components/student/action-plan-card";
 import ProfileSection from "./_components/profile-section";
 import MoodCard from "./_components/mood-card";
 import QuickLinks from "./_components/quick-links";
@@ -15,6 +17,13 @@ export const metadata: Metadata = { title: "My dashboard" };
 export default async function StudentPage() {
   // Cached per request, so this reuses the layout's lookup.
   const viewer = await guardPage("student");
+  const supabase = await createClient();
+  const { data: actionItems } = await supabase
+    .from("action_item")
+    .select("id, title, is_completed, due_date")
+    .eq("student_id", viewer.profileId)
+    .order("created_at", { ascending: false })
+    .limit(8);
 
   return (
     <div className="flex flex-col gap-6 md:gap-8">
@@ -39,6 +48,7 @@ export default async function StudentPage() {
         </div>
         <ProfileSection className="xl:col-span-2" />
       </div>
+      <ActionPlanCard initialItems={actionItems ?? []} />
       <StudentAppointmentSection />
     </div>
   );

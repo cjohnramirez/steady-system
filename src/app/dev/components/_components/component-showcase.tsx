@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { EyeOff, ShieldAlert, UserPlus, Wind } from "lucide-react";
+import {
+  BookOpen,
+  EyeOff,
+  FolderOpen,
+  ShieldAlert,
+  UserCheck,
+  UserPlus,
+  Wind,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,8 +22,12 @@ import { Stepper } from "@/components/app/stepper";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { usePrivacyShield } from "@/components/app/privacy-shield";
 import { BreathingPacerDialog } from "@/components/student/breathing-pacer-dialog";
+import { ActionPlanCard } from "@/components/student/action-plan-card";
+import { CounselorDetailsDialog } from "@/components/student/counselor-details-dialog";
+import { ArticleReaderDialog } from "@/components/student/article-reader-dialog";
 import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 import { WarmReferralDialog } from "@/components/counselor/warm-referral-dialog";
+import { DossierDialog } from "@/components/counselor/dossier-dialog";
 import { SessionCard } from "@/components/counselor/session-card";
 import { BrandMark } from "@/components/app/brand-mark";
 
@@ -33,6 +45,9 @@ export function ComponentShowcase() {
   const [breathingOpen, setBreathingOpen] = useState(false);
   const [crisisOpen, setCrisisOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
+  const [counselorOpen, setCounselorOpen] = useState(false);
+  const [articleOpen, setArticleOpen] = useState(false);
+  const [dossierOpen, setDossierOpen] = useState(false);
   const { enabled: privacyOn, toggle: togglePrivacy } = usePrivacyShield();
 
   return (
@@ -192,12 +207,50 @@ export function ComponentShowcase() {
               <UserPlus className="text-primary size-4" />
               Open Warm Referral Dialog
             </Button>
+            <Button variant="outline" onClick={() => setCounselorOpen(true)}>
+              <UserCheck className="text-primary size-4" />
+              Open Counselor Details
+            </Button>
+            <Button variant="outline" onClick={() => setArticleOpen(true)}>
+              <BookOpen className="text-primary size-4" />
+              Open Article Reader
+            </Button>
+            <Button variant="outline" onClick={() => setDossierOpen(true)}>
+              <FolderOpen className="text-primary size-4" />
+              Open Student Dossier
+            </Button>
             <Button variant="destructive" onClick={() => setCrisisOpen(true)}>
               <ShieldAlert className="size-4" />
               Open Crisis Support Dialog
             </Button>
           </div>
         </SectionCard>
+
+        {/* Tier 2: Student Post-Session Action Plan */}
+        <ActionPlanCard
+          previewOnly
+          initialItems={[
+            {
+              id: "demo-1",
+              title: "Practice 4-7-8 breathing for 3 minutes before sleeping",
+              is_completed: true,
+              due_date: "2026-12-01",
+            },
+            {
+              id: "demo-2",
+              title:
+                "Break down the hydraulics lab into 25-minute Pomodoro blocks",
+              is_completed: false,
+              due_date: "2026-12-03",
+            },
+            {
+              id: "demo-3",
+              title: "Log energy levels after midday lunch for 3 days",
+              is_completed: false,
+              due_date: "2026-12-05",
+            },
+          ]}
+        />
 
         {/* Tier 2: Counselor SessionCard */}
         <SessionCard
@@ -243,6 +296,80 @@ export function ComponentShowcase() {
             name: "Dr. Luis Ramos, RGC",
           },
         ]}
+      />
+      <CounselorDetailsDialog
+        open={counselorOpen}
+        onOpenChange={setCounselorOpen}
+        counselor={{
+          id: "22222222-2222-2222-2222-222222222222",
+          name: "Dr. Clara Mendoza, RGC",
+          department: "College of Engineering & Architecture",
+          email: "clara.mendoza@steady.edu",
+          officeRoom: "Guidance Center, Room 204",
+          dutyStatus: "available",
+          officeHours: "Mon – Fri, 8:00 AM – 5:00 PM",
+          bio: "Registered Guidance Counselor specializing in academic stress, burnout recovery, and transition coaching for engineering students.",
+        }}
+      />
+      <ArticleReaderDialog
+        open={articleOpen}
+        onOpenChange={setArticleOpen}
+        onOpenBreathing={() => setBreathingOpen(true)}
+        article={{
+          id: "demo-art-1",
+          title: "Resetting Exam Overwhelm in Five Minutes",
+          author: "Dr. Clara Mendoza, RGC",
+          mood: "Anxious",
+          readMinutes: 3,
+          summary:
+            "Short physiological resets lower cortisol faster than pushing through fatigue.",
+          body: [
+            "When deadlines pile up, your nervous system treats an overflowing syllabus like a physical threat. Trying to force concentration while your heart rate is elevated usually backfires.",
+            "Before opening your notes, take three slow 4-7-8 breathing cycles and write down just one concrete 20-minute task. Momentum follows regulation, not the other way around.",
+          ],
+        }}
+      />
+      <DossierDialog
+        open={dossierOpen}
+        onOpenChange={setDossierOpen}
+        previewOnly
+        student={{
+          id: "11111111-1111-1111-1111-111111111111",
+          name: "Marcus Vance",
+          email: "marcus.vance@steady.edu",
+          universityId: "2023-304-9124",
+          department: "BS Computer Engineering",
+          yearLevel: 3,
+          emotionalStatus: "Anxious",
+          actionItems: [
+            {
+              id: "d-1",
+              title: "Complete 3 breathing resets before midterms",
+              is_completed: true,
+              due_date: "2026-12-01",
+            },
+            {
+              id: "d-2",
+              title: "Share revised study schedule at next check-in",
+              is_completed: false,
+              due_date: "2026-12-06",
+            },
+          ],
+          recentSessions: [
+            {
+              id: "s-1",
+              dateLabel: "Nov 21, 2026 • 1:00 PM",
+              status: "completed",
+              reason: "Midterm burnout and sleep schedule disruption",
+            },
+            {
+              id: "s-2",
+              dateLabel: "Dec 04, 2026 • 2:00 PM",
+              status: "approved",
+              reason: "Follow-up on study pacing and sleep log",
+            },
+          ],
+        }}
       />
     </div>
   );

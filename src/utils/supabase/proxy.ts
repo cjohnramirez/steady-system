@@ -16,7 +16,16 @@ import {
  *
  * `/portal` is here deliberately: the resource library is public by design.
  */
-const PUBLIC_PREFIXES = ["/auth", "/home", "/misc", "/portal", "/error"];
+const PUBLIC_PREFIXES = [
+  "/auth",
+  "/home",
+  "/misc",
+  "/portal",
+  "/error",
+  "/dev/components",
+  "/robots.txt",
+  "/sitemap.xml",
+];
 
 function isPublic(pathname: string): boolean {
   return (

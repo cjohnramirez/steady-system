@@ -4,8 +4,9 @@ import { createClient } from "@/utils/supabase/server";
 import { PageHeader } from "@/components/app/page-header";
 import { SectionCard } from "@/components/app/section-card";
 import { EmptyState } from "@/components/app/empty-state";
-import { UserAvatar } from "@/components/app/user-avatar";
 import { PageTransition } from "@/components/motion/primitives";
+import { StudentDossierGrid } from "./_components/student-dossier-grid";
+import type { StudentDossierRecord } from "@/components/counselor/dossier-dialog";
 
 export const metadata: Metadata = {
   title: "Student Dossier",
@@ -13,62 +14,68 @@ export const metadata: Metadata = {
 
 export default async function CounselorStudentsPage() {
   const supabase = await createClient();
-  const { data: students } = await supabase
-    .from("student_with_details")
-    .select(
-      "id, first_name, last_name, email, university_id, year_level, department, emotional_status",
-    )
-    .order("last_name", { ascending: true })
-    .limit(60);
+  const [{ data: students }, { data: actionItems }] = await Promise.all([
+    supabase
+      .from("student_with_details")
+      .select(
+        "id, first_name, last_name, email, university_id, year_level, department, emotional_status",
+      )
+      .order("last_name", { ascending: true })
+      .limit(60),
+    supabase
+      .from("action_item")
+      .select("id, student_id, title, is_completed, due_date")
+      .order("created_at", { ascending: false })
+      .limit(200),
+  ]);
+
+  const itemsByStudent = new Map<
+    string,
+    NonNullable<StudentDossierRecord["actionItems"]>
+  >();
+  for (const item of actionItems ?? []) {
+    const list = itemsByStudent.get(item.student_id) ?? [];
+    list.push({
+      id: item.id,
+      title: item.title,
+      is_completed: item.is_completed,
+      due_date: item.due_date,
+    });
+    itemsByStudent.set(item.student_id, list);
+  }
+
+  const records: StudentDossierRecord[] = (students ?? [])
+    .filter((s): s is typeof s & { id: string } => Boolean(s.id))
+    .map((s) => ({
+      id: s.id,
+      name: `${s.first_name ?? ""} ${s.last_name ?? ""}`.trim() || "Student",
+      email: s.email,
+      universityId: s.university_id,
+      department: s.department,
+      yearLevel: s.year_level,
+      emotionalStatus: s.emotional_status,
+      actionItems: itemsByStudent.get(s.id) ?? [],
+    }));
 
   return (
     <PageTransition className="flex flex-col gap-6">
       <PageHeader
         title="Student Dossier & Caseload"
-        description="Students enrolled in your assigned academic departments. Press P anytime to activate Desk Privacy."
+        description="Click any student to view their dossier and assign follow-up action steps. Press P anytime for Desk Privacy."
       />
 
       <SectionCard
         title="Assigned Department Students"
-        description={`${students?.length ?? 0} students visible under your counselor scope.`}
+        description={`${records.length} students visible under your counselor scope.`}
       >
-        {!students || students.length === 0 ? (
+        {records.length === 0 ? (
           <EmptyState
             icon={Users}
             title="No students in your departments yet"
             description="Once students register under your assigned departments, their profiles will appear here."
           />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {students.map((s) => {
-              const name = `${s.first_name ?? ""} ${s.last_name ?? ""}`.trim();
-              return (
-                <div
-                  key={s.id}
-                  className="bg-muted/60 border-border flex items-start gap-3.5 rounded-[18px] border p-4"
-                >
-                  <UserAvatar
-                    name={name || "Student"}
-                    className="size-11 shrink-0 rounded-[12px]"
-                  />
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="privacy-sensitive truncate font-medium">
-                      {name || "Unnamed Student"}
-                    </p>
-                    <p className="text-muted-foreground privacy-sensitive truncate text-xs">
-                      {s.university_id} • {s.department ?? "Department"} • Year{" "}
-                      {s.year_level ?? "—"}
-                    </p>
-                    {s.emotional_status && (
-                      <span className="bg-brand-subtle text-brand-subtle-foreground inline-block rounded-full px-2.5 py-0.5 text-xs font-medium">
-                        {s.emotional_status}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <StudentDossierGrid students={records} />
         )}
       </SectionCard>
     </PageTransition>

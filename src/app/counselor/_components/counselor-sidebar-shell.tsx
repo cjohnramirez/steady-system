@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import {
   BarChart3,
   CalendarClock,
@@ -9,12 +9,15 @@ import {
   ShieldAlert,
   Users,
 } from "lucide-react";
+import { toast } from "sonner";
 import {
   RoleSidebarShell,
   type SidebarNavGroupDef,
 } from "@/components/app/role-sidebar";
 import { Button } from "@/components/ui/button";
 import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
+import { updateDutyStatus } from "@/lib/actions/clinical";
+import type { DUTY_STATUSES } from "@/lib/validation/clinical";
 
 const COUNSELOR_GROUPS: readonly SidebarNavGroupDef[] = [
   {
@@ -75,11 +78,26 @@ export function CounselorSidebarShell({
   userAvatar?: string | null;
   children: ReactNode;
 }) {
-  const [duty, setDuty] = useState<string>("available");
+  const [duty, setDuty] = useState<(typeof DUTY_STATUSES)[number]>("available");
   const [crisisOpen, setCrisisOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const currentDuty =
     DUTY_OPTIONS.find((d) => d.value === duty) ?? DUTY_OPTIONS[1];
+
+  function handleDutyChange(next: (typeof DUTY_STATUSES)[number]) {
+    const prev = duty;
+    setDuty(next);
+    startTransition(async () => {
+      const res = await updateDutyStatus(next);
+      if (!res.ok) {
+        setDuty(prev);
+        toast.error(res.error);
+      } else {
+        toast.success("Duty status updated");
+      }
+    });
+  }
 
   return (
     <>
@@ -100,8 +118,13 @@ export function CounselorSidebarShell({
             <select
               aria-label="Counselor duty status"
               value={duty}
-              onChange={(e) => setDuty(e.target.value)}
-              className="w-full cursor-pointer bg-transparent text-sm outline-none"
+              disabled={isPending}
+              onChange={(e) =>
+                handleDutyChange(
+                  e.target.value as (typeof DUTY_STATUSES)[number],
+                )
+              }
+              className="w-full cursor-pointer bg-transparent text-sm outline-none disabled:opacity-60"
             >
               {DUTY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
