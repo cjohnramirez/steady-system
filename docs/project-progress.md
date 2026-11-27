@@ -54,10 +54,16 @@
 - [x] Aligned `ConfirmDialog` to Figma `ApproveDialog` (`678:19057`) & `DeclineDialog` (`678:19078`).
 - [x] Wired live `ProposeBookingTrigger` into `/counselor` and exposed both new dialogs on `/dev/components`.
 
+### Milestone 6.5 — Custom Figma Dropdown, Animated Mascot & Dialog Scroll Lock (Complete)
+
+- [x] Restyled `Select` (`src/components/ui/select.tsx`) to match Figma Status Dropdown (`678:19099`) with symmetrical `px-5` left/right trigger padding and replaced native `<select>` elements in `WarmReferralDialog`, `ProposedBookingDialog`, and `CounselorSidebarShell`.
+- [x] Built `<SteadyMascot />` (`src/components/app/steady-mascot.tsx`) from exact Figma vector (`678:17585`) with natural eye blinking and cursor-proximity tracking (`260px` radius), and wired it as the default Brand Blue avatar in `UserAvatar`.
+- [x] Locked static headers & footers with scrollable center bodies (`flex max-h-[85vh] flex-col` + `min-h-0 flex-1 overflow-y-auto`) across all 7 dialogs.
+- [x] Exposed interactive Mascot & Custom Dropdown demos at the top of `/dev/components`.
+
 ---
 
 ## Upcoming Milestones
 
-- [ ] **Milestone 6.5 — Brand Logos & Animated Mascot (Deliberation Required):** Extract exact Figma logos and mascot SVG/artwork, add to `/dev/components`, and deliberate deeply on mascot animations (idle breathing/bobbing, mood-reactive expressions, hover interactions, reduced-motion fallbacks).
 - [ ] **Milestone 7 — Student 4-Step Booking Wizard & Auth Polish:** Upgrade `/student/appointment` to the 4-step `Stepper` wizard with `CounselorDetailsDialog` & `ReasonTile`, and polish `/auth/login/[role]` & `/auth/signup/student` 1:1 with Figma.
 - [ ] **Milestone 8 — Admin Audit View, Analytics & Full Responsive QA:** Wire `/admin/appointments` to `admin_appointment_audit` view with CSV export, add Counselor Analytics charts (`/counselor/analytics`), and verify `390px` / `768px` / `1440px` across Light & Dark modes.

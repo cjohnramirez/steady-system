@@ -17,7 +17,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SectionCard } from "@/components/app/section-card";
+import { SteadyMascot } from "@/components/app/steady-mascot";
+import { UserAvatar } from "@/components/app/user-avatar";
 import { StatusBadge, UrgencyBadge } from "@/components/app/status-badge";
 import { PillTabs } from "@/components/app/pill-tabs";
 import { Stepper } from "@/components/app/stepper";
@@ -44,6 +55,7 @@ const STEPS = [
 
 export function ComponentShowcase() {
   const [tab, setTab] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("pending");
   const [step, setStep] = useState(0);
   const [switchOn, setSwitchOn] = useState(true);
   const [breathingOpen, setBreathingOpen] = useState(false);
@@ -80,6 +92,81 @@ export function ComponentShowcase() {
             <ThemeToggle />
           </div>
         </header>
+
+        {/* Tier 0: Brand Mascot & Custom Figma Dropdown */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SectionCard
+            title="0. Animated Brand Mascot (Default Profile Pic)"
+            description="Move your cursor near the mascots to test proximity tracking and natural blinking."
+          >
+            <div className="flex flex-wrap items-end gap-5">
+              <div className="flex flex-col items-center gap-2">
+                <UserAvatar
+                  name="Maria dela Cruz"
+                  className="size-[51px] rounded-[10px]"
+                />
+                <span className="text-muted-foreground text-xs">
+                  Default (51px)
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <UserAvatar
+                  name="Marcus Vance"
+                  className="size-[84px] rounded-[20px]"
+                />
+                <span className="text-muted-foreground text-xs">
+                  Medium (84px)
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="size-[120px] overflow-hidden rounded-[28px]">
+                  <SteadyMascot tone="blue" />
+                </div>
+                <span className="text-muted-foreground text-xs">
+                  Hero Blue (120px)
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="size-[84px] overflow-hidden rounded-[20px]">
+                  <SteadyMascot tone="emerald" />
+                </div>
+                <span className="text-muted-foreground text-xs">
+                  Emerald Variant
+                </span>
+              </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            title="Custom Figma Dropdown (678:19099)"
+            description="Symmetrical left/right trigger padding with Figma rounded-[15px] popover."
+          >
+            <div className="flex flex-wrap items-center gap-4">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[233px]">
+                  <SelectValue placeholder="Filter status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Status</SelectLabel>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="rescheduled">Rescheduled</SelectItem>
+                    <SelectItem value="declined">
+                      Declined and Referred
+                    </SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <span className="text-muted-foreground text-sm">
+                Selected:{" "}
+                <strong className="text-foreground">{statusFilter}</strong>
+              </span>
+            </div>
+          </SectionCard>
+        </div>
 
         {/* Tier 1: Buttons */}
         <SectionCard

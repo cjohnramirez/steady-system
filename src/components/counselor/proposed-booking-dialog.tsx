@@ -11,6 +11,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createManualBooking } from "@/lib/actions/clinical";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +94,7 @@ export function ProposedBookingDialog({
   const [viewDate, setViewDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [timeSlot, setTimeSlot] = useState<string>("10:30 AM");
-  const [duration, setDuration] = useState<number>(30);
+  const [duration, setDuration] = useState<string>("30");
   const [note, setNote] = useState("");
   const [isPending, startTransition] = useTransition();
 
@@ -125,7 +134,7 @@ export function ProposedBookingDialog({
       const res = await createManualBooking({
         student_id: studentId,
         scheduled_at: toIsoSlot(selectedDate, timeSlot),
-        duration_minutes: duration,
+        duration_minutes: Number(duration),
         urgency: "low",
         reason: note.trim() || "Counselor-proposed follow-up session",
       });
@@ -142,9 +151,9 @@ export function ProposedBookingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] gap-0 overflow-y-auto p-0 sm:max-w-[588px]">
-        {/* Gray Header Band (Figma 678:18531) */}
-        <div className="bg-muted/60 border-border space-y-5 border-b p-5 pr-12 text-left">
+      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[588px]">
+        {/* Static Gray Header Band (Figma 678:18531) */}
+        <div className="bg-muted/60 border-border shrink-0 space-y-5 border-b p-5 pr-12 text-left">
           <div className="space-y-1">
             <DialogTitle className="text-[15px] font-medium">
               Propose a Booking Time
@@ -158,24 +167,22 @@ export function ProposedBookingDialog({
           {/* Student -> Counselor Pill Row (Figma 678:18536) */}
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5">
-              <label
-                htmlFor="propose-student"
-                className="block text-[14px] font-medium"
-              >
-                Student
-              </label>
-              <select
-                id="propose-student"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                className="bg-card border-border shadow-steady-card rounded-[25px] border px-5 py-3 text-[15px] outline-none"
-              >
-                {students.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <span className="block text-[14px] font-medium">Student</span>
+              <Select value={studentId} onValueChange={setStudentId}>
+                <SelectTrigger className="min-w-44">
+                  <SelectValue placeholder="Select student" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Student</SelectLabel>
+                    {students.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <ArrowRight
@@ -185,15 +192,15 @@ export function ProposedBookingDialog({
 
             <div className="space-y-1.5">
               <span className="block text-[14px] font-medium">Counselor</span>
-              <div className="bg-card border-border shadow-steady-card rounded-[25px] border px-5 py-3 text-[15px]">
+              <div className="bg-card border-border shadow-steady-card flex h-12 items-center rounded-[25px] border px-5 text-[15px]">
                 {counselorName}
               </div>
             </div>
           </div>
         </div>
 
-        {/* White Body (Figma 678:18553) */}
-        <div className="space-y-5 p-5">
+        {/* Scrollable Center White Body (Figma 678:18553) */}
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
           <div className="space-y-1 text-left">
             <p className="text-[15px] font-medium">Select Date and Time</p>
             <p className="text-foreground/80 text-[15px]">
@@ -275,45 +282,45 @@ export function ProposedBookingDialog({
               </div>
 
               <div className="space-y-1.5">
-                <label
-                  htmlFor="propose-time"
-                  className="block text-[14px] font-medium"
-                >
+                <span className="block text-[14px] font-medium">
                   Appointment Time
-                </label>
-                <select
-                  id="propose-time"
-                  value={timeSlot}
-                  onChange={(e) => setTimeSlot(e.target.value)}
-                  className="bg-card border-border shadow-steady-card w-full rounded-[25px] border px-4 py-3 text-[15px] outline-none"
-                >
-                  {TIME_SLOTS.map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
-                </select>
+                </span>
+                <Select value={timeSlot} onValueChange={setTimeSlot}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Time</SelectLabel>
+                      {TIME_SLOTS.map((slot) => (
+                        <SelectItem key={slot} value={slot}>
+                          {slot}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-1.5">
-                <label
-                  htmlFor="propose-duration"
-                  className="block text-[14px] font-medium"
-                >
+                <span className="block text-[14px] font-medium">
                   Appointment Duration
-                </label>
-                <select
-                  id="propose-duration"
-                  value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  className="bg-card border-border shadow-steady-card w-full rounded-[25px] border px-4 py-3 text-[15px] outline-none"
-                >
-                  {DURATIONS.map((mins) => (
-                    <option key={mins} value={mins}>
-                      {mins} mins
-                    </option>
-                  ))}
-                </select>
+                </span>
+                <Select value={duration} onValueChange={setDuration}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Duration</SelectLabel>
+                      {DURATIONS.map((mins) => (
+                        <SelectItem key={mins} value={String(mins)}>
+                          {mins} mins
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <p className="text-muted-foreground text-[14px] leading-snug">
@@ -334,8 +341,8 @@ export function ProposedBookingDialog({
           </div>
         </div>
 
-        {/* Gray Footer Band (Figma 678:18687) */}
-        <div className="bg-muted/60 border-border flex items-center justify-end gap-2.5 border-t p-5">
+        {/* Static Gray Footer Band (Figma 678:18687) */}
+        <div className="bg-muted/60 border-border flex shrink-0 items-center justify-end gap-2.5 border-t p-5">
           <Button
             type="button"
             variant="outline"
