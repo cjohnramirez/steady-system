@@ -3,6 +3,8 @@
 import { useState } from "react";
 import {
   BookOpen,
+  CalendarPlus,
+  ClipboardList,
   EyeOff,
   FolderOpen,
   ShieldAlert,
@@ -28,6 +30,8 @@ import { ArticleReaderDialog } from "@/components/student/article-reader-dialog"
 import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 import { WarmReferralDialog } from "@/components/counselor/warm-referral-dialog";
 import { DossierDialog } from "@/components/counselor/dossier-dialog";
+import { ProposedBookingDialog } from "@/components/counselor/proposed-booking-dialog";
+import { PendingSessionDetailsDialog } from "@/components/counselor/pending-session-details-dialog";
 import { SessionCard } from "@/components/counselor/session-card";
 import { BrandMark } from "@/components/app/brand-mark";
 
@@ -48,6 +52,8 @@ export function ComponentShowcase() {
   const [counselorOpen, setCounselorOpen] = useState(false);
   const [articleOpen, setArticleOpen] = useState(false);
   const [dossierOpen, setDossierOpen] = useState(false);
+  const [proposedBookingOpen, setProposedBookingOpen] = useState(false);
+  const [pendingDetailsOpen, setPendingDetailsOpen] = useState(false);
   const { enabled: privacyOn, toggle: togglePrivacy } = usePrivacyShield();
 
   return (
@@ -219,6 +225,20 @@ export function ComponentShowcase() {
               <FolderOpen className="text-primary size-4" />
               Open Student Dossier
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => setProposedBookingOpen(true)}
+            >
+              <CalendarPlus className="text-primary size-4" />
+              Open Proposed Booking
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setPendingDetailsOpen(true)}
+            >
+              <ClipboardList className="text-primary size-4" />
+              Open Pending Session Details
+            </Button>
             <Button variant="destructive" onClick={() => setCrisisOpen(true)}>
               <ShieldAlert className="size-4" />
               Open Crisis Support Dialog
@@ -358,6 +378,39 @@ export function ComponentShowcase() {
             "Responds well to somatic breathwork. Monitoring recovery from OS midterm exam crunch.",
           completedSessions: 4,
           totalSessions: 12,
+        }}
+      />
+      <ProposedBookingDialog
+        previewOnly
+        open={proposedBookingOpen}
+        onOpenChange={setProposedBookingOpen}
+        counselorName="Maria dela Cruz, RGC"
+        students={[
+          { id: "11111111-1111-1111-1111-111111111111", name: "Marcus Vance" },
+          { id: "22222222-2222-2222-2222-222222222222", name: "Gabriel Cruz" },
+        ]}
+      />
+      <PendingSessionDetailsDialog
+        open={pendingDetailsOpen}
+        onOpenChange={setPendingDetailsOpen}
+        onReferral={() => {
+          setPendingDetailsOpen(false);
+          setReferralOpen(true);
+        }}
+        onReschedule={() => {
+          setPendingDetailsOpen(false);
+          setProposedBookingOpen(true);
+        }}
+        session={{
+          id: "demo-pending-1",
+          studentName: "Marcus Vance",
+          studentUniversityId: "2023-951-0842",
+          courseAndYear: "BSCE, 3rd Year",
+          scheduledLabel: "Nov 16, 2026, 6:00 PM",
+          emergencyContactName: "Elena Vance (Mother)",
+          emergencyContactPhone: "0917 555 0192",
+          reason:
+            "During circuit board oral defense yesterday, my throat completely seized up and I couldn't get words out. Prof told me if I can't present my breadboard tomorrow, that's an automatic INC. I'm terrified to walk into the lab.",
         }}
       />
     </div>
