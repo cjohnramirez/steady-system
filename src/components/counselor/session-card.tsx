@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { saveClinicalNote } from "@/lib/actions/clinical";
 import { cn } from "@/lib/utils";
@@ -157,31 +158,28 @@ export function SessionCard({
       </div>
 
       {/* Inner White Card (Figma 313:199 / 374:1189) */}
-      <div className="bg-card border-border flex flex-col gap-5 rounded-[19px] border p-5">
-        {/* Time Row */}
-        <div className="flex items-center justify-between gap-2 text-[15px]">
-          <span className="flex items-center gap-2.5">
-            <Clock className="size-3.5 shrink-0" />
-            <span>{session.scheduledLabel}</span>
-          </span>
-          {onOpenReferral && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onOpenReferral}
-            >
-              <UserPlus className="size-3.5" />
+      <div className="bg-card border-border relative flex flex-col gap-5 rounded-[19px] border p-5">
+        {/* Floating Warm Referral Button so it never inflates the time row height */}
+        {onOpenReferral && (
+          <div className="sm:absolute sm:top-5 sm:right-5 sm:z-10">
+            <Button type="button" variant="outline" onClick={onOpenReferral}>
+              <UserPlus strokeWidth={1.5} className="size-4" />
               Warm Referral
             </Button>
-          )}
+          </div>
+        )}
+
+        {/* Time Row */}
+        <div className="flex items-center gap-2.5 text-[15px]">
+          <Clock strokeWidth={1.5} className="size-3.5 shrink-0" />
+          <span>{session.scheduledLabel}</span>
         </div>
 
         {/* 3-Column Student Row (Figma 313:204) */}
-        <div className="flex flex-wrap items-center gap-5">
+        <div className="flex flex-wrap items-center gap-5 sm:pr-44">
           <UserAvatar
             name={session.studentName}
-            className="size-[51px] shrink-0 rounded-[10px]"
+            className="size-11 shrink-0 rounded-[10px]"
           />
           <div className="flex flex-wrap items-center gap-x-10 gap-y-2 text-[15px]">
             <div>
@@ -260,17 +258,14 @@ export function SessionCard({
                         ["plan", "Plan"],
                       ] as const
                     ).map(([key, label]) => (
-                      <div
-                        key={key}
-                        className="bg-card border-border shadow-steady-card rounded-[20px] border p-4"
-                      >
+                      <div key={key} className="space-y-1.5">
                         <label
                           htmlFor={`soap-${session.id}-${key}`}
-                          className="text-muted-foreground mb-1 block text-[14px]"
+                          className="text-foreground/85 block px-1 text-[14px] font-medium"
                         >
                           {label}
                         </label>
-                        <textarea
+                        <Textarea
                           id={`soap-${session.id}-${key}`}
                           rows={2}
                           value={soap[key]}
@@ -281,7 +276,6 @@ export function SessionCard({
                             }))
                           }
                           placeholder={`Document ${label.toLowerCase()} observations...`}
-                          className="w-full resize-y bg-transparent text-[15px] outline-none"
                         />
                       </div>
                     ))}

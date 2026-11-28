@@ -29,6 +29,10 @@ import {
   ArticleReaderDialog,
   type WellnessArticle,
 } from "@/components/student/article-reader-dialog";
+import {
+  CounselorDetailsDialog,
+  type CounselorProfileInfo,
+} from "@/components/student/counselor-details-dialog";
 import { cn } from "@/lib/utils";
 
 const BreathingPacerDialog = dynamic(
@@ -95,6 +99,33 @@ const MOOD_CARDS: {
   },
 ];
 
+const STARTER_ACTION_ITEMS: ActionPlanItem[] = [
+  {
+    id: "starter-1",
+    title: "Have aunt drop off homecooked food container tonight",
+    is_completed: true,
+    due_date: null,
+  },
+  {
+    id: "starter-2",
+    title: "Take 15-min phone-free walk around campus before dinner",
+    is_completed: false,
+    due_date: null,
+  },
+  {
+    id: "starter-3",
+    title: "Sign and submit dean's overload reduction waiver",
+    is_completed: false,
+    due_date: null,
+  },
+  {
+    id: "starter-4",
+    title: "Send email to Prof. Ramos requesting project extension",
+    is_completed: false,
+    due_date: null,
+  },
+];
+
 export interface StudentDashboardProps {
   firstName: string;
   initialMood: string | null;
@@ -105,6 +136,7 @@ export interface StudentDashboardProps {
     scheduledLabel: string;
     durationMinutes: number;
   } | null;
+  counselorProfile?: CounselorProfileInfo | null;
   initialActionItems: ActionPlanItem[];
   featuredEvent: {
     id: string;
@@ -121,14 +153,19 @@ export function StudentDashboardView({
   firstName,
   initialMood,
   upcomingSession,
+  counselorProfile,
   initialActionItems,
   featuredEvent,
   featuredArticle,
 }: StudentDashboardProps) {
   const [selectedMood, setSelectedMood] = useState(initialMood ?? "Calm");
-  const [items, setItems] = useState<ActionPlanItem[]>(initialActionItems);
+  const isStarterItems = initialActionItems.length === 0;
+  const [items, setItems] = useState<ActionPlanItem[]>(
+    isStarterItems ? STARTER_ACTION_ITEMS : initialActionItems,
+  );
   const [breathingOpen, setBreathingOpen] = useState(false);
   const [articleOpen, setArticleOpen] = useState(false);
+  const [counselorOpen, setCounselorOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const completedCount = items.filter((i) => i.is_completed).length;
@@ -142,6 +179,8 @@ export function StudentDashboardView({
         row.id === item.id ? { ...row, is_completed: next } : row,
       ),
     );
+    if (isStarterItems || item.id.startsWith("starter-")) return;
+
     startTransition(async () => {
       const res = await toggleActionItem({ id: item.id, is_completed: next });
       if (!res.ok) {
@@ -230,20 +269,30 @@ export function StudentDashboardView({
               )}
             </div>
 
-            <Button asChild size="sm">
-              <Link
-                href={
-                  upcomingSession
-                    ? "/student/appointments"
-                    : "/student/appointment"
-                }
+            {upcomingSession && counselorProfile ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setCounselorOpen(true)}
               >
-                {upcomingSession ? "View Details" : "Book a Session"}
-              </Link>
-            </Button>
+                View Details
+              </Button>
+            ) : (
+              <Button asChild size="sm">
+                <Link
+                  href={
+                    upcomingSession
+                      ? "/student/appointments"
+                      : "/student/appointment"
+                  }
+                >
+                  {upcomingSession ? "View Details" : "Book a Session"}
+                </Link>
+              </Button>
+            )}
           </div>
 
-          {/* My Action Plan & Coping Steps */}
+          {/* My Action Plan & Coping Steps (Figma 678:19319) */}
           <div className="bg-card border-border shadow-steady-card space-y-4 rounded-[20px] border p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -259,44 +308,43 @@ export function StudentDashboardView({
               </SteadyLabel>
             </div>
 
-            {items.length === 0 ? (
-              <p className="text-muted-foreground py-3 text-sm">
-                No action steps assigned yet. Steps shared by your counselor
-                will appear here.
-              </p>
-            ) : (
-              <div className="grid gap-3 md:grid-cols-2" aria-busy={isPending}>
-                {items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    aria-pressed={item.is_completed}
-                    onClick={() => handleToggle(item)}
+            <div
+              className="grid gap-[8px] md:grid-cols-2"
+              aria-busy={isPending}
+            >
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="checkbox"
+                  aria-checked={item.is_completed}
+                  onClick={() => handleToggle(item)}
+                  className={cn(
+                    "shadow-steady-card flex cursor-pointer items-start gap-[15px] rounded-[19px] border p-[20px] text-left text-[15px] transition-colors",
+                    item.is_completed
+                      ? "border-[#009966] bg-[#ecfdf5] dark:border-emerald-500 dark:bg-emerald-950/35"
+                      : "border-border bg-card hover:border-foreground/30",
+                  )}
+                >
+                  <span
+                    aria-hidden
                     className={cn(
-                      "flex items-start gap-3 rounded-[16px] border p-4 text-left text-[15px] transition-colors",
+                      "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
                       item.is_completed
-                        ? "border-positive/60 bg-positive/10"
-                        : "border-border bg-card hover:bg-muted/40",
+                        ? "border-[#009966] bg-[#009966] text-white"
+                        : "border-border bg-background",
                     )}
                   >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors",
-                        item.is_completed
-                          ? "border-positive bg-positive text-positive-foreground"
-                          : "border-input bg-card",
-                      )}
-                    >
-                      {item.is_completed && (
-                        <Check strokeWidth={2} className="size-3.5" />
-                      )}
-                    </span>
-                    <span className="leading-snug">{item.title}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+                    {item.is_completed && (
+                      <Check strokeWidth={2.5} className="size-3" />
+                    )}
+                  </span>
+                  <span className="text-foreground leading-snug">
+                    {item.title}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -517,6 +565,11 @@ export function StudentDashboardView({
         open={articleOpen}
         onOpenChange={setArticleOpen}
         article={featuredArticle}
+      />
+      <CounselorDetailsDialog
+        open={counselorOpen}
+        onOpenChange={setCounselorOpen}
+        counselor={counselorProfile ?? null}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Instrument_Sans } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { BRAND } from "@/lib/brand";
@@ -11,13 +11,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 const instrumentSans = Instrument_Sans({
   variable: "--font-instrument-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -73,7 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
-        className={`${instrumentSans.variable} ${geistMono.variable} bg-background min-h-dvh font-sans text-[15px] antialiased`}
+        className={`${instrumentSans.variable} bg-background min-h-dvh font-sans text-[15px] antialiased`}
       >
         <Providers>
           {children}

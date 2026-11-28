@@ -6,13 +6,14 @@ import { formatDistanceToNow } from "date-fns";
 import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-m";
 import {
+  ArrowRight,
+  ArrowUpRight,
   Bell,
   BellOff,
-  BellRing,
   CalendarClock,
-  Megaphone,
-  Smartphone,
-  X,
+  Check,
+  RefreshCw,
+  Siren,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,20 +23,26 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/app/error-state";
-import { PillTabs } from "@/components/app/pill-tabs";
 import { useDeviceNotifications } from "@/hooks/use-device-notifications";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { Notification } from "@/lib/notifications/queries";
 import { steadyTransitions } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
+type FilterTab = "all" | "unread" | "requests" | "alerts";
+
 const ICONS = {
   appointment: CalendarClock,
-  announcement: Megaphone,
-  system: Bell,
+  announcement: RefreshCw,
+  system: Siren,
 } as const;
 
-/** Re-renders every minute so "2 minutes ago" doesn't freeze while the page is open. */
+const TYPE_TAGS = {
+  appointment: "Request",
+  announcement: "Update",
+  system: "Alert",
+} as const;
+
 function useMinuteTick() {
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -44,21 +51,40 @@ function useMinuteTick() {
   }, []);
 }
 
+/**
+ * Figma Notifications Popover (678:19177):
+ * Plain unread dot on bell trigger + rounded-[20px] card with status pill,
+ * "Mark all as read" pill button, 4-tab pill filter bar, clean rows with
+ * top-right ArrowUpRight, and footer link pill.
+ */
 export function NotificationBell({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"all" | "unread">("all");
+  const [tab, setTab] = useState<FilterTab>("all");
   const device = useDeviceNotifications();
-  const { feed, markRead, markAllRead, remove } = useNotifications(userId, {
+  const { feed, markRead, markAllRead } = useNotifications(userId, {
     onArrive: device.show,
   });
   const unread = feed.data?.unread ?? 0;
   const items = feed.data?.items ?? [];
-  const visibleItems =
-    tab === "unread" ? items.filter((n) => !n.read_at) : items;
+
+  const visibleItems = items.filter((n) => {
+    if (tab === "unread") return !n.read_at;
+    if (tab === "requests") return n.type === "appointment";
+    if (tab === "alerts") return n.type === "system";
+    return true;
+  });
+
   useMinuteTick();
 
   const label =
     unread > 0 ? `Notifications, ${unread} unread` : "Notifications";
+
+  const tabs: { value: FilterTab; label: string }[] = [
+    { value: "all", label: `All (${items.length})` },
+    { value: "unread", label: `Unread (${unread})` },
+    { value: "requests", label: "Requests" },
+    { value: "alerts", label: "Clinical Alerts" },
+  ];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -69,80 +95,104 @@ export function NotificationBell({ userId }: { userId: string }) {
           className="relative"
           aria-label={label}
         >
-          <Bell />
+          <Bell strokeWidth={1.5} className="size-[18px]" />
           {unread > 0 && (
             <span
               aria-hidden
-              className="bg-primary text-primary-foreground ring-card absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-medium ring-2"
-            >
-              {unread > 9 ? "9+" : unread}
-            </span>
+              className="bg-primary ring-card absolute top-2.5 right-2.5 size-2.5 rounded-full ring-2"
+            />
           )}
         </Button>
       </PopoverTrigger>
+
       <PopoverContent
         align="end"
-        // On a phone the popover is as wide as the screen less a 16px margin each
-        // side, and collision padding holds that margin, so it sits centred under
-        // the navbar. From sm up it is 24rem, aligned to the bell.
+        sideOffset={10}
         collisionPadding={16}
-        // overflow-hidden clips the tinted unread rows to the rounded corners.
-        // The popover is capped at the space left below the bell, and only the
-        // list scrolls, so the header stays put and nothing is cut off.
-        className="flex max-h-[min(32rem,calc(var(--radix-popover-content-available-height)-1rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl p-0 sm:w-96"
+        className="bg-card border-border shadow-steady-card flex max-h-[min(36rem,calc(var(--radix-popover-content-available-height)-1rem))] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[20px] border p-0 sm:w-[440px]"
       >
-        <div className="flex shrink-0 flex-col gap-3 border-b px-4 py-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="font-medium">Notifications</h2>
-            {unread > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => markAllRead.mutate()}
-                loading={markAllRead.isPending}
-              >
-                Mark all read
-              </Button>
-            )}
+        {/* Top Header Band (Figma 678:19178) */}
+        <div className="border-border flex shrink-0 flex-col gap-4 border-b p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1.5 text-left">
+              <h2 className="text-foreground text-[15px] leading-none font-medium">
+                Notifications
+              </h2>
+              <span className="bg-muted text-muted-foreground inline-flex items-center rounded-full px-3 py-0.5 text-[13px]">
+                {unread === 0 ? "All Caught Up" : `${unread} Unread`}
+              </span>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              disabled={unread === 0}
+              loading={markAllRead.isPending}
+              onClick={() => markAllRead.mutate()}
+              className="px-4 text-[14px]"
+            >
+              <span>Mark All as Read</span>
+              <Check strokeWidth={1.5} className="size-4" />
+            </Button>
           </div>
-          <PillTabs
-            ariaLabel="Filter notifications"
-            value={tab}
-            onChange={setTab}
-            options={[
-              { value: "all", label: "All", count: items.length },
-              { value: "unread", label: "Unread", count: unread },
-            ]}
-          />
+
+          {/* 4-Tab Pill Filter Strip */}
+          <div
+            role="tablist"
+            aria-label="Filter notifications"
+            className="bg-card border-border shadow-steady-card flex items-center justify-between gap-1 overflow-x-auto rounded-full border p-1"
+          >
+            {tabs.map((t) => {
+              const active = tab === t.value;
+              return (
+                <button
+                  key={t.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(t.value)}
+                  className={cn(
+                    "flex-1 cursor-pointer rounded-full px-3 py-2 text-center text-[13px] whitespace-nowrap transition-colors",
+                    active
+                      ? "bg-primary text-primary-foreground shadow-steady-pill font-medium"
+                      : "text-foreground/80 hover:text-foreground font-normal",
+                  )}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Scrollable Notification Feed */}
         {feed.isLoading ? (
-          <div className="space-y-3 p-4" aria-busy>
+          <div className="space-y-3 p-5" aria-busy>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-[16px]" />
+              <Skeleton key={i} className="h-20 w-full rounded-[16px]" />
             ))}
           </div>
         ) : feed.isError ? (
           <ErrorState
-            title="Notifications couldn't be loaded"
+            title="Notifications Couldn't Be Loaded"
             onRetry={() => feed.refetch()}
             className="m-4 border-none p-6"
           />
         ) : visibleItems.length === 0 ? (
-          <div className="text-muted-foreground flex flex-col items-center gap-2 p-8 text-center">
-            <BellOff aria-hidden strokeWidth={1.25} className="size-8" />
-            <p>
+          <div className="text-muted-foreground flex flex-col items-center gap-2 p-10 text-center">
+            <BellOff aria-hidden strokeWidth={1.5} className="size-8" />
+            <p className="text-[14px]">
               {tab === "unread"
                 ? "No unread notifications."
                 : "You're all caught up."}
             </p>
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [scrollbar-width:thin]">
-            <ul className="divide-y">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <ul className="divide-border divide-y">
               <AnimatePresence initial={false}>
                 {visibleItems.map((item) => (
-                  <m.div
+                  <m.li
                     key={item.id}
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -151,156 +201,96 @@ export function NotificationBell({ userId }: { userId: string }) {
                   >
                     <NotificationRow
                       item={item}
-                      removing={
-                        remove.isPending && remove.variables === item.id
-                      }
                       onOpen={() => {
                         if (!item.read_at) markRead.mutate(item.id);
                         if (item.link) setOpen(false);
                       }}
-                      onRemove={() => remove.mutate(item.id)}
                     />
-                  </m.div>
+                  </m.li>
                 ))}
               </AnimatePresence>
             </ul>
           </div>
         )}
 
-        <DeviceNotificationsRow device={device} />
+        {/* Footer Band */}
+        <div className="border-border flex shrink-0 items-center justify-end border-t p-4">
+          <Button
+            asChild
+            variant="outline"
+            onClick={() => setOpen(false)}
+            className="px-5 text-[14px]"
+          >
+            <Link href="/student/appointments">
+              <span>View All Activity</span>
+              <ArrowRight strokeWidth={1.5} className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
 }
 
-/** Offers device notifications, or explains why they aren't available. */
-function DeviceNotificationsRow({
-  device,
-}: {
-  device: ReturnType<typeof useDeviceNotifications>;
-}) {
-  const row =
-    "text-muted-foreground flex shrink-0 items-center gap-3 border-t px-4 py-3 text-xs";
-
-  if (device.permission === "default") {
-    return (
-      <div className={row}>
-        <BellRing aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
-        <p className="min-w-0 flex-1">
-          Get device notifications while Steady is open.
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          loading={device.requesting}
-          onClick={() => void device.enable()}
-        >
-          Turn on
-        </Button>
-      </div>
-    );
-  }
-  if (device.permission === "denied") {
-    return (
-      <p className={row}>
-        <BellOff aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
-        Device notifications are blocked. Allow them in your browser&apos;s site
-        settings.
-      </p>
-    );
-  }
-  if (device.permission === "granted") {
-    return (
-      <p className={row}>
-        <BellRing aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
-        Device notifications are on while Steady is open.
-      </p>
-    );
-  }
-  if (device.needsHomeScreen) {
-    return (
-      <p className={row}>
-        <Smartphone aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
-        On iPhone or iPad, add Steady to your Home Screen (Share, then Add to
-        Home Screen) to get notifications.
-      </p>
-    );
-  }
-  return null;
-}
-
 function NotificationRow({
   item,
-  removing,
   onOpen,
-  onRemove,
 }: {
   item: Notification;
-  removing: boolean;
   onOpen: () => void;
-  onRemove: () => void;
 }) {
   const Icon = ICONS[item.type] ?? Bell;
+  const tag = TYPE_TAGS[item.type] ?? "Notice";
   const unread = !item.read_at;
 
-  const body = (
+  const content = (
     <>
       <Icon
         aria-hidden
         strokeWidth={1.5}
-        className="text-muted-foreground mt-0.5 size-4 shrink-0"
+        className="text-foreground mt-0.5 size-5 shrink-0"
       />
-      <div className="min-w-0 flex-1 space-y-0.5 text-left">
-        <p className={cn("truncate", unread && "font-medium")}>
+      <div className="min-w-0 flex-1 space-y-1 text-left">
+        <p className="text-foreground truncate text-[15px] leading-snug font-medium">
           {unread && <span className="sr-only">Unread: </span>}
           {item.title}
         </p>
         {item.body && (
-          <p className="text-muted-foreground line-clamp-2 text-xs">
+          <p className="text-foreground/80 line-clamp-2 text-[14px] leading-snug">
             {item.body}
           </p>
         )}
-        <p className="text-muted-foreground text-xs">
-          {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-        </p>
+        <div className="flex items-center gap-2.5 pt-1">
+          <span className="text-muted-foreground text-[13px]">
+            {formatDistanceToNow(new Date(item.created_at), {
+              addSuffix: true,
+            })}
+          </span>
+          <span className="bg-muted text-muted-foreground rounded-full px-2.5 py-0.5 text-[12px]">
+            {tag}
+          </span>
+        </div>
       </div>
-      {unread && (
-        <span
-          aria-hidden
-          className="bg-primary mt-1.5 size-2 shrink-0 rounded-full"
-        />
-      )}
+      <ArrowUpRight
+        aria-hidden
+        strokeWidth={1.5}
+        className="text-foreground/70 mt-0.5 size-4 shrink-0"
+      />
     </>
   );
 
   const rowClass = cn(
-    "hover:bg-muted flex w-full gap-3 px-4 py-3 pr-10 transition-colors",
-    unread && "bg-brand-subtle",
+    "hover:bg-muted/50 flex w-full cursor-pointer items-start gap-3.5 px-5 py-4 transition-colors",
+    unread && "bg-brand-subtle/40",
   );
 
-  return (
-    <li className={cn("group relative", removing && "opacity-60")}>
-      {item.link ? (
-        <Link href={item.link} className={rowClass} onClick={onOpen}>
-          {body}
-        </Link>
-      ) : (
-        <button type="button" className={rowClass} onClick={onOpen}>
-          {body}
-        </button>
-      )}
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={`Remove notification: ${item.title}`}
-        loading={removing}
-        // Hover-only hid the button from touch screens entirely; there it stays
-        // visible, and anywhere it shows while the row has keyboard focus.
-        className="absolute top-2 right-1 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 data-loading:opacity-100 pointer-coarse:opacity-100"
-        onClick={onRemove}
-      >
-        <X />
-      </Button>
-    </li>
+  return item.link ? (
+    <Link href={item.link} className={rowClass} onClick={onOpen}>
+      {content}
+    </Link>
+  ) : (
+    <button type="button" className={rowClass} onClick={onOpen}>
+      {content}
+    </button>
   );
 }

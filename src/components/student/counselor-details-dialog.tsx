@@ -102,14 +102,14 @@ export function CounselorDetailsDialog({
                 </div>
                 <div className="flex flex-col items-start gap-1.5">
                   <span className="bg-card border-border shadow-steady-card inline-flex items-center gap-2.5 rounded-[35px] border px-3.5 py-2 text-[14px]">
-                    <Clock className="size-3.5 shrink-0" />
+                    <Clock strokeWidth={1.5} className="size-3.5 shrink-0" />
                     <span>
                       Office Hours on{" "}
                       {counselor.officeHours ?? "08:30 AM – 05:00 PM"}
                     </span>
                   </span>
                   <span className="bg-card border-border shadow-steady-card inline-flex items-center gap-2.5 rounded-[35px] border px-3.5 py-2 text-[14px]">
-                    <MapPin className="size-3.5 shrink-0" />
+                    <MapPin strokeWidth={1.5} className="size-3.5 shrink-0" />
                     <span>{counselor.officeRoom ?? "West Hall Room 204"}</span>
                   </span>
                 </div>
@@ -132,8 +132,8 @@ export function CounselorDetailsDialog({
               <p className="text-[15px] font-medium">Availability by Week</p>
               <p className="text-muted-foreground text-[14px] leading-snug">
                 Use the left and right buttons to navigate through the calendar.
-                Days highlighted in color indicate availability for the
-                counselor.
+                Dates filled in blue indicate days when the counselor is
+                available.
               </p>
             </div>
 
@@ -144,10 +144,10 @@ export function CounselorDetailsDialog({
                 onClick={() => shiftWeek(-7)}
                 className="border-border hover:bg-muted flex size-[46px] shrink-0 items-center justify-center rounded-full border transition-colors"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft strokeWidth={1.5} className="size-4" />
               </button>
 
-              <div className="bg-card border-border shadow-steady-card flex flex-1 flex-col items-center gap-3.5 rounded-[20px] border p-3">
+              <div className="bg-card border-border shadow-steady-card flex flex-1 flex-col items-center gap-3.5 rounded-[20px] border p-3.5">
                 <div className="flex flex-wrap items-center justify-center gap-2">
                   <span className="border-border rounded-[20px] border px-4 py-2 text-[14px]">
                     {monthLabel}
@@ -169,13 +169,20 @@ export function CounselorDetailsDialog({
                   <div className="grid grid-cols-7 gap-1">
                     {weekDates.map((d) => {
                       const isAvailable = availableDays.includes(d.getDay());
+                      const dayFull = d.toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "short",
+                        day: "numeric",
+                      });
                       return (
                         <div
                           key={d.toISOString()}
+                          title={`${dayFull} — ${isAvailable ? "Available" : "Unavailable"}`}
+                          aria-label={`${dayFull}, ${isAvailable ? "Available" : "Unavailable"}`}
                           className={cn(
                             "mx-auto flex size-[36px] items-center justify-center rounded-[10px] text-[14px] transition-colors",
                             isAvailable
-                              ? "bg-primary text-primary-foreground shadow-steady-pill"
+                              ? "bg-primary text-primary-foreground shadow-steady-pill font-medium"
                               : "text-muted-foreground",
                           )}
                         >
@@ -185,6 +192,24 @@ export function CounselorDetailsDialog({
                     })}
                   </div>
                 </div>
+
+                {/* Availability Color Legend */}
+                <div className="border-border flex w-full items-center justify-center gap-5 border-t pt-2.5 text-[13px]">
+                  <span className="text-foreground inline-flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="bg-primary shadow-steady-pill size-3 rounded-[4px]"
+                    />
+                    Available
+                  </span>
+                  <span className="text-muted-foreground inline-flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="bg-muted border-border size-3 rounded-[4px] border"
+                    />
+                    Unavailable
+                  </span>
+                </div>
               </div>
 
               <button
@@ -193,7 +218,7 @@ export function CounselorDetailsDialog({
                 onClick={() => shiftWeek(7)}
                 className="border-border hover:bg-muted flex size-[46px] shrink-0 items-center justify-center rounded-full border transition-colors"
               >
-                <ChevronRight className="size-4" />
+                <ChevronRight strokeWidth={1.5} className="size-4" />
               </button>
             </div>
           </div>

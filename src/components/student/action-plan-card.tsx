@@ -2,12 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { Calendar, Check, ClipboardCheck } from "lucide-react";
-import { AnimatePresence, m } from "motion/react";
 import { toast } from "sonner";
-import { SectionCard } from "@/components/app/section-card";
 import { EmptyState } from "@/components/app/empty-state";
+import { SteadyLabel } from "@/components/app/steady-label";
 import { toggleActionItem } from "@/lib/actions/clinical";
-import { steadyTransitions } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 export interface ActionPlanItem {
@@ -17,6 +15,10 @@ export interface ActionPlanItem {
   due_date?: string | null;
 }
 
+/**
+ * Figma 678:19319 Post-Session Action Plan card:
+ * Top header with SteadyLabel progress pill + 2x2 interactive checklist grid.
+ */
 export function ActionPlanCard({
   initialItems,
   previewOnly = false,
@@ -63,90 +65,88 @@ export function ActionPlanCard({
   }
 
   return (
-    <SectionCard
-      title="Post-Session Action Plan"
-      description="Small, practical steps you and your counselor agreed on."
-      className={className}
-      actions={
-        totalCount > 0 ? (
-          <span className="bg-brand-subtle text-brand-subtle-foreground inline-flex items-center rounded-full px-3 py-1 text-xs font-medium">
-            {completedCount} / {totalCount} done
-          </span>
-        ) : undefined
-      }
+    <section
+      className={cn(
+        "bg-card border-border shadow-steady-card space-y-5 rounded-[20px] border p-5 sm:p-6",
+        className,
+      )}
     >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-1">
+          <h2 className="text-foreground text-[18px] font-medium">
+            Post-Session Action Plan
+          </h2>
+          <p className="text-muted-foreground text-[15px]">
+            Small, practical steps you and your counselor agreed on.
+          </p>
+        </div>
+
+        {totalCount > 0 && (
+          <SteadyLabel size="md" progress={pct}>
+            {pct}% Complete
+          </SteadyLabel>
+        )}
+      </div>
+
       {totalCount === 0 ? (
         <EmptyState
           icon={ClipboardCheck}
-          title="No action steps yet"
+          title="No Action Steps Yet"
           description="After a counseling session, your counselor can share gentle follow-up steps here."
         />
       ) : (
-        <div className="space-y-4">
-          <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-            <m.div
-              className="bg-positive h-full rounded-full"
-              initial={false}
-              animate={{ width: `${pct}%` }}
-              transition={steadyTransitions.smooth}
-            />
-          </div>
-
-          <ul className="space-y-2.5" aria-busy={isPending}>
-            <AnimatePresence initial={false}>
-              {items.map((item) => (
-                <m.li
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={steadyTransitions.smooth}
+        <ul
+          className="grid gap-3 sm:grid-cols-2"
+          aria-busy={isPending}
+          aria-label="Action plan tasks"
+        >
+          {items.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                onClick={() => handleToggle(item)}
+                aria-pressed={item.is_completed}
+                className={cn(
+                  "border-border bg-card hover:bg-muted/50 focus-visible:ring-ring/50 shadow-steady-card flex h-full w-full cursor-pointer items-start gap-3.5 rounded-[16px] border p-4 text-left transition-colors outline-none focus-visible:ring-[3px]",
+                  item.is_completed && "bg-muted/40",
+                )}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors",
+                    item.is_completed
+                      ? "border-positive bg-positive text-positive-foreground"
+                      : "border-input bg-card",
+                  )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(item)}
-                    aria-pressed={item.is_completed}
+                  {item.is_completed && (
+                    <Check strokeWidth={2} className="size-3.5" />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1 space-y-1">
+                  <span
                     className={cn(
-                      "border-border hover:bg-muted/60 focus-visible:ring-ring/50 flex w-full items-start gap-3 rounded-[16px] border p-3.5 text-left transition-colors outline-none focus-visible:ring-[3px]",
-                      item.is_completed && "bg-muted/40",
+                      "block text-[15px] leading-snug font-normal transition-colors",
+                      item.is_completed
+                        ? "text-muted-foreground line-through"
+                        : "text-foreground",
                     )}
                   >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors",
-                        item.is_completed
-                          ? "border-positive bg-positive text-positive-foreground"
-                          : "border-input bg-card",
-                      )}
-                    >
-                      {item.is_completed && <Check className="size-3.5" />}
+                    {item.title}
+                  </span>
+                  {item.due_date && (
+                    <span className="text-muted-foreground inline-flex items-center gap-1.5 text-[13px]">
+                      <Calendar strokeWidth={1.5} className="size-3.5" />
+                      Target: {item.due_date}
                     </span>
-                    <span className="min-w-0 flex-1 space-y-1">
-                      <span
-                        className={cn(
-                          "block text-sm font-medium transition-colors",
-                          item.is_completed &&
-                            "text-muted-foreground line-through",
-                        )}
-                      >
-                        {item.title}
-                      </span>
-                      {item.due_date && (
-                        <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                          <Calendar className="size-3" />
-                          Target: {item.due_date}
-                        </span>
-                      )}
-                    </span>
-                  </button>
-                </m.li>
-              ))}
-            </AnimatePresence>
-          </ul>
-        </div>
+                  )}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
-    </SectionCard>
+    </section>
   );
 }

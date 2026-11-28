@@ -47,7 +47,7 @@ export function CounselorAnalyticsView({
         </div>
 
         <Select value={range} onValueChange={setRange}>
-          <SelectTrigger className="w-[170px]">
+          <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -61,54 +61,64 @@ export function CounselorAnalyticsView({
         </Select>
       </div>
 
-      {/* Main White Container (Figma 678:17952) */}
-      <div className="bg-card border-border shadow-steady-card space-y-5 rounded-[20px] border p-5">
-        {/* Top 3 KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="bg-card border-border shadow-steady-card space-y-3 rounded-[20px] border p-5">
-            <p className="text-foreground/85 text-[15px]">Session Attendance</p>
-            <p className="text-[32px] leading-none font-medium tabular-nums">
-              {attendancePct}%
-            </p>
-            <div className="space-y-0.5 text-xs">
-              <p className="flex items-center gap-1.5 font-medium">
-                <span>Trending up this period</span>
-                <TrendingUp className="size-3.5" />
+      {/* Main White Container (Figma 678:17952 & 678:17976) */}
+      <div className="bg-card border-border shadow-steady-card space-y-5 rounded-[20px] border p-5 font-sans">
+        {/* Top 3 KPI Cards (exact Figma 678:17976 sizing & Instrument Sans Regular/Medium) */}
+        <div className="grid gap-5 md:grid-cols-3">
+          <div className="bg-card border-border shadow-steady-card flex flex-col gap-5 rounded-[20px] border p-[21px]">
+            <div className="space-y-0.5">
+              <p className="text-foreground text-[15px] font-normal">
+                Session Attendance
               </p>
-              <p className="text-muted-foreground">
+              <p className="text-foreground text-[32px] leading-tight font-normal">
+                {attendancePct}%
+              </p>
+            </div>
+            <div className="space-y-1 text-[15px]">
+              <p className="text-foreground flex items-center gap-2 font-medium">
+                <span>Trending up this month</span>
+                <TrendingUp strokeWidth={1.5} className="size-4" />
+              </p>
+              <p className="text-muted-foreground font-normal">
                 Percentage of sessions attended
               </p>
             </div>
           </div>
 
-          <div className="bg-card border-border shadow-steady-card space-y-3 rounded-[20px] border p-5">
-            <p className="text-foreground/85 text-[15px]">
-              Average Wait to Session
-            </p>
-            <p className="text-[32px] leading-none font-medium tabular-nums">
-              {avgWaitDays} days
-            </p>
-            <div className="space-y-0.5 text-xs">
-              <p className="font-medium">Remained stable in the past month</p>
-              <p className="text-muted-foreground">
+          <div className="bg-card border-border shadow-steady-card flex flex-col gap-5 rounded-[20px] border p-[21px]">
+            <div className="space-y-0.5">
+              <p className="text-foreground text-[15px] font-normal">
+                Average Wait to Session
+              </p>
+              <p className="text-foreground text-[32px] leading-tight font-normal">
+                {avgWaitDays} days
+              </p>
+            </div>
+            <div className="space-y-1 text-[15px]">
+              <p className="text-foreground font-medium">
+                Remained stable in the past month
+              </p>
+              <p className="text-muted-foreground font-normal">
                 Time needed to approve appointments
               </p>
             </div>
           </div>
 
-          <div className="bg-card border-border shadow-steady-card space-y-3 rounded-[20px] border p-5">
-            <p className="text-foreground/85 text-[15px]">
-              Total Completed Sessions
-            </p>
-            <p className="text-[32px] leading-none font-medium tabular-nums">
-              {completedCount}
-            </p>
-            <div className="space-y-0.5 text-xs">
-              <p className="flex items-center gap-1.5 font-medium">
-                <span>Trending up this period</span>
-                <TrendingUp className="size-3.5" />
+          <div className="bg-card border-border shadow-steady-card flex flex-col gap-5 rounded-[20px] border p-[21px]">
+            <div className="space-y-0.5">
+              <p className="text-foreground text-[15px] font-normal">
+                Total Completed Sessions
               </p>
-              <p className="text-muted-foreground">
+              <p className="text-foreground text-[32px] leading-tight font-normal">
+                {completedCount}
+              </p>
+            </div>
+            <div className="space-y-1 text-[15px]">
+              <p className="text-foreground flex items-center gap-2 font-medium">
+                <span>Trending up this month</span>
+                <TrendingUp strokeWidth={1.5} className="size-4" />
+              </p>
+              <p className="text-muted-foreground font-normal">
                 Number of sessions completed
               </p>
             </div>

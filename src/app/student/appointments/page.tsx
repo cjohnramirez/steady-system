@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarPlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { PageHeader } from "@/components/app/page-header";
 import { PageTransition } from "@/components/motion/primitives";
 import { LinkPending } from "@/components/app/link-pending";
@@ -16,12 +16,12 @@ export default function StudentAppointmentsPage() {
     <PageTransition className="flex flex-col gap-6">
       <PageHeader
         title="My Appointments"
-        description="Track your confirmed sessions, pending requests, and reschedule or cancel when needed."
+        description="Track your confirmed sessions, pending requests, and post-session action plans"
         actions={
-          <Button asChild>
+          <Button asChild variant="outline" className="px-5">
             <Link href="/student/appointment">
               <LinkPending>
-                <CalendarPlus className="size-4" />
+                <Plus strokeWidth={1.5} className="size-4" />
               </LinkPending>
               Book a New Session
             </Link>

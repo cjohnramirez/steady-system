@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarPlus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   ProposedBookingDialog,
@@ -21,11 +21,13 @@ export function ProposeBookingTrigger({
     <>
       <Button
         type="button"
+        variant="outline"
         onClick={() => setOpen(true)}
         disabled={students.length === 0}
+        className="px-5"
       >
-        <CalendarPlus className="size-4" />
-        Propose Booking
+        <Plus strokeWidth={1.5} className="size-4" />
+        Manual Booking
       </Button>
 
       <ProposedBookingDialog

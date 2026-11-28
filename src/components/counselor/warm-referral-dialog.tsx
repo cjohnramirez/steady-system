@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { createWarmReferral } from "@/lib/actions/clinical";
 import { warmReferralCreateSchema } from "@/lib/validation/clinical";
@@ -216,13 +217,12 @@ export function WarmReferralDialog({
               >
                 Confidential Handoff Summary
               </label>
-              <textarea
+              <Textarea
                 id="referral-summary"
                 rows={3}
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
                 placeholder="Student experiencing acute exam panic and sleep disruption; verbal consent obtained for warm transfer..."
-                className="bg-card border-border shadow-steady-card focus-visible:ring-ring/50 w-full resize-y rounded-[20px] border p-5 text-[15px] outline-none focus-visible:ring-[3px]"
               />
             </div>
 

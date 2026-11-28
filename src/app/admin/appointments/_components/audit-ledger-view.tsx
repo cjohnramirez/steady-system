@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, Search } from "lucide-react";
-import { toast } from "sonner";
+import { Download, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,17 +18,24 @@ import {
   AuditMetadataDialog,
   type AuditRecord,
 } from "@/components/admin/audit-metadata-dialog";
+import { cn } from "@/lib/utils";
+import { AuditExportDialog } from "./audit-export-dialog";
 
 const PAGE_SIZE = 7;
 
 type FilterTab = "all" | "approved" | "pending" | "completed" | "referrals";
+type UrgencyFilter = "all" | "high" | "medium" | "low";
 
 export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
   const [tab, setTab] = useState<FilterTab>("all");
   const [search, setSearch] = useState("");
-  const [counselorFilter, setCounselorFilter] = useState("all");
+  const [counselorFlagActive, setCounselorFlagActive] = useState(false);
+  const [flagDropdownOpen, setFlagDropdownOpen] = useState(false);
+  const [highlightedIdx, setHighlightedIdx] = useState(0);
+  const [urgencyFilter, setUrgencyFilter] = useState<UrgencyFilter>("all");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AuditRecord | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const counselorNames = useMemo(
     () =>
@@ -39,6 +45,38 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
     [records],
   );
 
+  const matchingCounselors = useMemo(() => {
+    if (!counselorFlagActive) return [];
+    const q = search.trim().toLowerCase();
+    return q
+      ? counselorNames.filter((name) => name.toLowerCase().includes(q))
+      : counselorNames;
+  }, [counselorFlagActive, counselorNames, search]);
+
+  const safeHighlightedIdx =
+    matchingCounselors.length > 0
+      ? Math.min(highlightedIdx, matchingCounselors.length - 1)
+      : 0;
+
+  function handleSearchChange(val: string) {
+    if (!counselorFlagActive) {
+      const match = val.match(/^counselor:\s*(.*)$/i);
+      if (match) {
+        setCounselorFlagActive(true);
+        setFlagDropdownOpen(true);
+        setHighlightedIdx(0);
+        setSearch(match[1]);
+        setPage(1);
+        return;
+      }
+    } else {
+      setFlagDropdownOpen(true);
+      setHighlightedIdx(0);
+    }
+    setSearch(val);
+    setPage(1);
+  }
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return records.filter((r) => {
@@ -46,10 +84,11 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
       if (tab === "pending" && r.status !== "pending") return false;
       if (tab === "completed" && r.status !== "completed") return false;
       if (tab === "referrals" && !r.hasWarmReferral) return false;
-      if (counselorFilter !== "all" && r.counselorName !== counselorFilter) {
-        return false;
-      }
+      if (urgencyFilter !== "all" && r.urgency !== urgencyFilter) return false;
       if (!q) return true;
+      if (counselorFlagActive) {
+        return r.counselorName.toLowerCase().includes(q);
+      }
       return (
         r.obfuscatedStudentCode.toLowerCase().includes(q) ||
         r.counselorName.toLowerCase().includes(q) ||
@@ -57,7 +96,7 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
         r.department.toLowerCase().includes(q)
       );
     });
-  }, [records, tab, counselorFilter, search]);
+  }, [records, tab, urgencyFilter, search, counselorFlagActive]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -65,54 +104,6 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
     (safePage - 1) * PAGE_SIZE,
     safePage * PAGE_SIZE,
   );
-
-  function handleExportCsv() {
-    if (filtered.length === 0) {
-      toast.info("No records to export");
-      return;
-    }
-    const headers = [
-      "Scheduled",
-      "Duration (mins)",
-      "Student Code",
-      "College",
-      "Department",
-      "Assigned Counselor",
-      "Urgency",
-      "Status",
-      "Warm Referral",
-    ];
-    const escape = (val: string | number | boolean) =>
-      `"${String(val).replaceAll('"', '""')}"`;
-    const lines = [
-      headers.join(","),
-      ...filtered.map((r) =>
-        [
-          r.scheduledLabel,
-          r.durationMinutes,
-          r.obfuscatedStudentCode,
-          r.college,
-          r.department,
-          r.counselorName,
-          r.urgency,
-          r.status,
-          r.hasWarmReferral ? "Yes" : "No",
-        ]
-          .map(escape)
-          .join(","),
-      ),
-    ];
-    const blob = new Blob([lines.join("\n")], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `steady-appointment-audit-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`Exported ${filtered.length} obfuscated audit records`);
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -128,8 +119,12 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
           </p>
         </div>
 
-        <Button type="button" variant="outline" onClick={handleExportCsv}>
-          <Download className="size-4" />
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setExportOpen(true)}
+        >
+          <Download strokeWidth={1.5} className="size-4" />
           Export Audit Log
         </Button>
       </div>
@@ -153,51 +148,169 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
           ]}
         />
 
-        {/* Search + Counselor Dropdown Row */}
+        {/* Search (with Counselor: flag) + Urgency Dropdown Row */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="border-border bg-card shadow-steady-card flex h-12 flex-1 items-center gap-3 rounded-[25px] border px-5">
-            <Search className="text-muted-foreground size-4 shrink-0" />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search by student code, college, or counselor"
-              className="w-full bg-transparent text-[15px] outline-none"
-            />
+          <div className="relative flex-1">
+            <div className="border-border bg-card shadow-steady-card flex h-12 items-center gap-2.5 rounded-[25px] border px-5">
+              <Search
+                strokeWidth={1.5}
+                className="text-muted-foreground size-4 shrink-0"
+              />
+              {counselorFlagActive && (
+                <span className="bg-brand-subtle text-brand-subtle-foreground inline-flex shrink-0 items-center gap-1.5 rounded-[35px] px-2.5 py-1 text-[13px] font-medium">
+                  Counselor:
+                  <button
+                    type="button"
+                    aria-label="Remove Counselor filter flag"
+                    onClick={() => {
+                      setCounselorFlagActive(false);
+                      setFlagDropdownOpen(false);
+                      setSearch("");
+                      setPage(1);
+                    }}
+                    className="hover:text-foreground cursor-pointer rounded-full p-0.5 transition-colors"
+                  >
+                    <X strokeWidth={1.75} className="size-3" />
+                  </button>
+                </span>
+              )}
+              <input
+                type="text"
+                value={search}
+                role="combobox"
+                aria-controls="audit-counselor-suggestions"
+                aria-expanded={counselorFlagActive && flagDropdownOpen}
+                aria-autocomplete="list"
+                onFocus={() => {
+                  if (counselorFlagActive) {
+                    setFlagDropdownOpen(true);
+                    setHighlightedIdx(0);
+                  }
+                }}
+                onBlur={() => {
+                  window.setTimeout(() => setFlagDropdownOpen(false), 150);
+                }}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Backspace" &&
+                    counselorFlagActive &&
+                    search === ""
+                  ) {
+                    setCounselorFlagActive(false);
+                    setFlagDropdownOpen(false);
+                  } else if (e.key === "Escape") {
+                    setFlagDropdownOpen(false);
+                  } else if (
+                    counselorFlagActive &&
+                    flagDropdownOpen &&
+                    matchingCounselors.length > 0
+                  ) {
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setHighlightedIdx(
+                        (prev) => (prev + 1) % matchingCounselors.length,
+                      );
+                    } else if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setHighlightedIdx(
+                        (prev) =>
+                          (prev - 1 + matchingCounselors.length) %
+                          matchingCounselors.length,
+                      );
+                    } else if (e.key === "Enter") {
+                      e.preventDefault();
+                      const picked = matchingCounselors[safeHighlightedIdx];
+                      if (picked) {
+                        setSearch(picked);
+                        setFlagDropdownOpen(false);
+                        setPage(1);
+                      }
+                    }
+                  }
+                }}
+                placeholder={
+                  counselorFlagActive
+                    ? "Type a counselor name..."
+                    : 'Search by student ID or college, or type "Counselor:"...'
+                }
+                aria-label="Search appointment audit records"
+                className="w-full bg-transparent text-[15px] outline-none"
+              />
+            </div>
+
+            {counselorFlagActive && flagDropdownOpen && (
+              <div
+                id="audit-counselor-suggestions"
+                role="listbox"
+                className="bg-popover border-border shadow-steady-card absolute top-[calc(100%+6px)] left-0 z-30 max-h-[220px] w-full max-w-[340px] overflow-y-auto rounded-[15px] border p-2.5"
+              >
+                <p className="text-muted-foreground px-3 py-1.5 text-left text-[14px] font-medium">
+                  Assigned Counselors
+                </p>
+                {matchingCounselors.length === 0 ? (
+                  <p className="text-muted-foreground px-3 py-2 text-left text-[15px]">
+                    No matching counselors
+                  </p>
+                ) : (
+                  matchingCounselors.map((name, idx) => {
+                    const isHighlighted = idx === safeHighlightedIdx;
+                    return (
+                      <button
+                        key={name}
+                        type="button"
+                        role="option"
+                        aria-selected={isHighlighted}
+                        onMouseEnter={() => setHighlightedIdx(idx)}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          setSearch(name);
+                          setFlagDropdownOpen(false);
+                          setPage(1);
+                        }}
+                        className={cn(
+                          "flex w-full cursor-pointer items-center justify-start rounded-[10px] px-3 py-2.5 text-left text-[15px] transition-colors",
+                          isHighlighted
+                            ? "bg-muted text-foreground"
+                            : "text-foreground hover:bg-muted/60",
+                        )}
+                      >
+                        {name}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
 
           <Select
-            value={counselorFilter}
+            value={urgencyFilter}
             onValueChange={(v) => {
-              setCounselorFilter(v);
+              setUrgencyFilter(v as UrgencyFilter);
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-full sm:w-[210px]">
-              <SelectValue placeholder="All Counselors" />
+            <SelectTrigger aria-label="Filter by urgency">
+              <SelectValue placeholder="All Urgencies" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Counselor</SelectLabel>
-                <SelectItem value="all">All Counselors</SelectItem>
-                {counselorNames.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
+                <SelectLabel>Urgency</SelectLabel>
+                <SelectItem value="all">All Urgencies</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
         {/* 6-Column Audit Table */}
-        <div className="border-border overflow-x-auto rounded-[18px] border">
-          <table className="w-full min-w-[780px] border-collapse text-left text-[14px]">
+        <div className="border-border shadow-steady-card overflow-x-auto rounded-[20px] border">
+          <table className="w-full min-w-[780px] border-collapse text-left text-[15px]">
             <thead>
-              <tr className="border-border text-foreground/85 border-b text-[14px]">
+              <tr className="border-border text-foreground border-b text-[15px]">
                 <th className="px-5 py-4 font-medium">
                   Scheduled Date or Time
                 </th>
@@ -215,7 +328,7 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
                 <tr>
                   <td
                     colSpan={6}
-                    className="text-muted-foreground px-5 py-10 text-center text-sm"
+                    className="text-muted-foreground px-5 py-10 text-center text-[15px]"
                   >
                     No appointments match your current filter.
                   </td>
@@ -227,22 +340,26 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
                     className="hover:bg-muted/40 transition-colors"
                   >
                     <td className="px-5 py-4">
-                      <p className="font-medium">{row.scheduledLabel}</p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-foreground font-normal">
+                        {row.scheduledLabel}
+                      </p>
+                      <p className="text-muted-foreground text-[14px]">
                         {row.durationMinutes}m session
                       </p>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="font-mono font-medium">
+                      <p className="text-foreground font-normal tabular-nums">
                         {row.obfuscatedStudentCode}
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-muted-foreground text-[14px]">
                         {row.college}
                       </p>
                     </td>
                     <td className="px-4 py-4">
-                      <p className="font-medium">{row.counselorName}</p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-foreground font-normal">
+                        {row.counselorName}
+                      </p>
+                      <p className="text-muted-foreground text-[14px]">
                         Guidance Counselor
                       </p>
                     </td>
@@ -253,11 +370,7 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
                       <StatusBadge status={row.status} />
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => setSelected(row)}
-                      >
+                      <Button type="button" onClick={() => setSelected(row)}>
                         Audit Metadata
                       </Button>
                     </td>
@@ -270,14 +383,13 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
 
         {/* Pagination Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-[15px]">
             View {pageRows.length} out of {filtered.length} results
           </p>
           <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="outline"
-              size="sm"
               disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
@@ -286,7 +398,6 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
             <Button
               type="button"
               variant="outline"
-              size="sm"
               disabled={safePage >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             >
@@ -302,6 +413,12 @@ export function AuditLedgerView({ records }: { records: AuditRecord[] }) {
           if (!open) setSelected(null);
         }}
         record={selected}
+      />
+
+      <AuditExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        records={filtered}
       />
     </div>
   );

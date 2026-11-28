@@ -367,7 +367,7 @@ export function SteadyMascot({
         overflow="visible"
         className={cn(
           "pointer-events-none",
-          isOrb ? "size-full" : "absolute top-[2%] -left-[34%] size-[144%]",
+          isOrb ? "size-full" : "absolute top-[11%] -left-[32%] size-[140%]",
         )}
         animate={{
           x: gaze.x * (isOrb ? 2 : 1.5),
@@ -422,21 +422,40 @@ export function SteadyMascot({
           animate={{
             x: baseEye.x + gaze.x * 4,
             y: baseEye.y + gaze.y * 4,
-            scaleY: isBlinking ? 0.1 : 1,
           }}
-          style={{
-            transformOrigin:
-              emotion === "default"
-                ? `${33 + baseEye.x}px ${19 + baseEye.y}px`
-                : `${26 + baseEye.x}px ${25 + baseEye.y}px`,
-          }}
-          transition={
-            isBlinking
-              ? { duration: 0.08, ease: "easeInOut" }
-              : { type: "spring", stiffness: 320, damping: 22 }
-          }
+          transition={{ type: "spring", stiffness: 320, damping: 22 }}
         >
-          {renderEmotionEyes(emotion)}
+          {emotion === "default" ? (
+            <>
+              {/* Curved thick-stroke eyes (arc radius 53.16 = 2x orb radius) with center trim-path blink */}
+              <m.path
+                d="M 28.55 15.85 A 53.16 53.16 0 0 1 29.95 23.05"
+                fill="none"
+                stroke="white"
+                strokeWidth="5.06"
+                strokeLinecap="round"
+                animate={{
+                  pathLength: isBlinking ? 0.01 : 1,
+                  pathOffset: isBlinking ? 0.495 : 0,
+                }}
+                transition={{ duration: 0.095, ease: "easeInOut" }}
+              />
+              <m.path
+                d="M 36.95 14.15 A 53.16 53.16 0 0 1 38.35 21.35"
+                fill="none"
+                stroke="white"
+                strokeWidth="5.06"
+                strokeLinecap="round"
+                animate={{
+                  pathLength: isBlinking ? 0.01 : 1,
+                  pathOffset: isBlinking ? 0.495 : 0,
+                }}
+                transition={{ duration: 0.095, ease: "easeInOut" }}
+              />
+            </>
+          ) : (
+            renderEmotionEyes(emotion)
+          )}
         </m.g>
       </m.svg>
     </div>

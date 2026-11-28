@@ -3,22 +3,43 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import * as m from "motion/react-m";
 import {
+  ChevronRight,
+  ChevronsUpDown,
   EyeOff,
   LogOut,
   Menu,
+  Monitor,
+  Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  Siren,
+  SlidersHorizontal,
+  Sun,
   type LucideIcon,
 } from "lucide-react";
+import { AccountSettingsDialog } from "@/components/app/account-settings-dialog";
 import { BrandMark } from "@/components/app/brand-mark";
+import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 import { SteadyMark } from "@/components/app/steady-mark";
 import { UserAvatar } from "@/components/app/user-avatar";
 import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { usePrivacyShield } from "@/components/app/privacy-shield";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
@@ -54,7 +75,17 @@ export interface RoleSidebarProps {
   topSlot?: ReactNode;
   footerSlot?: ReactNode;
   privacyLabel?: string;
+  settingsHref?: string;
   children: ReactNode;
+}
+
+function resolveCrisisRole(
+  roleLabel: string,
+): "student" | "counselor" | "admin" {
+  const lower = roleLabel.toLowerCase();
+  if (lower.includes("admin")) return "admin";
+  if (lower.includes("counselor")) return "counselor";
+  return "student";
 }
 
 /**
@@ -74,25 +105,41 @@ export function RoleSidebarShell({
   children,
 }: RoleSidebarProps) {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [crisisOpen, setCrisisOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const { enabled: privacyOn, toggle: togglePrivacy } = usePrivacyShield();
   const signOut = useSignOut();
+
+  const crisisRole = resolveCrisisRole(roleLabel);
 
   const isActive = (item: SidebarNavItemDef) =>
     item.exact
       ? pathname === item.href
       : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
+  const activeNavItem = groups
+    .flatMap((g) => g.items)
+    .find((item) => isActive(item));
+  const breadcrumbPage = activeNavItem?.label ?? "Dashboard";
+
   const renderNavContent = (isCompact: boolean, closeMobile?: () => void) => (
     <div className="flex h-full flex-col justify-between gap-6">
       <div className="flex flex-col gap-7">
-        {/* Brand header */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <SteadyMark className="size-9 shrink-0" />
+        {/* Brand header — left aligned with nav labels, bell flush with active item right edge */}
+        <div
+          className={cn(
+            "flex items-center justify-between gap-3",
+            !isCompact && "pl-3",
+            isCompact && "justify-center",
+          )}
+        >
+          <div className="flex min-w-0 items-center gap-3.5">
+            <SteadyMark className="size-11 shrink-0" />
             {!isCompact && (
-              <div className="min-w-0 leading-tight">
+              <div className="min-w-0 leading-snug">
                 <p className="truncate text-[16px] font-medium">Steady</p>
                 <p className="text-muted-foreground truncate text-sm">
                   {roleLabel}
@@ -109,16 +156,21 @@ export function RoleSidebarShell({
         {/* Navigation Groups */}
         <nav
           aria-label={`${roleLabel} navigation`}
-          className="flex flex-col gap-6"
+          className={cn("flex flex-col", isCompact ? "gap-2" : "gap-6")}
         >
           {groups.map((group) => (
-            <div key={group.title} className="flex flex-col gap-2.5">
+            <div
+              key={group.title}
+              className={cn("flex flex-col", isCompact ? "gap-0" : "gap-2.5")}
+            >
               {!isCompact && (
                 <p className="text-muted-foreground px-3 text-[15px] font-normal">
                   {group.title}
                 </p>
               )}
-              <ul className="flex flex-col gap-1">
+              <ul
+                className={cn("flex flex-col", isCompact ? "gap-2" : "gap-1")}
+              >
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item);
@@ -168,65 +220,172 @@ export function RoleSidebarShell({
         </nav>
       </div>
 
-      {/* Footer: User Profile, Privacy Shield Toggle, Theme & Sign Out */}
-      <div className="flex flex-col gap-4 border-t pt-5">
-        <div
-          className={cn(
-            "flex items-center gap-3",
-            isCompact && "justify-center",
-          )}
-        >
-          <UserAvatar
-            name={userName}
-            src={userAvatar ?? undefined}
-            className="size-11 shrink-0 rounded-[12px]"
-          />
-          {!isCompact && (
-            <div className="min-w-0 flex-1 leading-tight">
-              <p className="privacy-sensitive truncate text-sm font-medium">
-                {userName}
-              </p>
-              <p className="text-muted-foreground privacy-sensitive truncate text-xs">
-                {userSubtitle}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {!isCompact && (
-          <label className="flex cursor-pointer items-center justify-between gap-2 rounded-[25px] px-1 py-1 text-sm">
-            <span className="flex items-center gap-2">
-              <EyeOff aria-hidden className="text-muted-foreground size-4" />
-              <span>{privacyLabel}</span>
-            </span>
-            <Switch
-              checked={privacyOn}
-              onCheckedChange={togglePrivacy}
-              aria-label={privacyLabel}
-            />
-          </label>
-        )}
-
+      {/* Footer: Optional role footerSlot & Profile Dropdown */}
+      <div className="flex flex-col gap-3 pt-2">
         {!isCompact && footerSlot}
 
-        <div
-          className={cn(
-            "flex items-center gap-2",
-            isCompact ? "flex-col" : "justify-between",
-          )}
-        >
-          <ThemeToggle />
-          <Button
-            variant="outline"
-            size={isCompact ? "icon" : "sm"}
-            onClick={() => void signOut()}
-            aria-label="Sign out"
-            className={cn(!isCompact && "flex-1")}
+        {/* Sidebar Profile Dropdown (styled identically to other Steady dropdowns) */}
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Open account menu"
+              className={cn(
+                "hover:bg-muted/70 focus-visible:ring-ring/50 flex w-full cursor-pointer items-center gap-4 rounded-[14px] p-1.5 text-left transition-colors outline-none focus-visible:ring-[3px]",
+                isCompact && "justify-center p-1",
+              )}
+            >
+              <UserAvatar
+                name={userName}
+                src={userAvatar ?? undefined}
+                className="size-11 shrink-0 rounded-[10px]"
+              />
+              {!isCompact && (
+                <>
+                  <div className="min-w-0 flex-1 leading-snug">
+                    <p className="privacy-sensitive text-foreground truncate text-[15px] font-medium">
+                      {userName}
+                    </p>
+                    <p className="text-muted-foreground privacy-sensitive truncate text-[15px] font-normal">
+                      {userSubtitle}
+                    </p>
+                  </div>
+                  <ChevronsUpDown
+                    aria-hidden
+                    strokeWidth={1.5}
+                    className="text-foreground/70 size-4 shrink-0"
+                  />
+                </>
+              )}
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent
+            side="top"
+            align="start"
+            sideOffset={10}
+            className="w-[290px]"
           >
-            <LogOut className="size-4" />
-            {!isCompact && <span>Sign out</span>}
-          </Button>
-        </div>
+            {/* Profile Header Band — ONLY divider in the dropdown */}
+            <div className="border-border mb-1.5 flex items-center gap-3.5 border-b px-2.5 pt-1.5 pb-3">
+              <UserAvatar
+                name={userName}
+                src={userAvatar ?? undefined}
+                className="size-11 shrink-0 rounded-[10px]"
+              />
+              <div className="min-w-0 flex-1 leading-snug">
+                <p className="privacy-sensitive text-foreground truncate text-[15px] font-medium">
+                  {userName}
+                </p>
+                <p className="text-muted-foreground privacy-sensitive truncate text-[14px] font-normal">
+                  {userSubtitle}
+                </p>
+              </div>
+            </div>
+
+            {/* Account Settings Modal */}
+            <DropdownMenuItem
+              onSelect={() => {
+                closeMobile?.();
+                setAccountOpen(true);
+              }}
+            >
+              <SlidersHorizontal
+                aria-hidden
+                strokeWidth={1.5}
+                className="size-4 shrink-0"
+              />
+              <span>Account Settings</span>
+            </DropdownMenuItem>
+
+            {/* Campus / Desk Privacy Switch */}
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                togglePrivacy();
+              }}
+              className="justify-between"
+            >
+              <span className="flex items-center gap-2.5">
+                <EyeOff
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="text-muted-foreground size-4 shrink-0"
+                />
+                <span>{privacyLabel}</span>
+              </span>
+              <Switch
+                checked={privacyOn}
+                onCheckedChange={togglePrivacy}
+                onClick={(e) => e.stopPropagation()}
+                aria-label={privacyLabel}
+              />
+            </DropdownMenuItem>
+
+            {/* Appearance Submenu */}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Sun
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="text-muted-foreground size-4 dark:hidden"
+                />
+                <Moon
+                  aria-hidden
+                  strokeWidth={1.5}
+                  className="text-muted-foreground hidden size-4 dark:block"
+                />
+                <span>Appearance</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="min-w-44">
+                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                  <DropdownMenuRadioItem value="light">
+                    <Sun aria-hidden strokeWidth={1.5} className="size-4" />
+                    Light
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">
+                    <Moon aria-hidden strokeWidth={1.5} className="size-4" />
+                    Dark
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system">
+                    <Monitor aria-hidden strokeWidth={1.5} className="size-4" />
+                    System
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+
+            {/* Crisis Protocol */}
+            <DropdownMenuItem
+              onSelect={() => {
+                closeMobile?.();
+                setCrisisOpen(true);
+              }}
+            >
+              <Siren
+                aria-hidden
+                strokeWidth={1.5}
+                className="size-4 shrink-0"
+              />
+              <span>Crisis Protocol</span>
+            </DropdownMenuItem>
+
+            {/* Logout */}
+            <DropdownMenuItem
+              onSelect={() => {
+                closeMobile?.();
+                void signOut();
+              }}
+            >
+              <LogOut
+                aria-hidden
+                strokeWidth={1.5}
+                className="size-4 shrink-0"
+              />
+              <span>Logout</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
@@ -239,7 +398,7 @@ export function RoleSidebarShell({
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" aria-label="Open menu">
-                <Menu className="size-5" />
+                <Menu strokeWidth={1.5} className="size-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[310px] overflow-y-auto p-6">
@@ -269,24 +428,49 @@ export function RoleSidebarShell({
 
       {/* Main Content Area */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <div className="hidden items-center justify-between px-6 pt-5 lg:flex">
-          <Button
-            variant="ghost"
-            size="icon-sm"
+        <div className="hidden items-center gap-4 px-8 pt-6 lg:flex">
+          <button
+            type="button"
             onClick={() => setCollapsed((prev) => !prev)}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="text-foreground hover:bg-muted focus-visible:ring-ring/50 -m-2 inline-flex size-8 cursor-pointer items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-[3px]"
           >
             {collapsed ? (
-              <PanelLeftOpen className="size-4" />
+              <PanelLeftOpen strokeWidth={1.5} className="size-4" />
             ) : (
-              <PanelLeftClose className="size-4" />
+              <PanelLeftClose strokeWidth={1.5} className="size-4" />
             )}
-          </Button>
+          </button>
+          <span aria-hidden className="bg-border h-5 w-px" />
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-2.5 text-[15px] font-normal"
+          >
+            <span className="text-foreground">{roleLabel}</span>
+            <ChevronRight
+              aria-hidden
+              strokeWidth={1.5}
+              className="text-muted-foreground size-4"
+            />
+            <span className="text-foreground/85">{breadcrumbPage}</span>
+          </nav>
         </div>
         <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
           {children}
         </main>
       </div>
+
+      <CrisisSupportDialog
+        open={crisisOpen}
+        onOpenChange={setCrisisOpen}
+        role={crisisRole}
+      />
+
+      <AccountSettingsDialog
+        open={accountOpen}
+        onOpenChange={setAccountOpen}
+        role={crisisRole}
+      />
     </div>
   );
 }

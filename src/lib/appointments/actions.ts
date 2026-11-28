@@ -23,6 +23,8 @@ const bookingSchema = z.object({
     .min(1, "Choose a reason")
     .max(120, "Keep the reason under 120 characters"),
   notes: z.string().trim().max(500, "Keep notes under 500 characters"),
+  urgency: z.enum(["low", "medium", "high"]).optional(),
+  duration_minutes: z.number().int().min(15).max(120).optional(),
 });
 
 export type BookingInput = z.input<typeof bookingSchema>;

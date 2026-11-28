@@ -47,8 +47,10 @@ function listAppointments(
   if (scope) query = query.eq(scope.column, scope.id);
   if (status) query = query.eq("status", status);
 
-  const pattern = searchPattern(search);
-  if (pattern) {
+  const tokens = (search ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 4);
+  for (const token of tokens) {
+    const pattern = searchPattern(token);
+    if (!pattern) continue;
     query = query.or(
       [
         `first_student_name.ilike.${pattern}`,

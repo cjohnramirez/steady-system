@@ -121,3 +121,63 @@ export function fromOfficeInputValue(value: string): string {
   const date = new Date(`${value}:00+08:00`);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString();
 }
+
+const STOP_WORDS = new Set(["of", "in", "and", "the", "for", "with", "to"]);
+
+/**
+ * Returns a compact abbreviation for a degree/program name to prevent overflow
+ * in tables, cards, and dropdowns.
+ * - "BS Electrical Engineering (BSEE)" -> "BSEE"
+ * - "Bachelor of Science in Computer Engineering" -> "BSCE"
+ * - "BS Information Technology" -> "BSIT"
+ */
+export function abbreviateProgram(program: string | null | undefined): string {
+  if (!program) return "";
+  const trimmed = program.trim();
+  if (!trimmed) return "";
+
+  const parenMatch = trimmed.match(/\(([A-Za-z0-9-]{2,10})\)\s*$/);
+  if (parenMatch) return parenMatch[1].toUpperCase();
+
+  if (trimmed.length <= 8 && !trimmed.includes(" ")) return trimmed;
+
+  const words = trimmed
+    .replace(/[^A-Za-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length <= 1) return trimmed.slice(0, 8);
+
+  let prefix = "";
+  let startIdx = 0;
+  const first = words[0].toUpperCase();
+
+  if (first === "BS" || first === "BA" || first === "AB" || first === "BE") {
+    prefix = first;
+    startIdx = 1;
+  } else if (
+    first === "BACHELOR" &&
+    words[1]?.toLowerCase() === "of" &&
+    words[2]?.toLowerCase() === "science"
+  ) {
+    prefix = "BS";
+    startIdx = 3;
+  } else if (
+    first === "BACHELOR" &&
+    words[1]?.toLowerCase() === "of" &&
+    words[2]?.toLowerCase() === "arts"
+  ) {
+    prefix = "BA";
+    startIdx = 3;
+  } else if (first === "BACHELOR") {
+    prefix = "B";
+    startIdx = 1;
+  }
+
+  const rest = words
+    .slice(startIdx)
+    .filter((w) => !STOP_WORDS.has(w.toLowerCase()));
+
+  const initials = rest.map((w) => w[0].toUpperCase()).join("");
+  const combined = `${prefix}${initials}`;
+  return combined.length >= 2 ? combined : trimmed.slice(0, 10);
+}

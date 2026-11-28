@@ -34,7 +34,7 @@ export const announcementSchema = z
 
 export const articleSchema = z.object({
   title: text("Title", 160),
-  content: text("Summary", 2000),
+  content: text("Content", 15000),
   link: z.url("Enter the full link, starting with https://"),
   author_name: text("Author", 120),
   publisher_name: text("Publisher", 120),

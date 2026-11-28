@@ -140,7 +140,9 @@ export function DossierDialog({
               onClick={() => onOpenChange(false)}
               className="shrink-0"
             >
-              <Link href="/counselor/appointments">
+              <Link
+                href={`/counselor/appointments?student=${encodeURIComponent(student.name)}&sort=date_desc`}
+              >
                 <ExternalLink className="size-3.5" />
                 View Sessions
               </Link>
@@ -175,9 +177,11 @@ export function DossierDialog({
             asChild
             onClick={() => onOpenChange(false)}
           >
-            <Link href="/counselor/appointments">
-              <CalendarPlus className="size-4" />
-              Book Slot
+            <Link
+              href={`/counselor/appointments?student=${encodeURIComponent(student.name)}&sort=date_desc`}
+            >
+              <CalendarPlus strokeWidth={1.5} className="size-4" />
+              View Sessions
             </Link>
           </Button>
           <Button

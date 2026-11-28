@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/app/page-header";
+import { guardPage } from "@/lib/auth/session";
+import { PageTransition } from "@/components/motion/primitives";
 import AccountsView from "./_components/accounts-view";
 
-export const metadata: Metadata = { title: "Accounts" };
+export const metadata: Metadata = { title: "Accounts & Directory Management" };
 
-export default function AccountsPage() {
+export default async function AccountsPage() {
+  await guardPage("admin");
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader
-        title="Accounts"
-        description="Students and counselors registered in the system."
-      />
+    <PageTransition className="flex flex-col gap-6">
       <AccountsView />
-    </div>
+    </PageTransition>
   );
 }

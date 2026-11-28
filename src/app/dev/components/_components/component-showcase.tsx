@@ -31,6 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SectionCard } from "@/components/app/section-card";
+import { MarkdownEditor } from "@/components/app/markdown-editor";
+import { MarkdownContent } from "@/components/app/markdown-content";
 import {
   SteadyMascot,
   type MascotEmotion,
@@ -77,6 +79,9 @@ export function ComponentShowcase() {
   const [dossierOpen, setDossierOpen] = useState(false);
   const [proposedBookingOpen, setProposedBookingOpen] = useState(false);
   const [pendingDetailsOpen, setPendingDetailsOpen] = useState(false);
+  const [markdownDemo, setMarkdownDemo] = useState(
+    "## Recognizing Academic Burnout\n\nAcademic burnout is more than feeling tired during **midterms or finals**; it is *prolonged emotional and mental exhaustion*.\n\n- Protect regular sleep windows\n- Break assignments into 25-minute blocks\n\n> Rest is part of sustainable academic progress.",
+  );
   const { enabled: privacyOn, toggle: togglePrivacy } = usePrivacyShield();
 
   return (
@@ -301,6 +306,29 @@ export function ComponentShowcase() {
           </SectionCard>
         </div>
 
+        {/* Tier 1b: Markdown Editor & Renderer (Figma 739:2215) */}
+        <SectionCard
+          title="3b. Rich Markdown Editor & Renderer (Figma 739:2215)"
+          description="Inline formatting toolbar (bold, italic, heading, lists, quote), live word counter, and XSS-safe React Markdown renderer."
+        >
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="demo-markdown">Article Content Editor</Label>
+              <MarkdownEditor
+                id="demo-markdown"
+                value={markdownDemo}
+                onChange={setMarkdownDemo}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Rendered Output</Label>
+              <div className="bg-card border-border shadow-steady-card min-h-[268px] rounded-[20px] border p-5">
+                <MarkdownContent content={markdownDemo} />
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+
         {/* Tier 2: PillTabs & Stepper */}
         <SectionCard
           title="4. Animated PillTabs & 4-Step Stepper"
@@ -469,6 +497,12 @@ export function ComponentShowcase() {
               title: "Log energy levels after midday lunch for 3 days",
               is_completed: false,
               due_date: "2026-12-05",
+            },
+            {
+              id: "demo-4",
+              title: "Take a 15-minute screen-free walk after evening lab",
+              is_completed: false,
+              due_date: "2026-12-07",
             },
           ]}
         />

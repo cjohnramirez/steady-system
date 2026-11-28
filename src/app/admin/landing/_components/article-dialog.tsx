@@ -3,11 +3,16 @@
 import { useMemo } from "react";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useQuery } from "@tanstack/react-query";
-import { FieldGroup } from "@/components/ui/field";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { MarkdownEditor } from "@/components/app/markdown-editor";
 import { FormInputField } from "@/components/form-input-field";
 import { FormSelectField } from "@/components/form-select-field";
-import ImageUpload from "@/components/image-upload";
+import { fieldErrors, isFieldInvalid } from "@/components/form/field-like";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
 import { saveArticle } from "@/lib/content/actions";
@@ -15,9 +20,12 @@ import { fetchEmotionalStatuses } from "@/lib/reference/queries";
 import { strToTitleCase } from "@/lib/format";
 import { queryKeys } from "@/lib/query-keys";
 import { articleSchema } from "@/lib/validation/content";
-import { ContentDialogShell } from "./content-dialog-shell";
+import { ContentDialogShell, CoverPhotoSection } from "./content-dialog-shell";
 import { useContentEditor } from "./use-content-editor";
 
+/**
+ * Create / Edit Article Modal (Figma 687:1282 & 739:2215).
+ */
 export default function ArticleDialog({
   article,
   onClose,
@@ -25,7 +33,9 @@ export default function ArticleDialog({
   article: Tables<"article"> | null;
   onClose: () => void;
 }) {
+  const isEditing = Boolean(article);
   const supabase = useMemo(() => createClient(), []);
+
   const moods = useQuery({
     queryKey: queryKeys.emotionalStatus,
     queryFn: () => fetchEmotionalStatuses(supabase),
@@ -63,76 +73,113 @@ export default function ArticleDialog({
 
   return (
     <ContentDialogShell
-      title={article ? "Edit article" : "New article"}
-      description="Recommended reading, matched to how students say they feel."
-      isEditing={Boolean(article)}
+      title={isEditing ? "Edit Article" : "Create Article"}
+      description={
+        isEditing
+          ? "Update this mood-tagged reading resource for students."
+          : "Add mood-tagged reading resources for students."
+      }
+      submitLabel={isEditing ? "Save Article" : "Publish Article"}
+      isEditing={isEditing}
       isBusy={isSubmitting || editor.image.isUploading}
-      busyLabel={editor.image.isUploading ? "Uploading image…" : "Saving…"}
+      busyLabel={editor.image.isUploading ? "Uploading photo..." : "Saving..."}
       onClose={onClose}
       onDelete={() => editor.remove(article?.title ?? "")}
       onSubmit={() => void form.handleSubmit()}
     >
       {() => (
-        <div className="grid gap-6 md:grid-cols-[18rem_1fr]">
-          <ImageUpload
+        <>
+          <CoverPhotoSection
+            label="Article Cover Photo"
             preview={editor.image.preview}
             onChange={editor.image.choose}
           />
-          <FieldGroup className="gap-5">
-            <form.Field name="title">
-              {(f) => <FormInputField field={f} label="Title" />}
-            </form.Field>
-            <form.Field name="link">
-              {(f) => (
-                <FormInputField
-                  field={f}
-                  label="Link"
-                  type="url"
-                  placeholder="https://"
-                />
-              )}
-            </form.Field>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <form.Field name="author_name">
-                {(f) => <FormInputField field={f} label="Author" />}
-              </form.Field>
-              <form.Field name="publisher_name">
-                {(f) => <FormInputField field={f} label="Publisher" />}
-              </form.Field>
-            </div>
-            <form.Field name="emotional_status_id">
-              {(f) => (
-                <FormSelectField
-                  field={f}
-                  label="Best for students feeling"
-                  isLoading={moods.isLoading}
-                  isError={moods.isError}
-                  options={(moods.data ?? []).map((m) => ({
-                    value: m.id,
-                    label: strToTitleCase(m.name),
-                  }))}
-                />
-              )}
-            </form.Field>
-            <form.Field name="content">
-              {(f) => (
-                <div className="space-y-2">
-                  <label htmlFor={f.name} className="text-sm font-medium">
-                    Summary
-                  </label>
-                  <Textarea
-                    id={f.name}
-                    rows={4}
-                    maxLength={2000}
-                    value={f.state.value}
-                    onChange={(e) => f.handleChange(e.target.value)}
-                    onBlur={f.handleBlur}
+
+          <div className="space-y-5 p-5">
+            <p className="text-foreground text-[15px] font-medium">
+              {isEditing ? "Edit Article Details" : "Article Details"}
+            </p>
+
+            <FieldGroup className="gap-4">
+              <form.Field name="title">
+                {(f) => (
+                  <FormInputField
+                    field={f}
+                    label="Article Title"
+                    placeholder="Understanding Academic Burnout"
                   />
-                </div>
-              )}
-            </form.Field>
-          </FieldGroup>
-        </div>
+                )}
+              </form.Field>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <form.Field name="author_name">
+                  {(f) => (
+                    <FormInputField
+                      field={f}
+                      label="Author"
+                      placeholder="Clara Wren"
+                    />
+                  )}
+                </form.Field>
+                <form.Field name="publisher_name">
+                  {(f) => (
+                    <FormInputField
+                      field={f}
+                      label="Publisher"
+                      placeholder="Steady Wellness Editorial"
+                    />
+                  )}
+                </form.Field>
+              </div>
+
+              <form.Field name="emotional_status_id">
+                {(f) => (
+                  <FormSelectField
+                    field={f}
+                    label="Target Mood Tag"
+                    isLoading={moods.isLoading}
+                    isError={moods.isError}
+                    options={(moods.data ?? []).map((m) => ({
+                      value: m.id,
+                      label: strToTitleCase(m.name),
+                    }))}
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="link">
+                {(f) => (
+                  <FormInputField
+                    field={f}
+                    label="External Article URL"
+                    type="url"
+                    placeholder="https://"
+                  />
+                )}
+              </form.Field>
+
+              <form.Field name="content">
+                {(f) => {
+                  const invalid = isFieldInvalid(f);
+                  return (
+                    <Field data-invalid={invalid}>
+                      <FieldLabel htmlFor={f.name}>Article Content</FieldLabel>
+                      <MarkdownEditor
+                        id={f.name}
+                        value={f.state.value}
+                        onChange={f.handleChange}
+                        onBlur={f.handleBlur}
+                        invalid={invalid}
+                        placeholder="Write the full article content here... Use the toolbar below for bold, italics, headings, or lists."
+                      />
+                      {invalid && <FieldError errors={fieldErrors(f)} />}
+                    </Field>
+                  );
+                }}
+              </form.Field>
+            </FieldGroup>
+          </div>
+        </>
       )}
     </ContentDialogShell>
   );

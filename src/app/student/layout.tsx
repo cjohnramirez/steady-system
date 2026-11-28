@@ -13,17 +13,18 @@ export default async function StudentLayout({
   const fullName =
     `${viewer.firstName} ${viewer.lastName}`.trim() || viewer.userName;
 
+  const subtitle = viewer.emotionalStatus
+    ? viewer.emotionalStatus.charAt(0).toUpperCase() +
+      viewer.emotionalStatus.slice(1)
+    : "Student Account";
+
   return (
     <ViewerProvider viewer={viewer}>
       <LiveUpdates />
       <StudentSidebarShell
         userId={viewer.userId}
         userName={fullName}
-        userSubtitle={
-          viewer.emotionalStatus
-            ? `Mood: ${viewer.emotionalStatus}`
-            : "Student Account"
-        }
+        userSubtitle={subtitle}
         userAvatar={viewer.avatar}
       >
         {children}
