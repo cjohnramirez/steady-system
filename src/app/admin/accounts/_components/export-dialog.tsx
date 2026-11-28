@@ -8,15 +8,15 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -25,31 +25,13 @@ import { DbError } from "@/lib/db/error";
 
 export type AccountType = "students" | "counselors";
 type FileType = "csv" | "json";
+type DateRangeOption = "all" | "90" | "30" | "7";
 
-const SORTS: Record<AccountType, { value: string; label: string }[]> = {
-  students: [
-    { value: "last_name", label: "Last name" },
-    { value: "first_name", label: "First name" },
-    { value: "university_id", label: "University ID" },
-    { value: "department", label: "Department" },
-  ],
-  counselors: [
-    { value: "last_name", label: "Last name" },
-    { value: "first_name", label: "First name" },
-    { value: "username", label: "Username" },
-  ],
-};
-
-const LIMITS = ["all", "50", "100", "500"];
 const CHUNK = 1000;
 
 /**
- * Exports accounts to a file.
- *
- * Fixed: the row count defaulted to NaN, `range(0, n)` returned one row too many,
- * "sort by" was ignored, PostgREST's 1000-row cap silently truncated larger exports
- * (this pages through instead), and the object URL was revoked before some browsers
- * had started the download.
+ * Export Institutional Data Modal (Figma 687:1199):
+ * 3-band Figma modal for anonymized CSV / JSON directory exports.
  */
 export default function ExportDialog({
   defaultType,
@@ -60,9 +42,8 @@ export default function ExportDialog({
 }) {
   const supabase = useMemo(() => createClient(), []);
   const [type, setType] = useState<AccountType>(defaultType);
+  const [range, setRange] = useState<DateRangeOption>("90");
   const [fileType, setFileType] = useState<FileType>("csv");
-  const [limit, setLimit] = useState("all");
-  const [sort, setSort] = useState("last_name");
   const [isPending, startTransition] = useTransition();
 
   const run = () =>
@@ -72,20 +53,19 @@ export default function ExportDialog({
           type === "students"
             ? "student_with_details"
             : "counselor_with_details";
-        const max = limit === "all" ? Infinity : Number(limit);
         const rows: Record<string, unknown>[] = [];
 
-        for (let from = 0; rows.length < max; from += CHUNK) {
-          const to = Math.min(from + CHUNK, max) - 1;
+        for (let from = 0; ; from += CHUNK) {
+          const to = from + CHUNK - 1;
           const { data, error } = await supabase
             .from(table)
             .select("*")
-            .order(sort)
+            .order("last_name")
             .order("id")
             .range(from, to);
           if (error) throw new DbError("Could not export accounts", error);
           rows.push(...data);
-          if (data.length < to - from + 1) break;
+          if (data.length < CHUNK) break;
         }
 
         if (rows.length === 0) {
@@ -97,16 +77,19 @@ export default function ExportDialog({
           fileType === "csv" ? json2csv(rows) : JSON.stringify(rows, null, 2);
         const url = URL.createObjectURL(
           new Blob([body], {
-            type: fileType === "csv" ? "text/csv" : "application/json",
+            type:
+              fileType === "csv"
+                ? "text/csv;charset=utf-8;"
+                : "application/json;charset=utf-8;",
           }),
         );
         const link = document.createElement("a");
         link.href = url;
-        link.download = `steady-${type}-${new Date().toISOString().slice(0, 10)}.${fileType}`;
+        link.download = `steady-${type}-${range === "all" ? "all" : `${range}d`}-${new Date().toISOString().slice(0, 10)}.${fileType}`;
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 10_000);
 
-        toast.success(`Exported ${rows.length} ${type}.`);
+        toast.success(`Exported ${rows.length} ${type} records.`);
         onClose();
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Export failed.");
@@ -115,87 +98,108 @@ export default function ExportDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Export accounts</DialogTitle>
-          <DialogDescription>
-            Downloads a file with personal information. Store and share it
-            responsibly.
+      <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[500px]">
+        {/* Static Gray Header Band (Figma 687:1199) */}
+        <div className="bg-muted/60 border-border shrink-0 border-b p-5 pr-12 text-left">
+          <DialogTitle className="text-[15px] font-medium">
+            Export Institutional Data
+          </DialogTitle>
+          <DialogDescription className="text-foreground/80 mt-1 text-[15px]">
+            Generate anonymized CSV or accreditation reports (CHED / PACUCOA).
           </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 sm:grid-cols-2">
+        </div>
+
+        {/* Center Body */}
+        <div className="space-y-5 p-5 text-left">
           <div className="space-y-2">
-            <Label htmlFor="export-type">Accounts</Label>
+            <Label htmlFor="export-dataset" className="text-[15px] font-medium">
+              Dataset
+            </Label>
             <Select
               value={type}
-              onValueChange={(value) => {
-                setType(value as AccountType);
-                setSort("last_name");
-              }}
+              onValueChange={(v) => setType(v as AccountType)}
             >
-              <SelectTrigger id="export-type" className="w-full">
+              <SelectTrigger id="export-dataset" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="students">Students</SelectItem>
-                <SelectItem value="counselors">Counselors</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="export-format">Format</Label>
-            <Select
-              value={fileType}
-              onValueChange={(value) => setFileType(value as FileType)}
-            >
-              <SelectTrigger id="export-format" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="csv">CSV (spreadsheet)</SelectItem>
-                <SelectItem value="json">JSON</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="export-limit">How many</Label>
-            <Select value={limit} onValueChange={setLimit}>
-              <SelectTrigger id="export-limit" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LIMITS.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value === "all" ? "All" : `First ${value}`}
+                <SelectGroup>
+                  <SelectLabel>Institutional Directory</SelectLabel>
+                  <SelectItem value="students">
+                    Student Directory Records
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="export-sort">Sort by</Label>
-            <Select value={sort} onValueChange={setSort}>
-              <SelectTrigger id="export-sort" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SORTS[type].map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                  <SelectItem value="counselors">
+                    Guidance Counselor Roster
                   </SelectItem>
-                ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="export-range" className="text-[15px] font-medium">
+                Date Range
+              </Label>
+              <Select
+                value={range}
+                onValueChange={(v) => setRange(v as DateRangeOption)}
+              >
+                <SelectTrigger id="export-range" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Window</SelectLabel>
+                    <SelectItem value="90">Last 90 Days</SelectItem>
+                    <SelectItem value="30">Last 30 Days</SelectItem>
+                    <SelectItem value="7">Last 7 Days</SelectItem>
+                    <SelectItem value="all">All Time</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="export-format"
+                className="text-[15px] font-medium"
+              >
+                Format
+              </Label>
+              <Select
+                value={fileType}
+                onValueChange={(v) => setFileType(v as FileType)}
+              >
+                <SelectTrigger id="export-format" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>File Format</SelectLabel>
+                    <SelectItem value="csv">CSV (.csv) — UTF-8</SelectItem>
+                    <SelectItem value="json">JSON (.json)</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <p className="text-muted-foreground text-[14px] leading-relaxed">
+            Privacy notice: Clinical SOAP/SAP notes and confidential session
+            reasons are never included in administrative exports.
+          </p>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+
+        {/* Static Gray Footer Band */}
+        <div className="bg-muted/60 border-border flex shrink-0 items-center justify-end gap-3 border-t px-6 py-4">
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={run} loading={isPending}>
-            Download
+          <Button type="button" loading={isPending} onClick={run}>
+            Download Export
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

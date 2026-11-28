@@ -1,6 +1,5 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -38,74 +37,70 @@ export function AuditMetadataDialog({
 }) {
   if (!record) return null;
 
+  const shortRef = `APT-${record.id.replaceAll("-", "").slice(0, 8).toUpperCase()}`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[588px]">
-        {/* Static Gray Header Band */}
+        {/* Static Gray Header Band (Figma 687:1223) */}
         <div className="bg-muted/60 border-border shrink-0 border-b p-5 pr-12 text-left">
           <DialogTitle className="text-[15px] font-medium">
             Appointment Audit Metadata
           </DialogTitle>
-          <DialogDescription className="text-foreground/80 mt-1 text-[14px]">
-            RA 11036 privacy-enforced record. Clinical notes and session reasons
-            are never exposed to administrative accounts.
+          <DialogDescription className="text-foreground/80 mt-1 text-[15px]">
+            {shortRef} &bull; RA 11036 Obfuscated Administrative Record
           </DialogDescription>
         </div>
 
-        {/* Scrollable Center Body */}
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5 text-left">
-          <div className="bg-brand-subtle/60 border-border flex items-center gap-3 rounded-[16px] border px-4 py-3 text-sm">
-            <ShieldCheck className="text-primary size-4 shrink-0" />
-            <span>
-              Student identity obfuscated as{" "}
-              <strong className="font-mono font-semibold">
-                {record.obfuscatedStudentCode}
-              </strong>
-            </span>
+        {/* Scrollable Center Body (Figma 687:1226) */}
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-5 text-left">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <StatusBadge status={record.status} />
+            <UrgencyBadge urgency={record.urgency} />
           </div>
 
           <div className="bg-card border-border shadow-steady-card divide-border divide-y rounded-[20px] border text-[15px]">
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">Student Code</span>
-              <span className="font-mono font-medium">
-                {record.obfuscatedStudentCode}
-              </span>
+            <div className="space-y-1 p-5">
+              <p className="text-foreground font-medium">
+                Obfuscated Student Code
+              </p>
+              <p className="text-foreground/90 font-normal tabular-nums">
+                {record.obfuscatedStudentCode} ({record.college})
+              </p>
             </div>
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">College / Dept</span>
-              <span className="text-right font-medium">
-                {record.college} • {record.department}
-              </span>
+            <div className="space-y-1 p-5">
+              <p className="text-foreground font-medium">Assigned Counselor</p>
+              <p className="text-foreground/90 font-normal">
+                {record.counselorName}
+              </p>
             </div>
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">Assigned Counselor</span>
-              <span className="font-medium">{record.counselorName}</span>
+            <div className="space-y-1 p-5">
+              <p className="text-foreground font-medium">
+                Scheduled Date &amp; Room
+              </p>
+              <p className="text-foreground/90 font-normal">
+                {record.scheduledLabel} &bull; {record.durationMinutes} mins
+              </p>
             </div>
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">Scheduled Slot</span>
-              <span className="font-medium">
-                {record.scheduledLabel} ({record.durationMinutes}m)
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">Triage Urgency</span>
-              <UrgencyBadge urgency={record.urgency} />
-            </div>
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">Status</span>
-              <StatusBadge status={record.status} />
-            </div>
-            <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-              <span className="text-muted-foreground">Warm Referral</span>
-              <span className="font-medium">
-                {record.hasWarmReferral ? "Yes (Logged)" : "None"}
-              </span>
+            <div className="space-y-1 p-5">
+              <p className="text-foreground font-medium">Warm Referral Flag</p>
+              <p className="text-foreground/90 font-normal">
+                {record.hasWarmReferral
+                  ? "Active transfer logged"
+                  : "No active transfer"}
+              </p>
             </div>
           </div>
+
+          <p className="text-muted-foreground text-[15px] leading-relaxed font-normal">
+            Confidentiality Boundary (RA 11036 / Data Privacy Act 2012):
+            Clinical SOAP/SAP notes and student session reasons are strictly
+            restricted to the assigned counselor.
+          </p>
         </div>
 
-        {/* Static Gray Footer Band */}
-        <div className="bg-muted/60 border-border flex shrink-0 items-center justify-end border-t p-5">
+        {/* Static Gray Footer Band (Figma 687:1247) */}
+        <div className="bg-muted/60 border-border flex shrink-0 items-center justify-end border-t px-6 py-4">
           <Button
             type="button"
             variant="outline"

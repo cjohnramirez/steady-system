@@ -11,27 +11,21 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FormInputField } from "@/components/form-input-field";
-import { FormSelectField } from "@/components/form-select-field";
-import { SectionCard } from "@/components/app/section-card";
+import { SteadyMascot } from "@/components/app/steady-mascot";
 import { fieldErrors } from "@/components/form/field-like";
 import type { Tables } from "@/types/supabase";
 import { updateOrganization } from "@/lib/admin/actions";
-import { formatClockTime } from "@/lib/format";
 import { queryKeys } from "@/lib/query-keys";
 import { organizationSchema } from "@/lib/validation/organization";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const TIMES = Array.from({ length: 29 }, (_, i) => {
-  const minutes = 6 * 60 + i * 30;
-  const value = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-  return { value, label: formatClockTime(value) };
-});
 
 /**
- * The office profile shown on the landing page, footer and booking fallback.
- * Saving now refreshes those too; the old form invalidated a key nothing read.
+ * Organization & Clinic Profile (Figma 678:21268):
+ * Pill-shaped inputs, native time pickers, and mascot office avatar header.
  */
 export default function OrganizationForm({
   organization,
@@ -71,43 +65,99 @@ export default function OrganizationForm({
   );
 
   return (
-    <SectionCard
-      title="Office details"
-      description="Shown on the public site and to students who can't book."
-    >
+    <section className="bg-card border-border shadow-steady-card divide-border divide-y rounded-[20px] border">
+      {/* Header Band */}
+      <div className="space-y-1 p-6">
+        <h2 className="text-foreground text-[15px] font-medium">
+          Organization &amp; Clinic Profile
+        </h2>
+        <p className="text-muted-foreground text-[14px]">
+          Manage the office information shown in student booking confirmations
+          and footer notices.
+        </p>
+      </div>
+
+      {/* Office Brand Preview Row */}
+      <div className="flex items-center justify-between gap-4 p-6">
+        <div className="space-y-1">
+          <p className="text-foreground text-[15px] font-medium">
+            Office Identity
+          </p>
+          <p className="text-muted-foreground max-w-[300px] text-[14px]">
+            Displayed on public portal pages and student consultation summaries.
+          </p>
+        </div>
+        <SteadyMascot
+          variant="avatar"
+          emotion="default"
+          className="size-[76px] shrink-0 rounded-[16px]"
+        />
+      </div>
+
+      {/* Organization Form */}
       <form
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
           void form.handleSubmit();
         }}
+        className="space-y-5 p-6"
       >
-        <FieldGroup className="gap-5">
-          <div className="grid gap-4 md:grid-cols-[3fr_1fr]">
-            <form.Field name="name">
-              {(f) => <FormInputField field={f} label="Office name" />}
-            </form.Field>
-            <form.Field name="abbreviation">
-              {(f) => <FormInputField field={f} label="Abbreviation" />}
-            </form.Field>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <form.Field name="email">
-              {(f) => <FormInputField field={f} label="Email" type="email" />}
-            </form.Field>
-            <form.Field name="phone">
-              {(f) => <FormInputField field={f} label="Phone" type="tel" />}
-            </form.Field>
-          </div>
-          <form.Field name="office_location">
-            {(f) => <FormInputField field={f} label="Location" />}
+        <div className="space-y-1">
+          <p className="text-foreground text-[15px] font-medium">
+            Edit Organization Details
+          </p>
+          <p className="text-muted-foreground text-[14px]">
+            Keep your office name, contact details, location, and operating
+            hours up to date.
+          </p>
+        </div>
+
+        <FieldGroup className="gap-4">
+          <form.Field name="name">
+            {(f) => <FormInputField field={f} label="Guidance Office Name" />}
           </form.Field>
+
+          <form.Field name="abbreviation">
+            {(f) => <FormInputField field={f} label="Office Abbreviation" />}
+          </form.Field>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="phone">
+              {(f) => (
+                <FormInputField
+                  field={f}
+                  label="Official Phone Extension"
+                  type="tel"
+                />
+              )}
+            </form.Field>
+            <form.Field name="office_location">
+              {(f) => (
+                <FormInputField
+                  field={f}
+                  label="Office Location / Building Room"
+                />
+              )}
+            </form.Field>
+          </div>
+
+          <form.Field name="email">
+            {(f) => (
+              <FormInputField
+                field={f}
+                label="Official Guidance Email"
+                type="email"
+              />
+            )}
+          </form.Field>
+
           <form.Field name="day_of_week">
             {(f) => {
               const invalid = f.state.meta.errors.length > 0;
               return (
                 <Field data-invalid={invalid}>
-                  <FieldLabel id="office-days">Open on</FieldLabel>
+                  <FieldLabel id="office-days">Open Days</FieldLabel>
                   <ToggleGroup
                     type="multiple"
                     variant="outline"
@@ -125,7 +175,7 @@ export default function OrganizationForm({
                       <ToggleGroupItem
                         key={day}
                         value={String(i)}
-                        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground min-w-12 flex-1"
+                        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground min-w-12 flex-1 rounded-[20px]"
                       >
                         {day}
                       </ToggleGroupItem>
@@ -136,25 +186,60 @@ export default function OrganizationForm({
               );
             }}
           </form.Field>
-          <div className="grid gap-4 md:grid-cols-2">
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <form.Field name="start_office_hour">
-              {(f) => (
-                <FormSelectField field={f} label="Opens" options={TIMES} />
-              )}
+              {(f) => {
+                const invalid = f.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={invalid}>
+                    <FieldLabel htmlFor="start-office-hour">
+                      Opening Office Hour
+                    </FieldLabel>
+                    <Input
+                      id="start-office-hour"
+                      type="time"
+                      value={f.state.value}
+                      onChange={(e) => f.handleChange(e.target.value)}
+                      onBlur={f.handleBlur}
+                      className="rounded-[25px]"
+                    />
+                    {invalid && <FieldError errors={fieldErrors(f)} />}
+                  </Field>
+                );
+              }}
             </form.Field>
+
             <form.Field name="end_office_hour">
-              {(f) => (
-                <FormSelectField field={f} label="Closes" options={TIMES} />
-              )}
+              {(f) => {
+                const invalid = f.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={invalid}>
+                    <FieldLabel htmlFor="end-office-hour">
+                      Closing Office Hour
+                    </FieldLabel>
+                    <Input
+                      id="end-office-hour"
+                      type="time"
+                      value={f.state.value}
+                      onChange={(e) => f.handleChange(e.target.value)}
+                      onBlur={f.handleBlur}
+                      className="rounded-[25px]"
+                    />
+                    {invalid && <FieldError errors={fieldErrors(f)} />}
+                  </Field>
+                );
+              }}
             </form.Field>
           </div>
-          <div className="flex justify-end">
+
+          <div className="flex justify-end pt-2">
             <Button type="submit" loading={isSubmitting}>
-              Save office details
+              Save Office Details
             </Button>
           </div>
         </FieldGroup>
       </form>
-    </SectionCard>
+    </section>
   );
 }

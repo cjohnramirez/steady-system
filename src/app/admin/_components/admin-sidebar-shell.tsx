@@ -15,7 +15,7 @@ import {
 
 const ADMIN_GROUPS: readonly SidebarNavGroupDef[] = [
   {
-    title: "Executive & Audits",
+    title: "Executive and Audits",
     items: [
       {
         href: "/admin/dashboard",
@@ -24,7 +24,7 @@ const ADMIN_GROUPS: readonly SidebarNavGroupDef[] = [
       },
       {
         href: "/admin/accounts",
-        label: "Accounts & Directory",
+        label: "Accounts and Directory",
         icon: Users,
       },
       {
@@ -35,11 +35,11 @@ const ADMIN_GROUPS: readonly SidebarNavGroupDef[] = [
     ],
   },
   {
-    title: "Publishing & Center Profile",
+    title: "Publishing and Center Profile",
     items: [
       {
         href: "/admin/landing",
-        label: "Portal & CMS",
+        label: "Portal and CMS",
         icon: BookOpen,
       },
       {
@@ -74,19 +74,19 @@ export function AdminSidebarShell({
       groups={ADMIN_GROUPS}
       privacyLabel="Enable Campus Privacy"
       footerSlot={
-        <div className="flex flex-col gap-2">
-          <div className="bg-card border-border shadow-steady-card flex items-center justify-between rounded-[25px] border px-4 py-2.5 text-xs">
-            <span className="font-medium">Steady Site</span>
-            <span className="text-positive inline-flex items-center gap-1.5 font-medium">
+        <div className="flex flex-col gap-2.5">
+          <div className="bg-card border-border shadow-steady-card flex items-center justify-between rounded-[25px] border px-5 py-3.5 text-[15px]">
+            <span className="text-foreground font-normal">Steady Site</span>
+            <span className="text-positive inline-flex items-center gap-2 font-normal">
               Online
-              <span className="bg-positive size-2 rounded-full" />
+              <span className="bg-positive size-2.5 rounded-full" />
             </span>
           </div>
-          <div className="bg-card border-border shadow-steady-card flex items-center justify-between rounded-[25px] border px-4 py-2.5 text-xs">
-            <span className="font-medium">Guidance Office</span>
-            <span className="text-positive inline-flex items-center gap-1.5 font-medium">
+          <div className="bg-card border-border shadow-steady-card flex items-center justify-between rounded-[25px] border px-5 py-3.5 text-[15px]">
+            <span className="text-foreground font-normal">UGCS Office</span>
+            <span className="text-positive inline-flex items-center gap-2 font-normal">
               Active
-              <span className="bg-positive size-2 rounded-full" />
+              <span className="bg-positive size-2.5 rounded-full" />
             </span>
           </div>
         </div>

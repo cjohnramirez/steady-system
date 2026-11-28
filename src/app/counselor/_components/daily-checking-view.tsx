@@ -19,7 +19,6 @@ import {
   WarmReferralDialog,
   type CounselorOption,
 } from "@/components/counselor/warm-referral-dialog";
-import { ProposeBookingTrigger } from "./propose-booking-trigger";
 import type { BookingStudentOption } from "@/components/counselor/proposed-booking-dialog";
 
 export interface DailyScheduleItem extends SessionCardData {
@@ -29,16 +28,14 @@ export interface DailyScheduleItem extends SessionCardData {
 }
 
 export function DailyCheckingView({
-  counselorName,
   counts,
   items,
-  students,
   colleagues,
 }: {
-  counselorName: string;
+  counselorName?: string;
   counts: { waiting: number; upcoming: number; completed: number };
   items: DailyScheduleItem[];
-  students: BookingStudentOption[];
+  students?: BookingStudentOption[];
   colleagues: CounselorOption[];
 }) {
   const [dossierStudent, setDossierStudent] =
@@ -78,32 +75,34 @@ export function DailyCheckingView({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="bg-card border-border shadow-steady-card flex items-center divide-x rounded-[20px] border px-2 py-3">
-            <div className="px-5 text-left">
-              <p className="text-[22px] leading-none font-medium tabular-nums">
-                {counts.waiting}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">Waiting</p>
-            </div>
-            <div className="px-5 text-left">
-              <p className="text-[22px] leading-none font-medium tabular-nums">
-                {counts.upcoming}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">Upcoming</p>
-            </div>
-            <div className="px-5 text-left">
-              <p className="text-[22px] leading-none font-medium tabular-nums">
-                {counts.completed}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">Completed</p>
-            </div>
+        {/* Exact Figma 678:17251 Header Counter */}
+        <div className="bg-card border-border shadow-steady-card flex items-stretch gap-[30px] rounded-[20px] border p-[21px]">
+          <div className="flex flex-col items-start gap-[2px] text-left">
+            <p className="text-foreground text-[24px] leading-none font-normal">
+              {counts.waiting}
+            </p>
+            <p className="text-foreground/85 text-[15px] leading-snug whitespace-nowrap">
+              Waiting
+            </p>
           </div>
-
-          <ProposeBookingTrigger
-            counselorName={counselorName}
-            students={students}
-          />
+          <span aria-hidden className="bg-border w-px self-stretch" />
+          <div className="flex flex-col items-start gap-[2px] text-left">
+            <p className="text-foreground text-[24px] leading-none font-normal">
+              {counts.upcoming}
+            </p>
+            <p className="text-foreground/85 text-[15px] leading-snug whitespace-nowrap">
+              Upcoming
+            </p>
+          </div>
+          <span aria-hidden className="bg-border w-px self-stretch" />
+          <div className="flex flex-col items-start gap-[2px] text-left">
+            <p className="text-foreground text-[24px] leading-none font-normal">
+              {counts.completed}
+            </p>
+            <p className="text-foreground/85 text-[15px] leading-snug whitespace-nowrap">
+              Completed
+            </p>
+          </div>
         </div>
       </div>
 
@@ -141,7 +140,7 @@ export function DailyCheckingView({
                 {/* Top row: Time + Status Pill */}
                 <div className="flex flex-wrap items-center justify-between gap-2 text-[15px]">
                   <span className="flex items-center gap-2">
-                    <Clock className="size-3.5 shrink-0" />
+                    <Clock strokeWidth={1.5} className="size-3.5 shrink-0" />
                     <span>{item.scheduledLabel}</span>
                   </span>
                   <StatusBadge status={item.status} />
@@ -151,7 +150,7 @@ export function DailyCheckingView({
                 <div className="flex flex-wrap items-center gap-5">
                   <UserAvatar
                     name={item.studentName}
-                    className="size-[51px] shrink-0 rounded-[10px]"
+                    className="size-11 shrink-0 rounded-[10px]"
                   />
                   <div className="flex flex-wrap items-center gap-x-10 gap-y-2 text-[15px]">
                     <div>

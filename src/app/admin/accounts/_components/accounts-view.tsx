@@ -2,19 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type {
-  ColumnDef,
-  PaginationState,
-  SortingState,
-} from "@tanstack/react-table";
-import {
-  Download,
-  GraduationCap,
-  MoreHorizontal,
-  Plus,
-  UserRound,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Building2, Download, Search, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,9 +10,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SectionCard } from "@/components/app/section-card";
-import { DataTable, SortableHeader } from "@/app/admin/_components/data-table";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/app/error-state";
+import { PageHeader } from "@/components/app/page-header";
+import { PillTabs } from "@/components/app/pill-tabs";
+import { UserAvatar } from "@/components/app/user-avatar";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { createClient } from "@/utils/supabase/client";
 import type { Tables } from "@/types/supabase";
@@ -34,7 +33,7 @@ import { queryKeys } from "@/lib/query-keys";
 import StudentEditDialog from "./student-edit-dialog";
 import CounselorEditDialog from "./counselor-edit-dialog";
 import CounselorCreateDialog from "./counselor-create-dialog";
-import DepartmentsDialog from "./departments-dialog";
+import ManageDepartmentsDialog from "./manage-departments-dialog";
 import ExportDialog, { type AccountType } from "./export-dialog";
 
 type Student = Tables<"student_with_details">;
@@ -43,300 +42,410 @@ type Counselor = Tables<"counselor_with_details">;
 type Open =
   | { kind: "student"; row: Student }
   | { kind: "counselor"; row: Counselor }
-  | { kind: "departments"; row: Counselor }
+  | { kind: "manage-departments" }
   | { kind: "create" }
   | { kind: "export" }
   | null;
 
+const PAGE_SIZE = 7;
+
+function formatOrdinalYear(year?: number | null): string {
+  if (!year) return "";
+  const suffixes: Record<number, string> = { 1: "st", 2: "nd", 3: "rd" };
+  return `${year}${suffixes[year] ?? "th"} Year`;
+}
+
 /**
- * Accounts, as one client view with dialogs held in state.
- *
- * The edit screens used to be an @modal parallel route. Refreshing on one gave a
- * 404, closing it fired two navigations, and the admin student form validated
- * fields it never rendered, so it could not be saved. Both tabs were also fetched
- * on every render whichever was showing.
+ * Accounts & Directory Management (Figma 678:20767):
+ * Student Directory and Guidance Counselors tabs with college filtering,
+ * View Actions dropdown, and full edit/create/export dialogs.
  */
 export default function AccountsView() {
   const supabase = useMemo(() => createClient(), []);
   const [tab, setTab] = useState<AccountType>("students");
   const [open, setOpen] = useState<Open>(null);
   const [search, setSearch] = useState("");
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [collegeFilter, setCollegeFilter] = useState("all");
+  const [page, setPage] = useState(0);
   const debouncedSearch = useDebouncedValue(search);
 
   const params = {
-    page: pagination.pageIndex,
-    pageSize: pagination.pageSize,
+    page,
+    pageSize: PAGE_SIZE,
     search: debouncedSearch,
-    sort: sorting[0],
+    sort: { id: "last_name", desc: false },
   };
 
   const students = useQuery({
     queryKey: queryKeys.students.list(params),
     queryFn: () => fetchStudents(supabase, params),
-    enabled: tab === "students",
     placeholderData: keepPreviousData,
   });
 
   const counselors = useQuery({
     queryKey: queryKeys.counselors.list(params),
     queryFn: () => fetchCounselors(supabase, params),
-    enabled: tab === "counselors",
     placeholderData: keepPreviousData,
   });
 
-  const studentColumns = useMemo<ColumnDef<Student>[]>(
-    () => [
-      {
-        id: "last_name",
-        accessorKey: "last_name",
-        meta: { label: "Name" },
-        header: ({ column }) => <SortableHeader column={column} title="Name" />,
-        cell: ({ row }) => (
-          <div className="min-w-40">
-            <p className="font-medium">
-              {row.original.last_name}, {row.original.first_name}
-            </p>
-            <p className="text-muted-foreground">@{row.original.username}</p>
-          </div>
-        ),
-      },
-      {
-        id: "email",
-        accessorKey: "email",
-        meta: { label: "Email" },
-        header: "Email",
-        enableSorting: false,
-      },
-      {
-        id: "university_id",
-        accessorKey: "university_id",
-        meta: { label: "University ID" },
-        header: ({ column }) => (
-          <SortableHeader column={column} title="University ID" />
-        ),
-      },
-      {
-        id: "department",
-        accessorKey: "department",
-        meta: { label: "Department" },
-        header: ({ column }) => (
-          <SortableHeader column={column} title="Department" />
-        ),
-        cell: ({ row }) => (
-          <div>
-            <p>{row.original.department}</p>
-            <p className="text-muted-foreground">{row.original.college_name}</p>
-          </div>
-        ),
-      },
-      {
-        id: "year_level",
-        accessorKey: "year_level",
-        meta: { label: "Year" },
-        header: ({ column }) => <SortableHeader column={column} title="Year" />,
-      },
-    ],
-    [],
-  );
+  const studentRows = useMemo(() => {
+    const raw = students.data?.data ?? [];
+    if (collegeFilter === "all") return raw;
+    return raw.filter(
+      (s) => s.college_name === collegeFilter || s.department === collegeFilter,
+    );
+  }, [collegeFilter, students.data?.data]);
 
-  const counselorColumns = useMemo<ColumnDef<Counselor>[]>(
-    () => [
-      {
-        id: "last_name",
-        accessorKey: "last_name",
-        meta: { label: "Name" },
-        header: ({ column }) => <SortableHeader column={column} title="Name" />,
-        cell: ({ row }) => (
-          <div className="min-w-40">
-            <p className="font-medium">
-              {row.original.last_name}, {row.original.first_name}
-            </p>
-            <p className="text-muted-foreground">@{row.original.username}</p>
-          </div>
-        ),
-      },
-      {
-        id: "email",
-        accessorKey: "email",
-        meta: { label: "Email" },
-        header: "Email",
-        enableSorting: false,
-      },
-      {
-        id: "department",
-        accessorKey: "department",
-        meta: { label: "Departments" },
-        header: "Departments",
-        enableSorting: false,
-        cell: ({ row }) =>
-          row.original.department ?? (
-            <span className="text-muted-foreground">None assigned</span>
-          ),
-      },
-      {
-        // Showed a red "Uncertain" for every active counselor, because it only
-        // looked at the schedule when is_active was null.
-        id: "is_active",
-        accessorKey: "is_active",
-        meta: { label: "Status" },
-        header: ({ column }) => (
-          <SortableHeader column={column} title="Status" />
-        ),
-        cell: ({ row }) =>
-          row.original.is_active ? (
-            <Badge className="bg-status-approved text-status-approved-foreground">
-              Accepting
-            </Badge>
-          ) : (
-            <Badge variant="outline">Unavailable</Badge>
-          ),
-      },
-      {
-        id: "actions",
-        enableHiding: false,
-        enableSorting: false,
-        header: () => <span className="sr-only">Actions</span>,
-        cell: ({ row }) => (
-          <DropdownMenu>
+  const counselorRows = useMemo(() => {
+    const raw = counselors.data?.data ?? [];
+    if (collegeFilter === "all") return raw;
+    return raw.filter((c) =>
+      (c.department ?? "").toLowerCase().includes(collegeFilter.toLowerCase()),
+    );
+  }, [collegeFilter, counselors.data?.data]);
+
+  const colleges = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of students.data?.data ?? []) {
+      if (s.college_name) set.add(s.college_name);
+      else if (s.department) set.add(s.department);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [students.data?.data]);
+
+  const activeQuery = tab === "students" ? students : counselors;
+  const studentTotal = students.data?.count ?? 0;
+  const counselorTotal = counselors.data?.count ?? 0;
+  const activeTotal = tab === "students" ? studentTotal : counselorTotal;
+  const activePageCount = Math.max(1, Math.ceil(activeTotal / PAGE_SIZE));
+  const visibleCount =
+    tab === "students" ? studentRows.length : counselorRows.length;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Header Row with View Actions Dropdown (Figma 678:20767 & 736:1723) */}
+      <PageHeader
+        title="Accounts & Directory Management"
+        description="Oversee student profiles, licensed guidance counselors, and college department allocations"
+        actions={
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={`Actions for ${row.original.first_name} ${row.original.last_name}`}
-                onClick={(event) => event.stopPropagation()}
-              >
-                <MoreHorizontal />
+              <Button type="button" variant="outline">
+                View Actions
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              onClick={(event) => event.stopPropagation()}
-            >
-              <DropdownMenuItem
-                onSelect={() =>
-                  setOpen({ kind: "counselor", row: row.original })
-                }
-              >
-                Edit profile
+            <DropdownMenuContent align="end" className="min-w-64">
+              <DropdownMenuItem onSelect={() => setOpen({ kind: "create" })}>
+                <UserPlus strokeWidth={1.5} className="size-4" />
+                Register Guidance Counselor
               </DropdownMenuItem>
               <DropdownMenuItem
-                onSelect={() =>
-                  setOpen({ kind: "departments", row: row.original })
-                }
+                onSelect={() => setOpen({ kind: "manage-departments" })}
               >
-                Assign departments
+                <Building2 strokeWidth={1.5} className="size-4" />
+                Manage Colleges &amp; Departments
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setOpen({ kind: "export" })}>
+                <Download strokeWidth={1.5} className="size-4" />
+                Export Institutional Data
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ),
-      },
-    ],
-    [],
-  );
-
-  const shared = {
-    pagination,
-    onPaginationChange: setPagination,
-    sorting,
-    onSortingChange: setSorting,
-    search,
-    onSearchChange: setSearch,
-    isFiltered: debouncedSearch.trim() !== "",
-    onClearFilters: () => {
-      setSearch("");
-      setPagination((current) => ({ ...current, pageIndex: 0 }));
-    },
-    toolbar: (
-      <Tabs
-        value={tab}
-        onValueChange={(value) => {
-          setTab(value as AccountType);
-          setPagination((current) => ({ ...current, pageIndex: 0 }));
-          setSorting([]);
-        }}
-      >
-        <TabsList>
-          <TabsTrigger value="students">Students</TabsTrigger>
-          <TabsTrigger value="counselors">Counselors</TabsTrigger>
-        </TabsList>
-      </Tabs>
-    ),
-  };
-
-  return (
-    <>
-      <SectionCard
-        title={tab === "students" ? "Students" : "Counselors"}
-        description="Select a row to edit it."
-        actions={
-          <>
-            <Button
-              variant="outline"
-              onClick={() => setOpen({ kind: "export" })}
-            >
-              <Download aria-hidden />
-              Export
-            </Button>
-            {tab === "counselors" && (
-              <Button onClick={() => setOpen({ kind: "create" })}>
-                <Plus aria-hidden />
-                Add counselor
-              </Button>
-            )}
-          </>
         }
-      >
-        {tab === "students" ? (
-          <DataTable
-            {...shared}
-            searchLabel="Search students"
-            columns={studentColumns}
-            data={students.data?.data ?? []}
-            rowCount={students.data?.count ?? 0}
-            isLoading={students.isLoading}
-            isFetching={students.isFetching}
-            isError={students.isError}
-            errorTitle="Students couldn't be loaded"
-            onRetry={() => students.refetch()}
-            empty={{
-              title: "No students yet",
-              description: "Students appear here once they create an account.",
-              icon: GraduationCap,
+      />
+
+      {/* Main White Directory Card (Figma 678:20767) */}
+      <div className="bg-card border-border shadow-steady-card space-y-5 rounded-[20px] border p-5">
+        <PillTabs
+          ariaLabel="Account directory view"
+          value={tab}
+          onChange={(next) => {
+            setTab(next as AccountType);
+            setPage(0);
+            setCollegeFilter("all");
+          }}
+          options={[
+            {
+              value: "students",
+              label: `Student Directory (${studentTotal})`,
+            },
+            {
+              value: "counselors",
+              label: `Guidance Counselors (${counselorTotal})`,
+            },
+          ]}
+        />
+
+        {/* Search + Academic College Filter Row */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="border-border bg-card shadow-steady-card flex h-12 flex-1 items-center gap-3 rounded-[25px] border px-5">
+            <Search
+              strokeWidth={1.5}
+              className="text-muted-foreground size-4 shrink-0"
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
+              placeholder="Search by name, student number, or email"
+              className="w-full bg-transparent text-[15px] outline-none"
+            />
+          </div>
+
+          <Select
+            value={collegeFilter}
+            onValueChange={(v) => {
+              setCollegeFilter(v);
+              setPage(0);
             }}
-            onRowClick={(row) => setOpen({ kind: "student", row })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="All Academic Colleges" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Academic College</SelectLabel>
+                <SelectItem value="all">All Academic Colleges</SelectItem>
+                {colleges.map((college) => (
+                  <SelectItem key={college} value={college}>
+                    {college}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Table Container */}
+        {activeQuery.isError ? (
+          <ErrorState
+            title={`Couldn't load ${tab}`}
+            onRetry={() => activeQuery.refetch()}
           />
         ) : (
-          <DataTable
-            {...shared}
-            searchLabel="Search counselors"
-            columns={counselorColumns}
-            data={counselors.data?.data ?? []}
-            rowCount={counselors.data?.count ?? 0}
-            isLoading={counselors.isLoading}
-            isFetching={counselors.isFetching}
-            isError={counselors.isError}
-            errorTitle="Counselors couldn't be loaded"
-            onRetry={() => counselors.refetch()}
-            empty={{
-              title: "No counselors yet",
-              description: "Add a counselor so students can book appointments.",
-              icon: UserRound,
-              action: (
-                <Button size="sm" onClick={() => setOpen({ kind: "create" })}>
-                  <Plus aria-hidden />
-                  Add counselor
-                </Button>
-              ),
-            }}
-            onRowClick={(row) => setOpen({ kind: "counselor", row })}
-          />
+          <div className="border-border shadow-steady-card overflow-x-auto rounded-[20px] border">
+            {tab === "students" ? (
+              <table className="w-full min-w-[820px] border-collapse text-left text-[15px]">
+                <thead>
+                  <tr className="border-border text-foreground border-b text-[15px]">
+                    <th className="px-5 py-4 font-medium">Student Name</th>
+                    <th className="px-4 py-4 font-medium">University ID</th>
+                    <th className="px-4 py-4 font-medium">
+                      Academic College and Program
+                    </th>
+                    <th className="px-4 py-4 font-medium">Contact</th>
+                    <th className="px-5 py-4 text-right font-medium">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-border divide-y">
+                  {students.isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i}>
+                        <td colSpan={5} className="px-5 py-4">
+                          <Skeleton className="h-11 w-full rounded-[12px]" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : studentRows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="text-muted-foreground px-5 py-10 text-center text-[15px]"
+                      >
+                        No students match your current filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    studentRows.map((row) => {
+                      const fullName =
+                        `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim() ||
+                        row.username ||
+                        "Student";
+                      const yearStr = formatOrdinalYear(row.year_level);
+                      const programLine = [row.department, yearStr]
+                        .filter(Boolean)
+                        .join(", ");
+                      return (
+                        <tr
+                          key={row.id ?? row.email}
+                          className="hover:bg-muted/40 transition-colors"
+                        >
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3.5">
+                              <UserAvatar
+                                name={fullName}
+                                className="size-11 shrink-0 rounded-[10px]"
+                              />
+                              <div className="min-w-0">
+                                <p className="text-foreground truncate font-medium">
+                                  {fullName}
+                                </p>
+                                <p className="text-muted-foreground truncate text-[14px]">
+                                  {row.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-foreground px-4 py-4 whitespace-nowrap tabular-nums">
+                            {row.university_id || "—"}
+                          </td>
+                          <td className="px-4 py-4">
+                            <p className="text-foreground font-normal">
+                              {row.college_name || row.department || "—"}
+                            </p>
+                            {programLine && (
+                              <p className="text-muted-foreground text-[14px]">
+                                {programLine}
+                              </p>
+                            )}
+                          </td>
+                          <td className="text-foreground/90 px-4 py-4 text-[14px]">
+                            {row.phone || row.username || "—"}
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            <Button
+                              type="button"
+                              onClick={() => setOpen({ kind: "student", row })}
+                            >
+                              Edit
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            ) : (
+              <table className="w-full min-w-[780px] border-collapse text-left text-[15px]">
+                <thead>
+                  <tr className="border-border text-foreground border-b text-[15px]">
+                    <th className="px-5 py-4 font-medium">Counselor Name</th>
+                    <th className="px-4 py-4 font-medium">
+                      Assigned Departments
+                    </th>
+                    <th className="px-4 py-4 font-medium">Status</th>
+                    <th className="px-5 py-4 text-right font-medium">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-border divide-y">
+                  {counselors.isLoading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <tr key={i}>
+                        <td colSpan={4} className="px-5 py-4">
+                          <Skeleton className="h-11 w-full rounded-[12px]" />
+                        </td>
+                      </tr>
+                    ))
+                  ) : counselorRows.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-muted-foreground px-5 py-10 text-center text-[15px]"
+                      >
+                        No counselors match your current filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    counselorRows.map((row) => {
+                      const fullName =
+                        `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim() ||
+                        row.username ||
+                        "Counselor";
+                      return (
+                        <tr
+                          key={row.id ?? row.email}
+                          className="hover:bg-muted/40 transition-colors"
+                        >
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3.5">
+                              <UserAvatar
+                                name={fullName}
+                                src={row.avatar ?? undefined}
+                                className="size-11 shrink-0 rounded-[10px]"
+                              />
+                              <div className="min-w-0">
+                                <p className="text-foreground truncate font-medium">
+                                  {fullName}
+                                </p>
+                                <p className="text-muted-foreground truncate text-[14px]">
+                                  {row.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-foreground px-4 py-4">
+                            {row.department || (
+                              <span className="text-muted-foreground">
+                                None assigned
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            {row.is_active ? (
+                              <span className="inline-flex items-center rounded-[35px] bg-[#a4f4cf] px-3 py-1 text-[14px] text-[#007a55] dark:bg-emerald-950/70 dark:text-emerald-200">
+                                Accepting
+                              </span>
+                            ) : (
+                              <span className="bg-muted text-muted-foreground inline-flex items-center rounded-[35px] px-3 py-1 text-[14px]">
+                                Unavailable
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            <Button
+                              type="button"
+                              onClick={() =>
+                                setOpen({ kind: "counselor", row })
+                              }
+                            >
+                              Edit
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
         )}
-      </SectionCard>
+
+        {/* Pagination Footer */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <p className="text-muted-foreground text-[15px]">
+            View {visibleCount} out of {activeTotal} results
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={page <= 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={page + 1 >= activePageCount}
+              onClick={() =>
+                setPage((p) => Math.min(activePageCount - 1, p + 1))
+              }
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {open?.kind === "student" && (
         <StudentEditDialog student={open.row} onClose={() => setOpen(null)} />
@@ -347,8 +456,8 @@ export default function AccountsView() {
           onClose={() => setOpen(null)}
         />
       )}
-      {open?.kind === "departments" && (
-        <DepartmentsDialog counselor={open.row} onClose={() => setOpen(null)} />
+      {open?.kind === "manage-departments" && (
+        <ManageDepartmentsDialog onClose={() => setOpen(null)} />
       )}
       {open?.kind === "create" && (
         <CounselorCreateDialog onClose={() => setOpen(null)} />
@@ -356,6 +465,6 @@ export default function AccountsView() {
       {open?.kind === "export" && (
         <ExportDialog defaultType={tab} onClose={() => setOpen(null)} />
       )}
-    </>
+    </div>
   );
 }

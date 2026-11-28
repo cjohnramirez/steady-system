@@ -8,7 +8,10 @@
   --color-foreground: var(--foreground);
   --font-sans:
     var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-mono:
+    var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 500;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -71,6 +74,7 @@
  */
 :root {
   --radius: 1.25rem; /* 20px card/dialog base */
+  --radius-label: 1.1875rem; /* 19px universal pill label */
 
   /* Brand & Action Palette — swap these 4 lines to change the entire app palette */
   --brand: #2b7fff;
@@ -86,6 +90,16 @@
   --destructive-foreground: #ffffff;
   --warning: #ff6900;
   --warning-foreground: #ffffff;
+
+  /* Emotion Mascot Orbs (Figma 678:19349–19440) */
+  --emotion-anxious: #ffb86a;
+  --emotion-overwhelmed: #ff6467;
+  --emotion-exhausted: #2b7fff;
+  --emotion-stressed: #00bba7;
+  --emotion-calm: #00bc7d;
+  --emotion-hopeful: #8e51ff;
+  --emotion-lonely: #fb64b6;
+  --emotion-reflective: #7f22fe;
 
   /* Neutrals */
   --background: #f3f4f6;
@@ -212,13 +226,51 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-sans);
+  }
+  strong,
+  b {
+    font-weight: 500;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+    -webkit-text-fill-color: var(--foreground);
+    transition: background-color 9999s ease-in-out 0s;
   }
 }
 
 .shadow-steady-pill {
   box-shadow: var(--shadow-steady-pill);
+}
+
+/* Figma 756:1562 — Subtle dot grid with vertical white/card linear gradient fade */
+.bg-steady-dot-grid {
+  background-color: var(--card);
+  background-image:
+    linear-gradient(
+      180deg,
+      var(--card) 0%,
+      color-mix(in srgb, var(--card) 0%, transparent) 100%
+    ),
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--foreground) 14%, transparent) 1px,
+      transparent 1px
+    );
+  background-size:
+    100% 100%,
+    18px 18px;
 }
 
 .shadow-steady-card {
@@ -249,4 +301,41 @@ html body[data-scroll-locked] {
 
 body {
   overflow-x: clip;
+}
+
+/* Minimal floating scrollbar: thumb only (25% opacity), transparent track, no arrows */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--foreground) 25%, transparent);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 25%, transparent)
+      transparent;
+  }
 }

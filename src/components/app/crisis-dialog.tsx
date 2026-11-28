@@ -1,6 +1,5 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -24,22 +23,17 @@ export function CrisisSupportDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[588px]">
-        {/* Static Header band (Figma 678:18315) */}
-        <div className="border-border flex shrink-0 items-start gap-5 border-b p-5 pr-12">
-          <div className="bg-destructive/15 text-destructive flex size-[59px] shrink-0 items-center justify-center rounded-[14px]">
-            <AlertTriangle className="size-7" aria-hidden />
-          </div>
-          <div className="min-w-0 flex-1 space-y-1 text-left">
-            <DialogTitle className="text-[15px] font-medium">
-              {isStaff
-                ? "Immediate Crisis Response Protocol"
-                : "Immediate Crisis Support & Help"}
-            </DialogTitle>
-            <DialogDescription className="text-foreground/80 text-[15px] leading-snug">
-              Direct contacts for campus safety, medical escorts, and 24/7
-              psychiatric emergency support
-            </DialogDescription>
-          </div>
+        {/* Static Header band (no icon) */}
+        <div className="bg-muted/40 border-border shrink-0 space-y-1 border-b p-5 pr-12 text-left">
+          <DialogTitle className="text-[16px] font-medium">
+            {isStaff
+              ? "Immediate Crisis Response Protocol"
+              : "Immediate Crisis Support & Help"}
+          </DialogTitle>
+          <DialogDescription className="text-foreground/80 text-[15px] leading-snug">
+            Direct contacts for campus safety, medical escorts, and 24/7
+            psychiatric emergency support
+          </DialogDescription>
         </div>
 
         {/* Scrollable 3 Horizontal Action Rows (Figma 678:18323 / 18334 / 18345) */}

@@ -6,7 +6,6 @@ import {
   CalendarClock,
   ClipboardCheck,
   Clock,
-  ShieldAlert,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -14,7 +13,6 @@ import {
   RoleSidebarShell,
   type SidebarNavGroupDef,
 } from "@/components/app/role-sidebar";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -24,13 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CrisisSupportDialog } from "@/components/app/crisis-dialog";
 import { updateDutyStatus } from "@/lib/actions/clinical";
 import type { DUTY_STATUSES } from "@/lib/validation/clinical";
 
 const COUNSELOR_GROUPS: readonly SidebarNavGroupDef[] = [
   {
-    title: "Clinical Workspace",
+    title: "Counselor",
     items: [
       {
         href: "/counselor",
@@ -51,11 +48,11 @@ const COUNSELOR_GROUPS: readonly SidebarNavGroupDef[] = [
     ],
   },
   {
-    title: "Office & Practices",
+    title: "Office and Practices",
     items: [
       {
         href: "/counselor/availability",
-        label: "Availability & Schedule",
+        label: "Availability and Schedule",
         icon: Clock,
       },
       {
@@ -88,11 +85,7 @@ export function CounselorSidebarShell({
   children: ReactNode;
 }) {
   const [duty, setDuty] = useState<(typeof DUTY_STATUSES)[number]>("available");
-  const [crisisOpen, setCrisisOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-
-  const currentDuty =
-    DUTY_OPTIONS.find((d) => d.value === duty) ?? DUTY_OPTIONS[1];
 
   function handleDutyChange(next: (typeof DUTY_STATUSES)[number]) {
     const prev = duty;
@@ -109,73 +102,45 @@ export function CounselorSidebarShell({
   }
 
   return (
-    <>
-      <RoleSidebarShell
-        roleLabel="Counselor"
-        userId={userId}
-        userName={userName}
-        userSubtitle={userSubtitle}
-        userAvatar={userAvatar}
-        groups={COUNSELOR_GROUPS}
-        privacyLabel="Enable Desk Privacy"
-        topSlot={
-          <Select
-            value={duty}
-            disabled={isPending}
-            onValueChange={(value) =>
-              handleDutyChange(value as (typeof DUTY_STATUSES)[number])
-            }
-          >
-            <SelectTrigger
-              aria-label="Counselor duty status"
-              className="w-full"
-            >
-              <span className="flex items-center gap-2.5 truncate">
-                <span
-                  aria-hidden
-                  className={`size-2.5 shrink-0 rounded-full ${currentDuty.dot}`}
-                />
-                <SelectValue />
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Duty Status</SelectLabel>
-                {DUTY_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    <span className="flex items-center gap-2.5">
-                      <span
-                        aria-hidden
-                        className={`size-2.5 shrink-0 rounded-full ${opt.dot}`}
-                      />
-                      <span>{opt.label}</span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        }
-        footerSlot={
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => setCrisisOpen(true)}
-          >
-            <ShieldAlert className="size-4" />
-            Crisis Protocol
-          </Button>
-        }
-      >
-        {children}
-      </RoleSidebarShell>
-
-      <CrisisSupportDialog
-        open={crisisOpen}
-        onOpenChange={setCrisisOpen}
-        role="counselor"
-      />
-    </>
+    <RoleSidebarShell
+      roleLabel="Counselor"
+      userId={userId}
+      userName={userName}
+      userSubtitle={userSubtitle}
+      userAvatar={userAvatar}
+      groups={COUNSELOR_GROUPS}
+      privacyLabel="Enable Desk Privacy"
+      topSlot={
+        <Select
+          value={duty}
+          disabled={isPending}
+          onValueChange={(value) =>
+            handleDutyChange(value as (typeof DUTY_STATUSES)[number])
+          }
+        >
+          <SelectTrigger aria-label="Counselor duty status" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Duty Status</SelectLabel>
+              {DUTY_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  <span className="flex items-center gap-2.5">
+                    <span
+                      aria-hidden
+                      className={`size-2.5 shrink-0 rounded-full ${opt.dot}`}
+                    />
+                    <span>{opt.label}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      }
+    >
+      {children}
+    </RoleSidebarShell>
   );
 }

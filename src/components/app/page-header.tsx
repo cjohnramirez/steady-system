@@ -24,10 +24,14 @@ export function PageHeader({
         className,
       )}
     >
-      <div className="min-w-0 space-y-2">
-        <h1 className="text-3xl tracking-tight md:text-4xl">{title}</h1>
+      <div className="min-w-0 space-y-1">
+        <h1 className="text-[22px] leading-tight font-medium tracking-tight md:text-[24px]">
+          {title}
+        </h1>
         {description && (
-          <p className="text-muted-foreground max-w-2xl">{description}</p>
+          <p className="text-muted-foreground max-w-2xl text-[15px]">
+            {description}
+          </p>
         )}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

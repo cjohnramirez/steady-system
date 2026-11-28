@@ -37,6 +37,7 @@ export function ReasonTile({
     >
       <Icon
         aria-hidden
+        strokeWidth={1.5}
         className={cn(
           "size-5 shrink-0 transition-colors",
           selected ? "text-primary" : "text-foreground/80",

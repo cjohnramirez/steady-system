@@ -10,7 +10,7 @@ import {
 } from "react";
 import { AnimatePresence } from "motion/react";
 import * as m from "motion/react-m";
-import { EyeOff, ShieldAlert } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { steadyTransitions } from "@/lib/motion";
 
 interface PrivacyShieldContextValue {
@@ -75,24 +75,28 @@ export function PrivacyShieldProvider({ children }: { children: ReactNode }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={steadyTransitions.snappy}
-            className="bg-foreground text-background shadow-steady-card fixed top-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/15 px-4 py-2 text-xs font-medium"
+            className="bg-card/95 text-foreground border-border shadow-steady-card fixed top-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3.5 rounded-[25px] border py-2 pr-2.5 pl-3 text-[14px] backdrop-blur-md"
           >
-            <ShieldAlert
+            <span
               aria-hidden
-              className="text-destructive size-4 shrink-0"
-            />
-            <span>
-              <strong>Privacy Shield Active</strong> — Sensitive student details
-              are blurred
+              className="bg-brand-subtle text-primary flex size-8 shrink-0 items-center justify-center rounded-full"
+            >
+              <EyeOff strokeWidth={1.5} className="size-4" />
+            </span>
+            <span className="flex items-center gap-2 whitespace-nowrap">
+              <span className="font-medium">Privacy Shield Active</span>
+              <span className="text-muted-foreground hidden sm:inline">
+                Sensitive details are blurred
+              </span>
             </span>
             <button
               type="button"
               onClick={toggle}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-medium transition-colors hover:bg-white/25"
+              className="bg-primary text-primary-foreground shadow-steady-pill inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium transition-transform active:scale-[0.98]"
             >
-              <EyeOff aria-hidden className="size-3.5" />
+              <Eye aria-hidden strokeWidth={1.5} className="size-3.5" />
               Unmask
-              <kbd className="rounded bg-white/20 px-1.5 py-0.5 font-mono text-[10px]">
+              <kbd className="rounded-full bg-white/20 px-1.5 py-0.5 font-sans text-[11px] leading-none">
                 P
               </kbd>
             </button>

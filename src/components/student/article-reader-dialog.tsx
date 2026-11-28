@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { MarkdownContent } from "@/components/app/markdown-content";
 
 export interface WellnessArticle {
   id: string;
@@ -95,11 +96,9 @@ export function ArticleReaderDialog({
               </p>
             </div>
 
-            {/* Paragraphs (Figma 702:27979) */}
-            <article className="text-foreground space-y-4 text-[15px] leading-[1.5]">
-              {paragraphs.map((para, index) => (
-                <p key={index}>{para}</p>
-              ))}
+            {/* Formatted Markdown Content (Figma 702:27979) */}
+            <article>
+              <MarkdownContent content={paragraphs.join("\n\n")} />
             </article>
           </div>
         </div>
